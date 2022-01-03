@@ -21,6 +21,8 @@ module.exports = {
       },
     ],
     sidebar: [
+      // 字符串 - 页面文件路径
+      '/README.md',
       // NavbarItem
       {
         text: '➣ HTML/CSS 部分',
@@ -42,8 +44,40 @@ module.exports = {
         link: '/node',
         children: ['/node/1.md'],
       },
-      // 字符串 - 页面文件路径
-      '/README.md',
+      {
+        text: '➣ 前端性能优化',
+        link: '/optimization',
+        children: ['/optimization/1.md'],
+      },
+      {
+        text: '➣ 前端工程化和架构',
+        link: '/structure',
+        children: ['/structure/1.md'],
+      },
+      {
+        text: '➣ 操作系统和网络',
+        link: '/network_system',
+        children: ['/network_system/1.md'],
+      },
+      {
+        text: '➣ 设计模式',
+        link: '/design_pattern',
+        children: [
+          '/design_pattern/1.md',
+          '/design_pattern/2.md',
+          '/design_pattern/3.md',
+          '/design_pattern/4.md',
+          '/design_pattern/5.md',
+          '/design_pattern/6.md',
+          '/design_pattern/7.md',
+          '/design_pattern/8.md',
+        ],
+      },
+      {
+        text: '➣ 数据结构和算法',
+        link: '/algorithms',
+        children: ['/algorithms/1.md'],
+      },
     ],
   },
 };
