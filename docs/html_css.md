@@ -4,8 +4,8 @@ title: HTML/CSS
 description: HTML/CSS的描述
 ---
 
-# Hello HTML/CSS
+# HTML/CSS 部分
 
-## Hello Detail
+## 说明
 
-hello world
+> 这部分包含一些重要知识点的总结以及一些常见考点的梳理。

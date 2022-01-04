@@ -1,6 +1,6 @@
 ---
 lang: zh-CN
-title: 基础知识
+title: 考点梳理
 description: Javascript 的描述
 ---
 
@@ -24,10 +24,12 @@ description: Javascript 的描述
   entries()：返回一个包含Set对象中所有元素得键值对迭代器
   forEach((v, k) => (), thisArg)：用于对集合成员执行callbackFn操作，如果提供了 thisArg 参数，回调中的this会是这个参数，没有返回值
   ```
+
 ##### 2. WeakSet
   - 成员都是对象
   - 成员都是弱引用，可以被垃圾回收机制回收，可以用来保存DOM节点，不容易造成内存泄漏
   - 不能遍历，方法有add、delete、has
+
 ##### 3. Map
   - 本质上是键值对的集合，类似集合
   - 可以遍历，方法很多可以跟各种数据格式转换
@@ -77,6 +79,7 @@ function getTypeOf(data) {
   }
 }
 ```
+
 ### > 实现Call和Apply
 ```js
 Function.prototype.myCall = function(context) {
@@ -110,6 +113,7 @@ Function.prototype.myApply = function(context, args) {
 };
 
 ```
+
 ### > 实现对象new操作
 ```js
 function New(func) {
@@ -236,6 +240,7 @@ var child = new Child('child');
 child.print();
 child.p_print();
 ```
+
 ### > 手写深拷贝和浅拷贝
 
 ```js
@@ -301,30 +306,14 @@ function shallowClone(data) {
 
 ```
 
-### > 基本数据类型和引用数据类型
-
-1. 基本数据类型：String/Boolean/Number/Null/Undefined/Symbol/BigInt(ES2020)
-2. 引用数据类型：Function/Object/Array
-
 ### > 如何判断对象上的属性是原型属性还是实例属性呢？
+
 ```js
 /* 实例属性 */
 Object.prototype.hasOwnProperty.call(obj, attr);
 /* 原型属性 */
 (attr in obj) && !Object.prototype.hasOwnProperty.call(obj, attr);
 ```
-
-### > ES6新增特性
-
-1. Promise
-2. let/const/块级作用域
-3. Arrow Function、函数默认参数、数组、对象、函数返回值的解构
-4. Map/WeakMap/Set/WeakSet
-5. ES6 Class
-6. 字符串方法扩展repeat/trim/includes/startsWith/endsWith/padStart/padEnd
-7. 数组方法扩展find/findIndex/fill/includes
-8. Array.from将类数组和实现了迭代器的对象转换成数组
-9. Array.of将一个或多个值转换成数组
 
 ### > 移动端点击穿透问题
 1. 问题来源  
@@ -360,7 +349,9 @@ Object.prototype.hasOwnProperty.call(obj, attr);
     })
 })()
 ```
+
 ### > 函数防抖和节流实现
+
 ```js
 /* 去抖 */
 function debounce(fn, time) {
@@ -390,44 +381,6 @@ function throttle(fn, time) {
 }
 ```
 
-### > 浏览器上的线程和进程
-
-##### 1. 浏览器包含下面几种进程：
-   - Browser 进程：浏览器的主进程（负责协调、主控），只有一个。
-   - 第三方插件进程：每种类型的插件对应一个进程，仅当使用该插件时才创建。
-   - GPU 进程：最多一个，用于 3D 绘制等。
-   - 浏览器渲染进程（浏览器内核）（Renderer 进程，内部是多线程的）：默认每个 Tab 页面一个进程，互不影响。
-
-##### 2. 浏览器渲染进程是多线程的，包括以下线程：
-
-- GUI 渲染线程  
-负责渲染浏览器界面，解析 HTML，CSS，构建 DOM 树和 RenderObject 树，布局和绘制等。
-当界面需要重绘（Repaint）或由于某种操作引发回流(reflow)时，该线程就会执行
-GUI 渲染线程与 JS 引擎线程是互斥的，当 JS 引擎执行时 GUI 线程会被挂起（相当于被冻结了），GUI 更新会被保存在一个队列中等到 JS 引擎空闲时立即被执行。
-
-- JS 引擎线程  
-也称为 JS 内核，负责处理 Javascript 脚本程序。（例如 V8 引擎）
-JS 引擎线程负责解析 Javascript 脚本，运行代码。
-JS 引擎一直等待着任务队列中任务的到来，然后加以处理，一个 Tab 页（renderer 进程）中无论什么时候都只有一个 JS 线程在运行 JS 程序
-同样注意，GUI 渲染线程与 JS 引擎线程是互斥的，所以如果 JS 执行的时间过长，这样就会造成页面的渲染不连贯，导致页面渲染加载阻塞。
-
-- 事件触发线程  
-归属于浏览器而不是 JS 引擎，用来控制事件循环（可以理解，JS 引擎自己都忙不过来，需要浏览器另开线程协助）
-当 JS 引擎执行代码块如 setTimeOut 时（也可来自浏览器内核的其他线程, 如鼠标点击、AJAX 异步请求等），会将对应任务添加到事件线程中
-当对应的事件符合触发条件被触发时，该线程会把事件添加到待处理队列的队尾，等待 JS 引擎的处理
-注意，由于 JS 的单线程关系，所以这些待处理队列中的事件都得排队等待 JS 引擎处理（当 JS 引擎空闲时才会去执行）
-
-- 定时触发器线程  
-传说中的 setInterval 与 setTimeout 所在线程
-浏览器定时计数器并不是由 JavaScript 引擎计数的, （因为 JavaScript 引擎是单线程的, 如果处于阻塞线程状态就会影响记计时的准确）
-因此通过单独线程来计时并触发定时（计时完毕后，添加到事件队列中，等待 JS 引擎空闲后执行）
-注意，W3C 在 HTML 标准中规定，规定要求 setTimeout 中低于 4ms 的时间间隔算为 4ms。
-
-- 异步 http 请求线程  
-在 XMLHttpRequest 在连接后是通过浏览器新开一个线程请求
-将检测到状态变更时，如果设置有回调函数，异步线程就产生状态变更事件，将这个回调再放入事件队列中。再由 JavaScript 引擎执行。
-
-从输入 URL 到页面渲染完成发生了什么
 
 ### > Js事件循环(宏任务、微任务)
 ![](http://nojsja.gitee.io/static-resources/images/interview/EventLoop.png)
@@ -463,9 +416,10 @@ setTimeout(function() {
 });
 
 ```
-输出结果：`124536`，注意main主进程代码第一次执行时被看做宏任务。
+输出结果：`124536`，注意 main 主进程代码第一次执行时被看做宏任务。
 
 ### > 模拟实现 setTimeout
+
 ```js
 let setTimeout = (fn, timeout, ...args) => {
   // 初始当前时间
@@ -495,7 +449,9 @@ let setTimeout = (fn, timeout, ...args) => {
 - GPU 合成，输出到屏幕
 
 ### > tcp协议三次握手和四次挥手
+
 ![](http://nojsja.gitee.io/static-resources/images/interview/tcp.png)
+
 ##### 1. 三次握手讲解
 - 客户端发送位码为syn＝1,随机产生seq确认号到服务器，服务器由SYN=1知道客户端要求建立联机（客户端：我要连接你）
 - 服务器收到请求后要确认联机信息，向A发送ack number=(客户端的seq+1),syn=1,ack=1,随机产生seq=7654321的包（服务器：好的，你来连吧）
@@ -515,6 +471,7 @@ let setTimeout = (fn, timeout, ...args) => {
 &nbsp;&nbsp;&nbsp;&nbsp; TCP是全双工信道，何为全双工就是客户端与服务端建立两条通道，通道1:客户端的输出连接服务端的输入；通道2:客户端的输入连接服务端的输出。两个通道可以同时工作：客户端向服务端发送信号的同时服务端也可以向客户端发送信号。所以关闭双通道的时候就是这样：
 - 客户端：我要关闭输入通道了。 服务端：好的，你关闭吧，我这边也关闭这个通道。
 - 服务端：我也要关闭输入通道了。 客户端：好的你关闭吧，我也把这个通道关闭。
+
 ### > 页面加载会触发哪些事件
 
 1. document readystatechange事件  
@@ -555,17 +512,19 @@ document.onreadystatechange = function () {
 ```
 
 
-### > document.ready和window.onload的区别  
+### > document.ready 和 window.onload 的区别
 ```sh
 ready事件在DOM结构绘制完成之后就会执行，这样能确保就算有大量的媒体文件没加载出来，JS代码一样可以执行。
 load事件必须等到网页中所有内容全部加载完毕之后才被执行，如果一个网页中有大量的图片的话，则就会出现这种情况：网页文档已经呈现出来，但由于网页数据还没有完全加载完毕，导致load事件不能够即时被触发。
 ```
-### > 闭包Closure  
 
-1. 执行上下文  
+### > 闭包Closure
+
+1. 执行上下文
 函数每次执行，都会生成一个执行上下文内部对象(可理解为函数作用域)，这个上下文对象会保存函数中所有的变量值和该函数内部定义的函数的引用。函数每次执行时对应的执行上下文都是独一无二的，正常情况下函数执行完毕执行上下文就会被销毁。  
 2. 内部作用域的外部引用导致作用域内变量垃圾回收不执行  
 当一个函数内部作用域(注意不是单纯的变量引用)被其外层作用域引用时，函数执行完之后，其执行上下文不会被销毁，我们还能沿着作用域链访问到某个被引用的内部变量。
+
 ```js
 // 外层作用域
 function counterCreator() {
@@ -606,6 +565,7 @@ function add(num) {
 ```
 
 ### > 函数柯里化2：curry函数
+
 1. 实现效果：
 ```js
 function sum(a, b, c) {
@@ -642,6 +602,7 @@ function curry(func) {
 ### > 前端错误监控方法
 
 ### > 发布订阅模式和观察者模式区别
+
 - 在观察者模式中，观察者是知道Subject的，Subject一直保持对观察者进行记录。然而，在发布订阅模式中，发布者和订阅者不知道对方的存在。它们只有通过消息代理进行通信。
 - 在发布订阅模式中，组件是松散耦合的，正好和观察者模式相反。
 - 可以理解为观察者模式没中间商赚差价，发布订阅模式，有中间商赚差价。
@@ -700,6 +661,7 @@ EventEmitter.prototype.emit = function(type) {
 ```
 
 ### > 实现ajax并发请求控制
+
 简化版：
 ```js
 /**
@@ -770,5 +732,6 @@ function multiAjaxRequest(urls=[], maxNum=0) {
 
 ### > 如何自己实现一个单点登录系统
 
-### > 使用ES5实现Promise  
+### > 使用ES5实现Promise
+
 [链接-> 使用ES5实现ES6 Promise API](https://github.com/nojsja/promise-nojsja)
