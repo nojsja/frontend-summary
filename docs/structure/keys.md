@@ -41,7 +41,9 @@ dview 是一个聚合服务云平台，内部包含很多子服务：
 
 #### 前端
 
-nginx -> node proxy -> server cluster (local/remote)
+web static -> nginx -> node proxy -> cluster nodes
+
+web static -> nginx -> node proxy -> cluster nodes
 
 #### 后端
 

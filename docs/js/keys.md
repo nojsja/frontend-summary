@@ -735,3 +735,31 @@ function multiAjaxRequest(urls=[], maxNum=0) {
 ### > 使用ES5实现Promise
 
 [链接-> 使用ES5实现ES6 Promise API](https://github.com/nojsja/promise-nojsja)
+
+### > 什么情况下会发生布尔值的隐式强制类型转换？
+
+- (..) 语句中的条件判断表达式。
+- for ( .. ; .. ; .. ) 语句中的条件判断表达式（第二个）。
+- while (..) 和 do..while(..) 循环中的条件判断表达式。
+- 三元运算中的条件判断表达式。
+- 逻辑运算中的操作数。
+- 算术运算中的操作数。
+
+### > 待完善
+
+JavaScript：
+请你谈谈 Cookie 的优缺点
+简单说一下浏览器本地存储是怎样的
+原型 / 构造函数 / 实例
+原型链：
+执行上下文(EC)
+变量对象
+作用域链
+闭包
+对象的拷贝
+instanceof 原理
+代码的复用
+继承
+类型转换
+babel编译原理
+......
