@@ -1,6 +1,6 @@
 ---
 lang: zh-CN
-title: 考点梳理
+title: ● 考点梳理
 description: 考点梳理
 ---
 

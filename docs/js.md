@@ -1,6 +1,6 @@
 ---
 lang: zh-CN
-title: Javascript
+title: ● Javascript
 description: Javascript 的描述
 ---
 

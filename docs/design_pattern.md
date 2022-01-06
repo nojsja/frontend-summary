@@ -1,6 +1,6 @@
 ---
 lang: zh-CN
-title: Design Pattern
+title: ● Design Pattern
 description: Design Pattern 的描述
 ---
 

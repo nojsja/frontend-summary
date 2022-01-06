@@ -1,6 +1,6 @@
 ---
 lang: zh-CN
-title: 策略模式
+title: ● 策略模式
 description: Design Pattern 的描述
 ---
 

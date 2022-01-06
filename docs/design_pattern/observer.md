@@ -1,6 +1,6 @@
 ---
 lang: zh-CN
-title: 观察者模式
+title: ● 观察者模式
 description: Design Pattern 的描述
 ---
 

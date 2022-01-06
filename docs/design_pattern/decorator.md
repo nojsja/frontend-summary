@@ -1,6 +1,6 @@
 ---
 lang: zh-CN
-title: 装饰器模式
+title: ● 装饰器模式
 description: Design Pattern 的描述
 ---
 

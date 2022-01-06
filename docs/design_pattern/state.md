@@ -1,6 +1,6 @@
 ---
 lang: zh-CN
-title: 状态模式
+title: ● 状态模式
 description: Design Pattern 的描述
 ---
 

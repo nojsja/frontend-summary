@@ -1,6 +1,6 @@
 ---
 lang: zh-CN
-title: 享元模式
+title: ● 享元模式
 description: Design Pattern 的描述
 ---
 

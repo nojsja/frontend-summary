@@ -1,6 +1,6 @@
 ---
 lang: zh-CN
-title: 模板方法模式
+title: ● 模板方法模式
 description: Design Pattern 的描述
 ---
 

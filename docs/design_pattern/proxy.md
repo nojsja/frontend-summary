@@ -1,6 +1,6 @@
 ---
 lang: zh-CN
-title: 代理模式
+title: ● 代理模式
 description: Design Pattern 的描述
 ---
 

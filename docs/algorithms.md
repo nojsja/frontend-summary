@@ -1,6 +1,6 @@
 ---
 lang: zh-CN
-title: 数据结构和算法
+title: ● 数据结构和算法
 description: Algorithms 的描述
 ---
 

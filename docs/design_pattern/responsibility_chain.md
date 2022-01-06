@@ -1,6 +1,6 @@
 ---
 lang: zh-CN
-title: 责任链模式
+title: ● 责任链模式
 description: Design Pattern 的描述
 ---
 

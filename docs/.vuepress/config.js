@@ -7,7 +7,7 @@ module.exports = {
   // 主题和它的配置
   theme: '@vuepress/theme-default',
   themeConfig: {
-    logo: 'https://vuejs.org/images/logo.png',
+    logo: 'https://nojsja.gitee.io/blogs/img/avatar/nojsja.jpeg',
     navbar: [
     ],
     navbar: [
