@@ -251,15 +251,88 @@ myStream.end('完成写入数据');
 - readable.setEncoding(encoding): 方法为从可读流读取的数据设置字符编码。默认情况下没有设置字符编码，流数据返回的是 Buffer 对象。 如果设置了字符编码，则流数据返回指定编码的字符串。 例如，调用 readable.setEncoding('utf-8') 会将数据解析为 UTF-8 数据，并返回字符串。
 
 ##### 可读可写双向流
+
 双工流（Duplex）是同时实现了 Readable 和 Writable 接口的流。
 
 Duplex 流的例子包括：
+
 - TCP socket
 - zlib 流
 - crypto 流
+- 
 ##### 转换流
+
 转换流（Transform）是一种 Duplex 流，但它的输出与输入是相关联的。 与 Duplex 流一样， Transform 流也同时实现了 Readable 和 Writable 接口。
 
 Transform 流的例子包括：
+
 - zlib 流
 - crypto 流
+
+### > EventLoop 事件循环
+
+![](http://nojsja.gitee.io/static-resources/images/interview/node_eventloop.png)
+
+Node.js 是一个新的 JS 运行环境，它同样要支持异步逻辑，包括定时器、IO、网络请求，很明显，也可以用 Event Loop 那一套来跑。
+但是呢，浏览器那套 Event Loop 就是为浏览器设计的，对于做高性能服务器来说，那种设计还是有点粗糙了。
+
+浏览器的 Event Loop 只分了两层优先级，一层是宏任务，一层是微任务。但是宏任务之间没有再划分优先级，微任务之间也没有再划分优先级。
+
+#### 宏任务
+
+而 Node.js 任务宏任务之间也是有优先级的，比如定时器 Timer 的逻辑就比 IO 的逻辑优先级高，因为涉及到时间，越早越准确；而 close 资源的处理逻辑优先级就很低，因为不 close 最多多占点内存等资源，影响不大。主线程的 Script 代码最初也会作为一个宏任务执行。
+
+于是就把宏任务队列拆成了五个优先级：Timers、Pending、Poll、Check、Close。
+
+解释一下这五种宏任务：
+
+![](http://nojsja.gitee.io/static-resources/images/interview/node_macro_task.png)
+
+- Timers Callback： 涉及到时间，肯定越早执行越准确，所以这个优先级最高很容易理解。
+- Pending Callback：处理网络、IO 等异常时的回调，有的 unix 系统会等待发生错误的上报，所以得处理下。
+- Poll Callback：处理 IO 的 data，网络的 connection，服务器主要处理的就是这个。
+- Check Callback：执行 setImmediate 的回调，特点是刚执行完 IO 之后就能回调这个。
+- Close Callback：关闭资源的回调，晚点执行影响也不到，优先级最低。
+
+还有一点不同要特别注意：
+
+node 11 之前，Node.js 的 Event Loop 并不是浏览器那种一次执行一个宏任务，然后执行所有的微任务，而是执行完一定数量的 Timers 宏任务，再去执行所有微任务，然后再执行一定数量的 Pending 的宏任务，然后再去执行所有微任务，剩余的 Poll、Check、Close 的宏任务也是这样。
+
+node 11 之后改为了每个宏任务都执行所有微任务了。
+
+而 Node.js 的 宏任务之间也是有优先级的，所以 Node.js 的 Event Loop 每次都是把当前优先级的所有宏任务跑完再去跑微任务，然后再跑下一个优先级的宏任务。
+
+也就是是一定数量的 Timers 宏任务，再所有微任务，再一定数量的 Pending Callback 宏任务，再所有微任务这样。这里执行一定数量而不是所有的原因是：如果某个阶段宏任务太多，下个阶段就一直执行不到了，所以有个上限的限制，剩余的下个 Event Loop 再继续执行。
+
+#### 微任务
+
+除了宏任务有优先级，微任务也划分了优先级，多了一个 process.nextTick 的高优先级微任务，在所有的普通微任务之前来跑。
+
+node 的微任务：
+
+- process.nextTick
+- Promise
+
+#### 总结
+
+Node.js 的 Event Loop 的完整流程就是这样的：
+
+- Timers 阶段：执行一定数量的定时器，也就是 setTimeout、setInterval 的 callback，太多的话留到下次执行。
+- 微任务：执行所有 nextTick 的微任务，再执行其他的普通微任务。
+- Pending 阶段：执行一定数量的 IO 和网络的异常回调，太多的话留到下次执行。
+- 微任务：执行所有 nextTick 的微任务，再执行其他的普通微任务。
+- Idle/Prepare 阶段：内部用的一个阶段。
+- 微任务：执行所有 nextTick 的微任务，再执行其他的普通微任务。
+- Poll 阶段：执行一定数量的文件的 data 回调、网络的 connection 回调，太多的话留到下次执行。如果没有 IO 回调并且也没有 timers、check 阶段的回调要处理，就阻塞在这里等待 IO 事件。
+微任务：执行所有 nextTick 的微任务，再执行其他的普通微任务
+Check 阶段：执行一定数量的 setImmediate 的 callback，太多的话留到下次执行。
+微任务：执行所有 nextTick 的微任务，再执行其他的普通微任务
+Close 阶段：执行一定数量的 close 事件的 callback，太多的话留到下次执行。
+微任务：执行所有 nextTick 的微任务，再执行其他的普通微任务
+比起浏览器里的 Event Loop，明显复杂了很多，但是经过我们之前的分析，也能够理解：
+
+Node.js 对宏任务做了优先级划分，从高到低分别是 Timers、Pending、Poll、Check、Close 这 5 种，也对微任务做了划分，也就是 nextTick 的微任务和其他微任务。执行流程是先执行完当前优先级的一定数量的宏任务（剩下的留到下次循环），然后执行 process.nextTick 的微任务，再执行普通微任务，之后再执行下个优先级的一定数量的宏任务。。这样不断循环。其中还有一个 Idle/Prepare 阶段是给 Node.js 内部逻辑用的，不需要关心。
+
+改变了浏览器 Event Loop 里那种一次执行一个宏任务的方式，可以让高优先级的宏任务更早的得到执行，但是也设置了个上限，避免下个阶段一直得不到执行。
+
+还有一个特别要注意的点，就是 poll 阶段：如果执行到 poll 阶段，发现 poll 队列为空并且 timers 队列、check 队列都没有任务要执行，那么就阻塞的等在这里等 IO 事件，而不是空转。 这点设计也是因为服务器主要是处理 IO 的，阻塞在这里可以更早的响应 IO。

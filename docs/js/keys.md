@@ -383,6 +383,7 @@ function throttle(fn, time) {
 
 
 ### > Js事件循环(宏任务、微任务)
+
 ![](http://nojsja.gitee.io/static-resources/images/interview/EventLoop.png)
 
 &nbsp;&nbsp;&nbsp;&nbsp; 每次执行栈执行的代码就是一个宏任务（包括每次从事件队列中获取一个事件回调并放到执行栈中执行）
@@ -513,6 +514,7 @@ document.onreadystatechange = function () {
 
 
 ### > document.ready 和 window.onload 的区别
+
 ```sh
 ready事件在DOM结构绘制完成之后就会执行，这样能确保就算有大量的媒体文件没加载出来，JS代码一样可以执行。
 load事件必须等到网页中所有内容全部加载完毕之后才被执行，如果一个网页中有大量的图片的话，则就会出现这种情况：网页文档已经呈现出来，但由于网页数据还没有完全加载完毕，导致load事件不能够即时被触发。
@@ -547,6 +549,7 @@ counterA();     // 2
 ### > 函数式编程思想的体现
 
 ### > 函数柯里化：add(1)(2)(3) == 6
+
 ```js
 function add(num) {
   var sum = 0;
