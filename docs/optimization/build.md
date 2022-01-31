@@ -283,11 +283,13 @@ module.exports = {
 ### > webpack：使用 sideEffects + treeShaking 减少代码体积
 -------------
 
-![treeShaking](http://nojsja.gitee.io/static-resources/images/interview/treeShaking.png)
+treeShaking 字面意思上可以理解为 ` 树摇 `。webpack 做的事儿其实就是从入口文件开始递归地查找和解析模块，可以将入口文档当成是树的树干，然后分布在文件中的各个模块就是树的树枝和树叶。treeShaking 这个特性就是用于将一些没有与树干有关系的叶子模块去掉，即已在模块文件中定义，但是没被我们实际导入使用的模块。
+
+![treeshaking-before](https://nojsja.gitee.io/static-resources/images/interview/treeshaking-before.png)
+
+![treeshaking-after](https://nojsja.gitee.io/static-resources/images/interview/treeshaking-after.png)
 
 #### 1. treeShaking 配置
-
-treeShaking 字面意思上可以理解为 ` 树摇 `。webpack 做的事儿其实就是从入口文件开始递归地查找和解析模块，可以将入口文档当成是树的树干，然后分布在文件中的各个模块就是树的树枝和树叶。treeShaking 这个特性就是用于将一些没有与树干有关系的叶子模块去掉，即已在模块文件中定义，但是没被我们实际导入使用的模块。
 
 使用 treeShaking，开发环境 development 下，需要启用 `optimization.usedExports`，生产环境则会被自动启用，无须手动配置。
 
@@ -767,7 +769,59 @@ require.ensure("module-name") // 先加载代码块
 
 ### > webpack：理解模块联邦
 
-> 完善中
+#### 1. 概念
+
+模块邦联是 webpack5 的新特性，它让我们可以在开发环境和生产环境中直接在本地运行的项目中通过一个地址加载远程模块，当然前提是远程模块也是由 webpack 模块邦联插件生成的。
+
+![](https://nojsja.gitee.io/static-resources/images/interview/module-federation.png)
+
+模块邦联的概念中本地运行的构建称为 `host`，远程加载的构建称为 `remote`，同时本地构建也可以作为 `remote` 方暴露自己的一些模块给其它 `host` 使用。模块邦联本质上是一种去中心化的模块加载方式，项目在远程加载模块的同时，也可以作为模块的远程提供者。
+
+多个独立的构建可以组成一个应用程序，这些独立的构建之间不应该存在依赖关系，因此可以单独开发和部署它们。
+
+#### 2. 配置说明
+
+模块邦联作为一个内置插件的形式提供给使用者：
+
+```json
+{
+  ...
+  plugins: [
+    ...
+    new ModuleFederationPlugin({
+      name: 'app1',
+      filename: 'remoteEntry.js',
+      exposes: {
+        './App': './src/App',
+      },
+      shared: {
+        react: { singleton: true },
+        'react-dom': { singleton: true }
+      },
+      remotes: {
+        app2: "app2@localhost:3001/remoteEntry.js",
+      },
+    }),
+  ],
+}
+```
+
+- name：本地构建的名称，被远程调用时的引用标识。
+- filename：生成的入口文件名称。
+- exposes：暴露给其它 host 远程调用的模块。
+- shared: 将 host 本地环境中的 lib 库共享给 remote 远程加载后的模块一起使用，此项配置会优先让 remote 构建使用本地的 lib 环境。
+
+#### 3. 使用场景一：每个页面单独构建
+
+单页应用的每个页面都是在单独的构建中从容器暴露出来的。主体应用程序(application shell)也是独立构建，会将所有页面作为远程模块来引用。通过这种方式，可以单独部署每个页面。在更新路由或添加新路由时部署主体应用程序。主体应用程序将常用库定义为共享模块，以避免在页面构建中出现重复。
+
+这个场景比较符合现在微前端中 `基座应用+子应用` 的模式，微前端只是在应用级别的分割，而子应用公共模块可以使用模块邦联来辅助管理。
+
+#### 4. 使用场景二：将组件库作为容器
+
+许多应用程序共享一个通用的组件库，可以将其构建成暴露所有组件的容器。每个应用程序使用来自组件库容器的组件。可以单独部署对组件库的更改，而不需要重新部署所有应用程序。应用程序自动使用组件库的最新版本。
+
+与去中心化的使用方式不同，这种方式将所有应用都需要使用的组件作为一个独立的共享项目进行部署，它只对外提供模块而不需要实际运行业务，这样子各个公共模块以及不同版本的同一个公共模块都可以被更好的组织起来。
 
 ### > webpack：善用打包分析工具
 

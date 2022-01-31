@@ -4,6 +4,7 @@
   "description": "frontend markdown docs",
   "main": "index.js",
   "scripts": {
+    "start": "yarn docs:dev",
     "docs:dev": "vuepress dev docs",
     "docs:build": "vuepress build docs"
   },
