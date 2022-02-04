@@ -2,6 +2,7 @@ module.exports = {
   // 站点配置
   lang: 'zh-CN',
   title: 'NoJsJa Frontend Summary',
+  base: '/frontend-summary/',
   description: '',
 
   // 主题和它的配置
