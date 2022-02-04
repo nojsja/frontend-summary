@@ -4,7 +4,7 @@ title: ● 考点梳理
 description: 考点梳理
 ---
 
-### > BFC及其应用
+## ➣ BFC及其应用
 
 1) BFC 就是块级格式上下文，是页面盒模型布局中的一种 CSS 渲染模式，
 相当于一个独立的容器，里面的元素和外部的元素相互不影响。创建 BFC 的方式有：
@@ -27,14 +27,14 @@ description: 考点梳理
    - BFC是页面上的一个隔离的独立容器，容器里面的子元素不会影响到外面的元素
    - BFC可以正确包含浮动元素，计算BFC的高度时，浮动元素也会参与计算
 
-### > 怎样实现一个不定宽高的div水平垂直居中
+## ➣ 怎样实现一个不定宽高的div水平垂直居中
 
 - 只需要在父盒子设置：`display: flex; justify-content: center;align-items: center;`
 - 使用 CSS3 transform，父盒子设置: `display:relative
 Div 设置: transform: translate(-50%，-50%);position: absolute;top: 50%;left: 50%;`
 - 使用 display:table-cell 方法，父盒子设置:`display:table-cell; text-align:center;vertical-align:middle;`，Div 设置: `display:inline-block;vertical-align:middle;`。
 
-### > box-sizing是什么
+## ➣ box-sizing是什么
 设置CSS盒模型为标准模型或IE模型。标准模型的宽度只包括content，二IE模型包括border和padding。
 
 box-sizing属性可以为三个值之一：
@@ -42,7 +42,7 @@ box-sizing属性可以为三个值之一：
 - padding-box，padding计算入宽度内
 - border-box，border和padding计算入宽度之内
 
-### > 浏览器回流和重绘
+## ➣ 浏览器回流和重绘
 
 &nbsp;&nbsp;&nbsp;&nbsp; 从上面这个图上，我们可以看到，浏览器渲染过程如下：
 
@@ -52,13 +52,13 @@ box-sizing属性可以为三个值之一：
 - Painting(重绘):根据渲染树以及回流得到的几何信息，得到节点的绝对像素
 - Display:将像素发送给GPU，展示在页面上。
 
-### > 两列布局实现
+## ➣ 两列布局实现
 1) 使用float浮动元素同时设置元素宽度为100/列数 %
 2) 使用inline-block实现方式同1
 3) 使用css属性column-count实现
 4) 使用flex布局、grid布局
 
-### > 1px问题
+## ➣ 1px问题
 1. 涉及到css像素比 device pixel/css pixel = devicePixelRatio(DPR)  
 2. 解决方法一  
 伪元素设置height模拟边框：
@@ -89,7 +89,7 @@ box-sizing属性可以为三个值之一：
             0  1px  1px -1px #e5e5e5,   //下边线
             -1px 0  1px -1px #e5e5e5;   //左边线
 ```
-### > 浮动布局相关
+## ➣ 浮动布局相关
 1. 清除浮动的属性  
 浮动元素尾部那个不跟随浮动的元素设置`clear:both`
 2. 撑起浮动容器元素的方法一  
@@ -107,11 +107,11 @@ box-sizing属性可以为三个值之一：
 4. 撑起浮动容器元素的方法三  
 利用BFC特性，设置浮动容器元素的`overflow`为scroll、auto、hidden
 
-### > 位图和矢量图的区别
+## ➣ 位图和矢量图的区别
 1. 位图也叫像素图，每个点可以用二进制描述颜色和亮度信息，色彩表现丰富，占用空间大，缩放失真
 2. 矢量图使用计算机指令绘制而成，由点线面构成，色彩不丰富，占用空间小，缩放不失真
 
-### > opacity: 0、visibility: hidden、display: none 的异同
+## ➣ opacity: 0、visibility: hidden、display: none 的异同
 &nbsp;&nbsp;&nbsp;&nbsp; 这几个属性它们都能让元素不可见
 
 - 结构： display:none: 会让元素完全从渲染树中消失，渲染的时候不占据任何空间, 不能点击， visibility: hidden:不会让元素从渲染树消失，渲染元素继续占据空间，只是内容不可见，不能点击 opacity: 0: 不会让元素从渲染树消失，渲染元素继续占据空间，只是内容不可见，可以点击
@@ -120,7 +120,7 @@ box-sizing属性可以为三个值之一：
 
 - 性能： displa:none : 修改元素会造成文档回流,读屏器不会读取，性能消耗较大；visibility:hidden: 修改元素只会造成本元素的重绘, 性能消耗较少，读屏器能读取；；opacity: 0 ： 修改元素会造成重绘，性能消耗较少，读屏器能读取。
 
-### > 多端适配
+## ➣ 多端适配
 
 ##### 1. 关于视口
 
@@ -185,7 +185,7 @@ MacBook Pro 视网膜屏（Retina）显示器硬件像素是 2880px 1800px。当
 在普通显示屏的电脑中打开是正常的，但假设在手机或 Retina 屏中打开，按照逻辑分辨率来渲染，他们的 devicePixelRatio = 2，那么就相当于拿 4 个物理像素来描绘 1 个电子像素。这等于拿一个2倍的放大镜去看图片，图片就会变得模糊。这时，就需要使用 @2x 甚至 @3x 图来避免图片的失真。
 
 
-### > Get/Post请求传参长度有什么特点
+## ➣ Get/Post请求传参长度有什么特点
 
 我们经常说get请求参数的大小存在限制，而post请求的参数大小是无限制的。这是一个错误的说法，实际上HTTP 协议从未规定 GET/POST 的请求长度限制是多少。对get请求参数的限制是来源与浏览器或web服务器，浏览器或web服务器限制了url的长度。为了明确这个概念，我们必须再次强调下面几点:
 
@@ -197,7 +197,7 @@ GET的最大长度显示是因为 浏览器和 web服务器限制了 URI的长�
 
 要支持IE，则最大长度为2083byte，若只支持Chrome，则最大长度 8182byte
 
-### > 前端需要注意哪些 SEO
+## ➣ 前端需要注意哪些 SEO
 
 - 合理的 title、description、keywords：搜索对着三项的权重逐个减小，title 值强调重点即可，重要关键词出现不要超过 2 次，而且要靠前，不同页面 title 要有所不同；description 把页面内容高度概括，长度合适，不可过分堆砌关键词，不同页面 description 有所不同；keywords 列举出重要关键词即可。
 
@@ -213,7 +213,7 @@ GET的最大长度显示是因为 浏览器和 web服务器限制了 URI的长�
 
 - 提高网站速度(网站速度是搜索引擎排序的一个重要指标)
 
-### > 实现一个页面操作不会整页刷新的网站，并且能在浏览器前进、后 退时正确响应。给出你的技术实现方案？
+## ➣ 实现一个页面操作不会整页刷新的网站，并且能在浏览器前进、后 退时正确响应。给出你的技术实现方案？
 
 第一步，通过使用 pushState + ajax 实现浏览器无刷新前进后退，当一次 ajax 调用成功后我们将一 条 state 记录加入到 history 对象中。
 
@@ -223,7 +223,7 @@ GET的最大长度显示是因为 浏览器和 web服务器限制了 URI的长�
 
 更多参考：http://blog.chenxu.me/post/detail?id=ed4f0732-897f-48e4-9d4f-821e82f17fad
 
-### > Reflect 对象创建目的？
+## ➣ Reflect 对象创建目的？
 
 将 Object 对 象 的 一 些 明 显 属 于 语 言 内 部 的 方 法 （ 比 如 Object.defineProperty，放到 Reflect 对象上。
 
@@ -235,10 +235,10 @@ Reflect 对象的方法与 Proxy 对象的方法一一对应，只要是 Proxy �
 
 也就是说，不管 Proxy 怎么修改默认行为，你总可以在 Reflect 上获取 默认行为。
 
-### > 你是怎么理解HTML语义化
+## ➣ 你是怎么理解HTML语义化
 
 
-### > 待完善
+## ➣ 待完善
 
 你用过哪些HTML5标签
 meta viewport 是做什么用的，怎么写

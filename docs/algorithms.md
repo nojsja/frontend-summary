@@ -4,7 +4,7 @@ title: ● 数据结构和算法
 description: Algorithms 的描述
 ---
 
-### > 考察重点
+## ➣ 考察重点
 
 1. 各种算法考察概率
 
@@ -56,7 +56,7 @@ description: Algorithms 的描述
 - 12）二叉树
 ![](http://nojsja.gitee.io/static-resources/images/interview/二叉树.png)
 
-### > 推荐作者和资源
+## ➣ 推荐作者和资源
 
 1. [力扣加加算法题解](https://leetcode-solution-leetcode-pp.gitbook.io/leetcode-solution/thinkings)
 

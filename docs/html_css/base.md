@@ -4,7 +4,7 @@ title: ● 基础知识
 description: 基础知识梳理
 ---
 
-### > position各个属性的作用
+## ➣ position各个属性的作用
 
 - **static(默认值)**：浏览器会按照源码的顺序，决定每个元素的位置，这称为"正常的页面流"。
 - **relative**：表示元素相对于默认位置（即static时的位置）进行偏移，即定位基点是元素的默认位置。需要搭配top、bottom、left、right这四个属性一起使用，用来指定偏移的方向和距离，例如`top: 20px;`表示`元素从默认位置向下偏移20px`。
@@ -12,11 +12,11 @@ description: 基础知识梳理
 - **absolute**：absolute表示，相对于上级元素（一般是父元素）进行偏移，即定位基点是父元素。不过定位基点（一般是父元素）不能是static定位，否则定位基点就会变成整个网页的根元素html，另外，absolute定位也必须搭配top、bottom、left、right这四个属性一起使用。
 - **sticky**：sticky跟前面四个属性值都不一样，它会产生动态效果，很像relative和fixed的结合：一些时候是relative定位（定位基点是自身默认位置），另一些时候自动变成fixed定位（定位基点是视口），需要搭配`top、bottom、left、right`使用。它的具体规则是，当页面滚动，父元素开始脱离视口时（即部分不可见），只要与sticky元素的距离达到生效门槛，relative定位自动切换为fixed定位；等到父元素完全脱离视口时（即完全不可见），fixed定位自动切换回relative定位。
 
-### > display各个属性作用
+## ➣ display各个属性作用
 
 &nbsp;&nbsp;&nbsp;&nbsp; display属性可以设置元素的内部和外部显示类型，元素的外部显示类型将决定该元素在流式布局中的表现，例如块级或内联元素，元素的内部显示类型可以控制其子元素的布局，例如grid或flex。目前所有浏览器都支持display属性，但是对于属性值的兼容性仍需注意。
 
-##### 1. 外部显示
+### 1. 外部显示
 
 &nbsp;&nbsp;&nbsp;&nbsp; 这些值指定了元素的外部显示类型，实际上就是其在流式布局中的角色，即在流式布局中的表现。
 
@@ -35,7 +35,7 @@ display: inline-block;是CSS2规范，无兼容性问题，该属性值表示此
 - display: **run-in**  
 display: run-in;是CSS2规范，绝大部分浏览器都不兼容，目前这是个实验性属性值，不应该用作生产环境，该属性值表示此元素会根据上下文决定对象是内联对象还是块级对象，如果它后一个元素是block那么它会变成inline并和后一个元素并排，如果它后一个元素是inline那么它会变成block。
 
-##### 2. 内部显示
+### 2. 内部显示
 &nbsp;&nbsp;&nbsp;&nbsp; 这些关键字指定了元素的内部显示类型，它们定义了该元素内部内容的布局方式，需要假定该元素为非替换元素。
 
 - display: **flow-root**  
@@ -62,7 +62,7 @@ display: inline-grid;是CSS3规范，目前主流浏览器都已支持，该属�
 - display: **list-item**  
 display: list-item;是CSS1规范，无兼容性问题，该属性值表示将元素的外部显示类型变为block盒模型，并将内部显示类型变为多个list-item inline盒模型。
 
-##### 3. 内部表现
+### 3. 内部表现
 &nbsp;&nbsp;&nbsp;&nbsp; table布局模型有着相对复杂的内部结构，因此它们的子元素可能扮演着不同的角色，这一类关键字就是用来定义这些内部显示类型，并且只有在这些特定的布局模型中才有意义。
 
 - display: **table-row-group**  
@@ -89,10 +89,10 @@ display: table-cell;是CSS2规范，兼容性良好，该属性值表示此元�
 - display: **table-caption**  
 display: table-caption;是CSS2规范，兼容性良好，该属性值表示此元素会作为一个表格标题显示，类似于`<caption>`。
 
-### > grid布局
+## ➣ grid布局
 &nbsp;&nbsp;&nbsp;&nbsp; 讲到布局，我们就会想到 flex 布局，甚至有人认为竟然有 flex 布局了，似乎没有必要去了解 Grid 布局。但 flex 布局和 Grid 布局有实质的区别，那就是 flex 布局是一维布局，Grid 布局是二维布局。flex 布局一次只能处理一个维度上的元素布局，一行或者一列。Grid 布局是将容器划分成了“行”和“列”，产生了一个个的网格，我们可以将网格元素放在与这些行和列相关的位置上，从而达到我们布局的目的。
 
-##### 1. 容器元素
+### 1. 容器元素
 
 - 需要设置：`display: grid;`
 - **grid-template-columns**：属性定义每一列的列宽。比如`100px 100px 100px`指定三列，列宽100px，也可使用百分比单位；搭配`repeat`函数可以简化书写：`repeat(3, 33.33%);`。repeat重复某种模式也是可以的，比如：`repeat(2, 100px 20px 80px)`；如果要实现不固定列数，自动填充的话使用`auto-fill`即可，会根据列宽和容器动态宽度自动进行计算：`repeat(auto-fill, 100px)`；为了方便表示列宽度之间的比例关系，可以使用fr关键字，比如两列的宽度分别为1fr和2fr，就表示后者是前者的两倍，分别占1/3和2/3，`grid-template-columns: 1fr 2fr`。fr和px可混用，`150px 1fr 2fr`；使用auto关键字表示由浏览器自己决定长度：`grid-template-columns: 100px auto 100px;`。
@@ -115,15 +115,15 @@ display: table-caption;是CSS2规范，兼容性良好，该属性值表示此�
 - **justify-content**：属性指定整个内容区域在容器里面的水平位置（左中右）：`start | end | center | stretch | space-around(item间隔均分) | space-between | space-evenly(边框和item完全平均分布);`。
 - **align-content**：属性指定整个内容区域的垂直位置（上中下）：`start | end | center | stretch | space-around(item间隔均分) | space-between | space-evenly(边框和item完全平均分布);`。
 
-##### 2. 子元素
+### 2. 子元素
 
 - **grid-area**：属性指定项目放在哪一个区域，与`grid-template-area`搭配使用：`grid-area: e;`。
 - **justify-self**：属性设置单元格内容的水平位置（左中右），跟justify-items属性的用法完全一致，但只作用于单个项目：`start | end | center | stretch;`。
 - **align-self**：属性设置单元格内容的垂直位置（上中下），跟align-items属性的用法完全一致，也是只作用于单个项目：`start | end | center | stretch;`。
 
-### > flex布局
+## ➣ flex布局
 
-##### 1. 容器元素
+### 1. 容器元素
 
 - 需要设置：`display: flex;`
 - flex-direction：属性决定主轴的方向（即项目的排列方向）： `row(默认) | row-reverse | column | column-reverse`。
@@ -133,7 +133,7 @@ display: table-caption;是CSS2规范，兼容性良好，该属性值表示此�
 - align-items：定义items在交叉轴上如何对齐：`flex-start | flex-end | center | baseline(第一行文本基线) | stretch(拉伸)`。
 - align-content：定义了多根主轴线的对齐方式，如果项目只有一根轴线，该属性不起作用：`flex-start | flex-end | center | space-between | space-around | stretch`。
 
-##### 2. 子元素
+### 2. 子元素
 
 - order：定义item的排列顺序，数值越小，排列越靠前，默认为0。
 - flex-grow：定义item的放大比例，默认为0，即如果存在剩余空间，也不放大。

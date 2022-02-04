@@ -4,7 +4,7 @@ title: ● 考点梳理
 description: Javascript 的描述
 ---
 
-### > Map/WeakMap/Set/WeakSet区别
+## ➣ Map/WeakMap/Set/WeakSet区别
 
 ##### 1. Set
   - 成员唯一、无序且不重复，可以为对象或基本类型
@@ -55,7 +55,7 @@ description: Javascript 的描述
   - 键名是弱引用，键值可以是任意的，键名所指向的对象可以被垃圾回收，此时键名是无效的
   - 不能遍历，方法有get、set、has、delete
 
-### > js类型的判断
+## ➣ js类型的判断
 ```js
 /*
 基础类型：string/boolean/number/null/undefined/symbol
@@ -80,7 +80,7 @@ function getTypeOf(data) {
 }
 ```
 
-### > 实现Call和Apply
+## ➣ 实现Call和Apply
 ```js
 Function.prototype.myCall = function(context) {
   var args, result, symbol;
@@ -114,7 +114,7 @@ Function.prototype.myApply = function(context, args) {
 
 ```
 
-### > 实现对象new操作
+## ➣ 实现对象new操作
 ```js
 function New(func) {
   if (Object.prototype.toString.call(func) !== '[object Function]')
@@ -144,7 +144,7 @@ Function.prototype.myBind = function(context) {
 }
 ```
 
-### > 二维数组扁平化
+## ➣ 二维数组扁平化
 
 ```js
 function flat(array) {
@@ -187,7 +187,7 @@ console.log(flat([[1,2], [2,3], 4]))
 
 ```
 
-### > Js如何判断一个数是不是2的N次幂
+## ➣ Js如何判断一个数是不是2的N次幂
 ```js
 function check2n(num) {
   if (!Number.isInteger(num) || num < 1) return false;
@@ -207,7 +207,7 @@ function check2n(num) {
 }
 ```
 
-### > Js实现继承
+## ➣ Js实现继承
 ```js
 function Inherit (parent, child) {
   function Empty() {};
@@ -241,7 +241,7 @@ child.print();
 child.p_print();
 ```
 
-### > 手写深拷贝和浅拷贝
+## ➣ 手写深拷贝和浅拷贝
 
 ```js
 /* 深拷贝 */
@@ -306,7 +306,7 @@ function shallowClone(data) {
 
 ```
 
-### > 如何判断对象上的属性是原型属性还是实例属性呢？
+## ➣ 如何判断对象上的属性是原型属性还是实例属性呢？
 
 ```js
 /* 实例属性 */
@@ -315,7 +315,7 @@ Object.prototype.hasOwnProperty.call(obj, attr);
 (attr in obj) && !Object.prototype.hasOwnProperty.call(obj, attr);
 ```
 
-### > 移动端点击穿透问题
+## ➣ 移动端点击穿透问题
 1. 问题来源  
 移动浏览器提供一个特殊的功能：双击(double tap)放大，300ms的延迟就来自这里，用户碰触页面之后，需要等待一段时间来判断是不是双击动作，而不是立即响应单击（click），等待的这段时间大约是300ms。为了消除延迟，我们使用touch start / touch end 事件来模拟click事件，这便是造成点击穿透问题的原因，想象一个场景：mask蒙层有个绑定touch start事件的关闭按钮，点击之后蒙层消失，之后300ms后点击位置触发click事件，导致mask下面的元素被误触。
 2. 问题解决  
@@ -323,7 +323,7 @@ Object.prototype.hasOwnProperty.call(obj, attr);
 2）界面只click事件(会造成300ms延迟)  
 3）mask隐藏后，给按钮下面元素添上`pointer-events: none`(会造成元素短时间无法响应)  
 4）使用外部框架`fastclick`解决  
-### > 图片懒加载具体实现方案和思路  
+## ➣ 图片懒加载具体实现方案和思路  
 使用监听器IntersectionObserver来监听界面滚动，当被监听元素处于视口可见区域时，设置图片元素的src为真实的地址。如果不使用这个API的话需要手动监听页面滚动然后通过计算img元素的`offsetTop < document.documentElement.clientHeight + (document.documentElement.scrollTop || document.body.scrollTop)` 来判断元素进入视区实现，并注意配合防抖函数进行优化。
 ```js
 (function lazyLoad(){
@@ -350,7 +350,7 @@ Object.prototype.hasOwnProperty.call(obj, attr);
 })()
 ```
 
-### > 函数防抖和节流实现
+## ➣ 函数防抖和节流实现
 
 ```js
 /* 去抖 */
@@ -382,7 +382,7 @@ function throttle(fn, time) {
 ```
 
 
-### > Js事件循环(宏任务、微任务)
+## ➣ Js事件循环(宏任务、微任务)
 
 ![](http://nojsja.gitee.io/static-resources/images/interview/EventLoop.png)
 
@@ -419,7 +419,7 @@ setTimeout(function() {
 ```
 输出结果：`124536`，注意 main 主进程代码第一次执行时被看做宏任务。
 
-### > 模拟实现 setTimeout
+## ➣ 模拟实现 setTimeout
 
 ```js
 let setTimeout = (fn, timeout, ...args) => {
@@ -440,7 +440,7 @@ let setTimeout = (fn, timeout, ...args) => {
 }
 ```
 
-### > 从输入URL到页面渲染完成发生了什么
+## ➣ 从输入URL到页面渲染完成发生了什么
 
 - 用户输入url ，通过DNS解析成请求目的IP地址
 - 浏览器与服务器建立连接（tcp 协议、三次握手），服务端处理请求返回html代码块
@@ -449,7 +449,7 @@ let setTimeout = (fn, timeout, ...args) => {
 - JS 根据 render 树进行计算、布局、重绘
 - GPU 合成，输出到屏幕
 
-### > tcp协议三次握手和四次挥手
+## ➣ tcp协议三次握手和四次挥手
 
 ![](http://nojsja.gitee.io/static-resources/images/interview/tcp.png)
 
@@ -473,7 +473,7 @@ let setTimeout = (fn, timeout, ...args) => {
 - 客户端：我要关闭输入通道了。 服务端：好的，你关闭吧，我这边也关闭这个通道。
 - 服务端：我也要关闭输入通道了。 客户端：好的你关闭吧，我也把这个通道关闭。
 
-### > 页面加载会触发哪些事件
+## ➣ 页面加载会触发哪些事件
 
 1. document readystatechange事件  
 readyState 属性描述了文档的加载状态，在整个加载过程中document.readyState会不断变化，每次变化都会触发readystatechange事件。事件使用`document.onreadystatechange`进行监听。  
@@ -513,14 +513,14 @@ document.onreadystatechange = function () {
 ```
 
 
-### > document.ready 和 window.onload 的区别
+## ➣ document.ready 和 window.onload 的区别
 
 ```sh
 ready事件在DOM结构绘制完成之后就会执行，这样能确保就算有大量的媒体文件没加载出来，JS代码一样可以执行。
 load事件必须等到网页中所有内容全部加载完毕之后才被执行，如果一个网页中有大量的图片的话，则就会出现这种情况：网页文档已经呈现出来，但由于网页数据还没有完全加载完毕，导致load事件不能够即时被触发。
 ```
 
-### > 闭包Closure
+## ➣ 闭包Closure
 
 1. 执行上下文
 函数每次执行，都会生成一个执行上下文内部对象(可理解为函数作用域)，这个上下文对象会保存函数中所有的变量值和该函数内部定义的函数的引用。函数每次执行时对应的执行上下文都是独一无二的，正常情况下函数执行完毕执行上下文就会被销毁。  
@@ -546,9 +546,9 @@ counterA();     // 2
 
 ```
 
-### > 函数式编程思想的体现
+## ➣ 函数式编程思想的体现
 
-### > 函数柯里化：add(1)(2)(3) == 6
+## ➣ 函数柯里化：add(1)(2)(3) == 6
 
 ```js
 function add(num) {
@@ -567,7 +567,7 @@ function add(num) {
 }
 ```
 
-### > 函数柯里化2：curry函数
+## ➣ 函数柯里化2：curry函数
 
 1. 实现效果：
 ```js
@@ -598,13 +598,13 @@ function curry(func) {
 }
 ```
 
-### > vue双向绑定实现原理
+## ➣ vue双向绑定实现原理
 
-### > Vue2.0与Vue3.0双向绑定，proxy实现
+## ➣ Vue2.0与Vue3.0双向绑定，proxy实现
 
-### > 前端错误监控方法
+## ➣ 前端错误监控方法
 
-### > 发布订阅模式和观察者模式区别
+## ➣ 发布订阅模式和观察者模式区别
 
 - 在观察者模式中，观察者是知道Subject的，Subject一直保持对观察者进行记录。然而，在发布订阅模式中，发布者和订阅者不知道对方的存在。它们只有通过消息代理进行通信。
 - 在发布订阅模式中，组件是松散耦合的，正好和观察者模式相反。
@@ -612,7 +612,7 @@ function curry(func) {
 - 观察者模式大多数时候是同步的，比如当事件触发，Subject就会去调用观察者的方法。而发布-订阅模式大多数时候是异步的（使用消息队列）。
 - 观察者模式需要在单个应用程序地址空间中实现，而发布-订阅更像交叉应用模式。
 
-### > 实现一个EventEmitter类，支持事件的on,off,emit,once,setMaxListeners。
+## ➣ 实现一个EventEmitter类，支持事件的on,off,emit,once,setMaxListeners。
 
 ```js
 function EventEmitter() {
@@ -663,7 +663,7 @@ EventEmitter.prototype.emit = function(type) {
 }
 ```
 
-### > 实现ajax并发请求控制
+## ➣ 实现ajax并发请求控制
 
 简化版：
 ```js
@@ -733,13 +733,13 @@ function multiAjaxRequest(urls=[], maxNum=0) {
 }
 ```
 
-### > 如何自己实现一个单点登录系统
+## ➣ 如何自己实现一个单点登录系统
 
-### > 使用ES5实现Promise
+## ➣ 使用ES5实现Promise
 
 [链接-> 使用ES5实现ES6 Promise API](https://github.com/nojsja/promise-nojsja)
 
-### > 什么情况下会发生布尔值的隐式强制类型转换？
+## ➣ 什么情况下会发生布尔值的隐式强制类型转换？
 
 - (..) 语句中的条件判断表达式。
 - for ( .. ; .. ; .. ) 语句中的条件判断表达式（第二个）。
@@ -748,7 +748,7 @@ function multiAjaxRequest(urls=[], maxNum=0) {
 - 逻辑运算中的操作数。
 - 算术运算中的操作数。
 
-### > 待完善
+## ➣ 待完善
 
 JavaScript：
 请你谈谈 Cookie 的优缺点

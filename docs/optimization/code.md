@@ -4,7 +4,7 @@ title: ● 编码优化
 description: optimization 的描述
 ---
 
-### > 前端如何优化大量数据的加载和渲染
+## ➣ 前端如何优化大量数据的加载和渲染
 
 1. 如果有使用Node.js中间层的话，可以利用服务器的多核渲染能力进行同构JS服务端渲染。
 2. 界面使用虚拟列表技术，动态显示部分数据。
@@ -13,7 +13,7 @@ description: optimization 的描述
 5. 如果在一次性请求大量数据并需要进行数据处理的话，可以使用 web-worker 线程单独处理然后返回给主线程使用，否则主线程大量的计算可能影响界面流畅度。
 6. 使用 websocket 进行异步加载而不是 ajax 同步请求获取数据。
 
-### > HTML/CSS 性能优化方面
+## ➣ HTML/CSS 性能优化方面
 
 #### 1. 网络层面
 
@@ -226,7 +226,7 @@ CDN 的优点：
   content   box-shadow   border-radius  transform
   ```
 
-### > Javascript 性能优化方面
+## ➣ Javascript 性能优化方面
 
 #### 1. 网络层面
 
@@ -764,7 +764,7 @@ document.getElementById('list').addEventListener('click', function (e) {
   obj.getAttr(); // from obj prototype chain
   ```
 
-### > React 性能优化方面
+## ➣ React 性能优化方面
 
 #### 1. 网络层面
 

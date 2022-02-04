@@ -79,6 +79,7 @@ module.exports = {
         children: [
           '/network_system/base.md',
           '/network_system/keys.md',
+          '/network_system/http.md',
         ],
       },
       {
