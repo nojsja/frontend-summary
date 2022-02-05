@@ -81,6 +81,7 @@ module.exports = {
           '/network_system/base.md',
           '/network_system/keys.md',
           '/network_system/http.md',
+          '/network_system/https.md',
         ],
       },
       {
