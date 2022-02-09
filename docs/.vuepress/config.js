@@ -72,6 +72,7 @@ module.exports = {
         children: [
           '/structure/base.md',
           '/structure/keys.md',
+          '/structure/project.md',
         ],
       },
       {
