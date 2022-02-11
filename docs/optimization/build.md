@@ -73,14 +73,14 @@ module.exports = {
 
 sourcemap 是为了解决开发代码与实际运行代码不一致时协助我们进行开发代码调试的技术。尤其是如今前端开发中大部分的代码都经过编译，打包等工程化转换。
 
-#### 1. sourcemap 的作用
+### 1. sourcemap 的作用
 
 sourcemap 其实就是一个映射文件，里面储存着位置信息。转换后的代码的每一个位置，所对应的转换前的位置。
 有了它，出错的时候，除错工具将直接显示原始代码，而不是转换后的代码。
 
 sourcemap 技术底层可以参考：[阮一峰博客 - SourceMap](http://www.ruanyifeng.com/blog/2013/01/javascript_source_map.html)。
 
-#### 2. webpack 中 sourcemap 的常见配置项
+### 2. webpack 中 sourcemap 的常见配置项
 
 - eval：生成代码，每个模块都被 eval 执行，并且存在 @sourceURL
 - cheap-eval-source-map：转换代码（行内），每个模块被 eval 执行，并且 sourcemap 作为 eval 的一个 dataurl。
@@ -104,7 +104,7 @@ eval 和 source-map 都是 webpack 中 devtool 的配置选项， eval 模式是
 
 webpack 将 .map 文件作为 DataURI 替换 eval 模式中末尾的 `//# souceURL`。eval 和 .map 文件都是 sourcemap 实现的不同方式，虽然大部分 sourcemap 的实现是通过产生 .map 文件。
 
-#### 3. 总结
+### 3. 总结
 
 eval 性能最好，source-map 性能最低，但就我自身的实践来看大多用的是最完整的 source-map，该模式对于不管是 js 还是 css，scss 等都能很好的覆盖， 相反其他模式都不完整，开发环境下重构性能似乎比不上功能的完善。需要补充的是 module 关键字， 当加上 module 关键字 webpack 将会添加 loader 的 sourcemap。
 
@@ -116,7 +116,7 @@ eval 性能最好，source-map 性能最低，但就我自身的实践来看大�
 
 根据以上过程，我们可以从 ` 模块文件的查找 ` 这一方面入手来着手进行优化：
 
-#### 1. 提高 loader 的匹配精确度
+### 1. 提高 loader 的匹配精确度
 
 &nbsp;&nbsp;&nbsp;&nbsp; 由于 Loader 对文件的转换操作很耗时，需要让尽可能少的文件被 Loader 处理。在使用 Loader 时可以通过 `test` 、`include`、`exclude` 三个配置项来命中 Loader 要应用规则的文件。为了尽可能少的让文件被 Loader 处理，可以通过 include 去命中只有哪些文件需要被处理。
 以采用 ES6 的项目为例，在配置 babel-loader 时，可以这样：
@@ -142,7 +142,7 @@ module.exports = {
 };
 ```
 
-#### 2. 限制 `module` 模块系统查找范围
+### 2. 限制 `module` 模块系统查找范围
 
 &nbsp;&nbsp;&nbsp;&nbsp; `resolve.modules` 可用于配置 webpack 去哪些目录下寻找我们通过 `npm install` 安装的第三方模块。其默认值：`['node_modules']` 表示 node 应该先去当前目录下的 `./node_modules` 目录下去搜索目标模块，如果没找到就依次去上层目录：`../node_modules, ../../node_modules` 中找，直到所有上层目录都搜索完成。
 
@@ -156,7 +156,7 @@ module.exports = {
 };
 ```
 
-#### 3. 通过 `alias` 直接指定模块加载地址
+### 3. 通过 `alias` 直接指定模块加载地址
 
 &nbsp;&nbsp;&nbsp;&nbsp; `resolve.alias` 配置项通过别名来把原导入路径映射成一个新的导入路径。
 在实战项目中经常会依赖一些庞大的第三方模块，以 React 库为例，安装到 node_modules 目录下的 React 库的目录结构如下：
@@ -225,7 +225,7 @@ const {toString} = require('utils/index.js');
 
 ## ➣ webpack：避免不必要的模块解析
 
-#### 1. 使用 `module.noParse` 忽略非模块化规范文件的处理
+### 1. 使用 `module.noParse` 忽略非模块化规范文件的处理
 
 &nbsp;&nbsp;&nbsp;&nbsp; `module.noParse` 配置项可以让 Webpack 忽略对部分没采用模块化的文件的递归解析处理，这样做的好处是能提高构建性能。 原因是一些库，例如 jQuery 、ChartJS， 它们庞大又没有采用模块化标准，让 Webpack 去解析这些文件耗时又没有意义。
 
@@ -239,7 +239,7 @@ module.exports = {
 ```
 ** 注意：** 被忽略掉的文件里不应该包含 import 、 require 、 define 等模块化语句，不然会导致构建出的代码中包含无法在浏览器环境下执行的模块化语句。
 
-#### 2. 使用 `module.externals` 排除不需要本地编译的文件
+### 2. 使用 `module.externals` 排除不需要本地编译的文件
 
 一些外部库模块我们会采用 cdn 的方式进行加载，这样就不需要在本地编译了，使用 `externals` 来声明不需要本地编译的模块。
 
@@ -283,7 +283,7 @@ treeShaking 字面意思上可以理解为 ` 树摇 `。webpack 做的事儿其�
 
 ![treeshaking-after](https://nojsja.gitee.io/static-resources/images/interview/treeshaking-after.png)
 
-#### 1. treeShaking 配置
+### 1. treeShaking 配置
 
 使用 treeShaking，开发环境 development 下，需要启用 `optimization.usedExports`，生产环境则会被自动启用，无须手动配置。
 
@@ -302,7 +302,7 @@ module.exports = {
 };
 ```
 
-#### 2. 更高效的 sideEffects
+### 2. 更高效的 sideEffects
 
 除了 `usedExports` 这一配置项，还要注意 `sideEffects` 副作用：
 
@@ -359,7 +359,7 @@ webpack 在编译就会去读取这个 sideEffects 字段，如果有的话，�
 
 另一方面，当我们开发了一个公共模块发布到模块仓库中，如果 package.json 的 "sideEffects" 属性值为 `false`，则向编译器表明项目中的这些模块是 "pure(纯正 ES2015 模块)"，由此可以安全地删除文件中未使用的部分。这样别人在项目中启用 treeShaking 特性的时候，我们发布的这个模块被引入之后就能按照 treeShaking 的模式正常工作。
 
-#### 3. 总结
+### 3. 总结
 
 为了利用 tree shaking 的优势，需要：
 
@@ -409,13 +409,13 @@ module.exports = {
 
 DLLPlugin 和 DLLReferencePlugin 用某种方法实现了拆分 bundles，同时还大大提升了构建的速度。
 
-#### DllPlugin
+### DllPlugin
 
 使用 DllPlugin 为更改不频繁的代码生成单独的编译结果。这可以提高应用程序的编译速度，尽管它增加了构建过程的复杂度。
 
 这个插件需要我们独立创建一个 webpack 配置文件，比如 `webpack.dll.js`，它用于创建一个或多个只有 dll 的 bundle(dll-only-bundle)，这些 dll 通常在开发过程中是不会改变的 (react/react-router/antd 等)，因此单独把他们抽离出来，防止多次重复构建他们。 这个插件会生成一个名为 manifest.json 的文件，DLLReferencePlugin 会读取这个文件，当我们 import 的模块时 webpack 会根据模块映射从之前抽离的 dll bundle 中读取。
 
-#### DLLReferencePlugin
+### DLLReferencePlugin
 
 这个插件是在 webpack 主配置文件中设置的， 这个插件把只有 dll 的 bundle(们)(dll-only-bundle(s)) 引用到需要的预编译的依赖。
 
@@ -428,7 +428,7 @@ DLLPlugin 和 DLLReferencePlugin 用某种方法实现了拆分 bundles，同时
 - scope (optional): dll 中内容的前缀
 - sourceType (optional): dll 是如何暴露的 (详见 [libraryTarget](https://www.webpackjs.com/configuration/output/#output-librarytarget))
 
-#### 配置示例
+### 配置示例
 
 在实际项目中，我们需要先使用 `webpack.dll.js` 生成 dll bundles，然后使用 `webpack.config.js` 启动开发环境或生产环境。
 
@@ -472,7 +472,7 @@ module.exports = {
 - 防止重复：使用 Entry dependencies 或者 SplitChunksPlugin 去重和分离 chunk。
 - 动态导入：通过模块的内联函数调用来分离代码。
 
-#### 1. 入口起点
+### 1. 入口起点
 
 webpack.config.js
 
@@ -514,9 +514,9 @@ webpack 5.4.0 compiled successfully in 245 ms
 - 如果入口 chunk 之间包含一些重复的模块，那些重复模块都会被引入到各个 bundle 中。
 - 这种方法不够灵活，并且不能动态地将核心应用程序逻辑中的代码拆分出来。
 
-#### 2. 防止重复
+### 2. 防止重复
 
-##### （1）方式一：设置入口依赖
+#### （1）方式一：设置入口依赖
 
 根据方法 1 提到的隐患，设置 `dependOn: 'shared-modules' 可以解决多入口模块重复打包代码的问题。
 
@@ -560,7 +560,7 @@ webpack.config.js
 
 尽管可以在 webpack 中允许每个页面使用多入口，应尽可能避免使用多入口的入口：entry: {page: ['./analytics', './app'] }。如此，在使用 async 脚本标签时，会有更好的优化以及一致的执行顺序。
 
-##### （2）方式二：splitChunks 分离公共依赖模块
+#### （2）方式二：splitChunks 分离公共依赖模块
 
 > 4.0 之前的老版本使用 commonTrunksPlugin 来达到类似效果
 
@@ -630,7 +630,7 @@ cacheGroups 提供了三个额外配置，分别为：test, priority 和 reuseEx
 - priority：表示抽取权重，数字越大表示优先级越高。因为一个 module 可能会满足多个 cacheGroups 的条件，那么抽取到哪个就由权重最高的说了算.
 - reuseExistingChunk：表示是否使用已有的 chunk，如果为 true 则表示如果当前的 chunk 包含的模块已经被抽取出去了，那么将不会重新生成新的。
 
-#### 3. 动态导入
+### 3. 动态导入
 
 上面配置了多入口和公共模块拆分之后，应用的并行加载性能已经得到了很大提升。使用 ES Modules 的动态导入特性可以进一步对应用加载速度进行优化。
 
@@ -759,7 +759,7 @@ require.ensure("module-name") // 先加载代码块
 
 ## ➣ webpack：理解模块联邦
 
-#### 概念
+### 概念
 
 模块邦联是 webpack5 的新特性，它让我们可以在开发环境和生产环境中直接在本地运行的项目中通过一个地址加载远程模块，当然前提是远程模块也是由 webpack 模块邦联插件生成的。
 
@@ -769,7 +769,7 @@ require.ensure("module-name") // 先加载代码块
 
 多个独立的构建可以组成一个应用程序，这些独立的构建之间不应该存在依赖关系，因此可以单独开发和部署它们。
 
-#### 配置说明
+### 配置说明
 
 模块邦联作为一个内置插件的形式提供给使用者：
 
@@ -816,7 +816,7 @@ require.ensure("module-name") // 先加载代码块
   - shareKey：共享依赖的别名, 默认值为 shared 配置项的 key 值。
   - eager：共享依赖在打包过程中是否被分离为 async chunk。eager 为 false，共享依赖被单独分离为 async chunk； eager 为 true，则会打包到 main、remoteEntry，不会被分离。默认值为 false，如果设置为 true，共享依赖其实是没有意义的。
 
-#### shareScope 说明
+### shareScope 说明
 
 webpack 在初始化 shareScope 时，会比较 host 应用和 remote 应用之间共享依赖的版本，将 shareScope 中共享依赖的版本更新为较高版本。
 
@@ -826,7 +826,7 @@ webpack 在初始化 shareScope 时，会比较 host 应用和 remote 应用之�
 - 如果配置 singleton 为 true，且 strictVersion 为 true，即需要保证版本必须一致，否则会抛出异常；
 - 如果配置 singleton 为 false，那么应用不会使用 shareScope 中的共享依赖，而是加载应用自己的依赖；
 
-##### library 说明
+### library 说明
 
 `library.name` - 暴露给外部应用的变量名，`library.type` - 暴露变量的方式：
 - var: remote 的输出内容分配给一个通过 var 定义的变量。
@@ -919,13 +919,13 @@ System.register("app2", [], function(__WEBPACK_DYNAMIC_EXPORT__, __system_contex
 }
 ```
 
-#### 使用场景一：每个页面单独构建
+### 使用场景一：每个页面单独构建
 
 单页应用的每个页面都是在单独的构建中从容器暴露出来的。主体应用程序 (application shell) 也是独立构建，会将所有页面作为远程模块来引用。通过这种方式，可以单独部署每个页面。在更新路由或添加新路由时部署主体应用程序。主体应用程序将常用库定义为共享模块，以避免在页面构建中出现重复。
 
 这个场景比较符合现在微前端中 ` 基座应用 + 子应用 ` 的模式，微前端只是在应用级别的分割，而子应用公共模块可以使用模块邦联来辅助管理。
 
-#### 使用场景二：将组件库作为容器
+### 使用场景二：将组件库作为容器
 
 许多应用程序共享一个通用的组件库，可以将其构建成暴露所有组件的容器。每个应用程序使用来自组件库容器的组件。可以单独部署对组件库的更改，而不需要重新部署所有应用程序。应用程序自动使用组件库的最新版本。
 
@@ -939,7 +939,7 @@ System.register("app2", [], function(__WEBPACK_DYNAMIC_EXPORT__, __system_contex
 
 ![](https://nojsja.gitee.io/static-resources/images/interview/webpack-bundle-analyzer.png)
 
-#### 安装
+### 安装
 
 ```javascript
 # NPM
@@ -958,7 +958,7 @@ module.exports = {
 }
 ```
 
-#### 说明
+### 说明
 
 - 获取打包后的 bundle 中的真正内容
 - 找出哪些模块具有较大的容量以供后续优化

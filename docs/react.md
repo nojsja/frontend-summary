@@ -4,8 +4,4 @@ title: ● React
 description: React 的描述
 ---
 
-# Hello React
-
-## Hello Detail
-
-hello world
+此章描述 React 关键基础知识和常见考点等。

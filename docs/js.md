@@ -4,8 +4,4 @@ title: ● Javascript
 description: Javascript 的描述
 ---
 
-# Hello Javascript
-
-## Hello Detail
-
-hello world
+此章描述 JavaScript 关键基础知识和常见考点等。

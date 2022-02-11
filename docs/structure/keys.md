@@ -4,10 +4,6 @@ title: ● 考点梳理
 description: structure 的描述
 ---
 
-## ➣ 前端网关的应用
-
-路由认证，用户权限验证，解决办法有自定义请求头，cookie 格式校验， 签名验证
-
 ## ➣ 前端兼容
 
 #### 1. 多屏幕自适应
@@ -370,4 +366,204 @@ import 'babel-polyfill';
 1. loader，它是一个转换器，将 A 文件进行编译成 B 文件，比如：将 A.less 转换为 A.css，单纯的文件转换过程。
 2. plugin 是一个扩展器，它丰富了 webpack 本身，针对是 loader 结束后，webpack 打包的整个过程，它并不直接操作文件，而是基于事件机制工作，会监听 webpack 打包过程中的某些节点，执行广泛的任务
 
-## ➣ 前端组件设计原则
+## ➣ 前端沙箱 SandBox 的实现方式
+
+> iframe 方式有很多缺点，不建议采用
+
+### 1. 基于 window diff / recover 快照的方式
+
+在不支持代理的浏览器中，我们可以通过 diff 的方式实习沙箱。在应用运行的时候保存一个快照 window 对象，将当前 window 对象的全部属性都复制到快照对象上，子应用卸载的时候将 window 对象修改做个 diff，将不同的属性用个 modifyMap 保存起来，再次挂载的时候再加上这些修改的属性。代码如下：
+
+```javascript
+class DiffSandbox {
+  constructor(name) {
+    this.name = name;
+    this.modifyMap = {}; // 存放修改的属性
+    this.windowSnapshot = {};
+  }
+  active() {
+    // 缓存 active 状态的沙箱
+    this.windowSnapshot = {};
+    for (const item in window) {
+      this.windowSnapshot[item] = window[item];
+    }
+
+    Object.keys(this.modifyMap).forEach(p => {
+      window[p] = this.modifyMap[p];
+    })
+
+  }
+
+  inactive() {
+    for (const item in window) {
+      if (this.windowSnapshot[item] !== window[item]) {
+        // 记录变更
+        this.modifyMap[item] = window[item];
+        // 还原 window
+        window[item] = this.windowSnapshot[item];
+      }
+    }
+  }
+}
+
+const diffSandbox = new DiffSandbox('diff 沙箱');
+diffSandbox.active();  // 激活沙箱
+window.a = '1'
+console.log('开启沙箱：', window.a);
+diffSandbox.inactive(); // 失活沙箱
+console.log('失活沙箱：', window.a);
+diffSandbox.active();   // 重新激活
+console.log('再次激活', window.a);
+```
+
+### 2. 基于 Proxy 的方式 (单沙箱实例)
+
+在 ES6 当中，我们可以通过代理 (Proxy) 实现对象的劫持。基本实录也是通过 window 对象的修改进行记录，在卸载时删除这些记录，在应用再次激活时恢复这些记录，来达到模拟沙箱环境的目的。代码如下
+
+```javascript
+// 修改 window 属性的公共方法
+const updateWindowProp = (prop, value, isDel) => {
+    if (value === undefined || isDel) {
+        delete window[prop];
+    } else {
+        window[prop] = value;
+    }
+}
+
+class ProxySandbox {
+
+    active() {
+        // 根据记录还原沙箱
+        this.currentUpdatedPropsValueMap.forEach((v, p) => updateWindowProp(p, v));
+    }
+    inactive() {
+        // 1 将沙箱期间修改的属性还原为原先的属性
+        this.modifiedPropsMap.forEach((v, p) => updateWindowProp(p, v));
+        // 2 将沙箱期间新增的全局变量消除
+        this.addedPropsMap.forEach((_, p) => updateWindowProp(p, undefined, true));
+    }
+
+    constructor(name) {
+        this.name = name;
+        this.proxy = null;
+        // 存放新增的全局变量
+        this.addedPropsMap  = new Map();
+        // 存放沙箱期间更新的全局变量
+        this.modifiedPropsMap = new Map();
+        // 存在新增和修改的全局变量，在沙箱激活的时候使用
+        this.currentUpdatedPropsValueMap = new Map();
+
+        const {addedPropsMap, currentUpdatedPropsValueMap, modifiedPropsMap} = this;
+        const fakeWindow = Object.create(null);
+        const proxy = new Proxy(fakeWindow, {
+            set(target, prop, value) {
+                if (!window.hasOwnProperty(prop)) {
+                    // 如果 window 上没有的属性，记录到新增属性里
+                    // debugger;
+                    addedPropsMap.set(prop, value);
+                } else if (!modifiedPropsMap.has(prop)) {
+                    // 如果当前 window 对象有该属性，且未更新过，则记录该属性在 window 上的初始值
+                    const originalValue = window[prop];
+                    modifiedPropsMap.set(prop, originalValue);
+                }
+                // 记录修改属性以及修改后的值
+                currentUpdatedPropsValueMap.set(prop, value);
+                // 设置值到全局 window 上
+                updateWindowProp(prop, value);
+                return true;
+            },
+            get(target, prop) {
+                return window[prop];
+            },
+        });
+        this.proxy = proxy;
+    }
+}
+
+
+const newSandBox = new ProxySandbox('代理沙箱');
+const proxyWindow = newSandBox.proxy;
+proxyWindow.a = '1'
+console.log('开启沙箱：', proxyWindow.a, window.a);
+newSandBox.inactive(); // 失活沙箱
+console.log('失活沙箱：', proxyWindow.a, window.a);
+newSandBox.active(); // 失活沙箱
+console.log('重新激活沙箱：', proxyWindow.a, window.a);
+```
+
+### 3. 基于 Proxy 的方式 (多沙箱实例)
+
+在单实例的场景总，我们的 fakeWindow 是一个空的对象，其没有任何储存变量的功能，微应用创建的变量最终实际都是挂载在 window 上的，这就限制了同一时刻不能有两个激活的微应用。
+
+```javascript
+class MultipleProxySandbox {
+
+    active() {
+        this.sandboxRunning = true;
+    }
+    inactive() {
+        this.sandboxRunning = false;
+    }
+
+    /**
+     * 构造函数
+     * @param {*} name 沙箱名称
+     * @param {*} context 共享的上下文
+     * @returns
+     */
+    constructor(name, context = {}) {
+        this.name = name;
+        this.proxy = null;
+        const fakeWindow = Object.create({});
+        const proxy = new Proxy(fakeWindow, {
+            set: (target, name, value) => {
+                if (this.sandboxRunning) {
+                    if (Object.keys(context).includes(name)) {
+                        context[name] = value;
+                    }
+                    target[name] = value;
+                }
+            },
+            get: (target, name) => {
+                // 优先使用共享对象
+                if (Object.keys(context).includes(name)) {
+                    return context[name];
+                }
+                return target[name];
+            }
+        })
+        this.proxy = proxy;
+    }
+}
+
+const context = {document: window.document};
+
+const newSandBox1 = new MultipleProxySandbox('代理沙箱 1', context);
+newSandBox1.active();
+const proxyWindow1 = newSandBox1.proxy;
+
+const newSandBox2 = new MultipleProxySandbox('代理沙箱 2', context);
+newSandBox2.active();
+const proxyWindow2 = newSandBox2.proxy;
+console.log('共享对象是否相等', window.document === proxyWindow1.document, window.document ===  proxyWindow2.document);
+
+proxyWindow1.a = '1'; // 设置代理 1 的值
+proxyWindow2.a = '2'; // 设置代理 2 的值
+window.a = '3';  // 设置 window 的值
+console.log('打印输出的值', proxyWindow1.a, proxyWindow2.a, window.a);
+
+
+newSandBox1.inactive(); newSandBox2.inactive(); // 两个沙箱都失活
+
+proxyWindow1.a = '4'; // 设置代理 1 的值
+proxyWindow2.a = '4'; // 设置代理 2 的值
+window.a = '4';  // 设置 window 的值
+console.log('失活后打印输出的值', proxyWindow1.a, proxyWindow2.a, window.a);
+
+newSandBox1.active(); newSandBox2.active(); // 再次激活
+
+proxyWindow1.a = '4'; // 设置代理 1 的值
+proxyWindow2.a = '4'; // 设置代理 2 的值
+window.a = '4';  // 设置 window 的值
+console.log('失活后打印输出的值', proxyWindow1.a, proxyWindow2.a, window.a);
+```

@@ -4,8 +4,4 @@ title: ● Design Pattern
 description: Design Pattern 的描述
 ---
 
-# Hello Design Pattern
-
-## Hello Detail
-
-hello world
+此章描述 设计模式 关键基础知识和常见考点等。

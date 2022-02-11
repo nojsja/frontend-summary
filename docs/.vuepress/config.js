@@ -100,7 +100,15 @@ module.exports = {
         ],
       },
       {
-        text: '➣ 数据结构和算法',
+        text: '➣ 数据结构',
+        link: '/data',
+        children: [
+          '/data/keys.md',
+          '/data/base.md',
+        ],
+      },
+      {
+        text: '➣ 算法',
         link: '/algorithms',
         children: [
           '/algorithms/array.md',
