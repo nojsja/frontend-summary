@@ -136,22 +136,22 @@ HTTP 长轮询是人为编程实现的一种通信方式，它在短轮询的基
 
 header：用于运算的 int8 数字，header 部分采用自定义算法进行编解码。header 即一个 `int8` 数字 (占 8bit，范围 0-255) 表示各种具有不同参数的 header 实例，位于消息体第一个字节。
 
-body：二进制字节流数据，会使用 protobuf 规范解析。与常见的 xml 和 json 数据类型不同，他们是通过把数据转化成字符串再传输，而Protobuf是把数据通过独特的方式压缩成更短的byte流进行传输。
+body：二进制字节流数据，会使用 protobuf 规范解析。与常见的 xml 和 json 数据类型不同，他们是通过把数据转化成字符串再传输，而 Protobuf 是把数据通过独特的方式压缩成更短的 byte 流进行传输。
 
 Protocol Buffer 在传输过程中其实只会传输四个信息，分别是：
 
-- **类型（string, int...)**
-- **字段映射的值（也就是 tag，也叫 key，在 proto 文件中定义）**
-- **value 长度**
-- **value 本身**
+- ** 类型（string, int...)**
+- ** 字段映射的值（也就是 tag，也叫 key，在 proto 文件中定义）**
+- **value 长度 **
+- **value 本身 **
 
-简要描述： `00001(tag/key) 111(type) 00000011 (length:3B) 3bytes(value)`，第一个字节3bit 解析为数据类型 type (int/string...)，第一个字节前5bit使用算法解析为 proto 中定义的 各种 key；紧接着一个字节如果高位为1，则表示后面紧接着的字节也表示value长度，如果紧接着的字节高位为0则当前字节表示value长度；最后根据前一步得到的value长度截取 value 值。
+简要描述： `00001(tag/key) 111(type) 00000011 (length:3B) 3bytes(value)`，第一个字节 3bit 解析为数据类型 type (int/string...)，第一个字节前 5bit 使用算法解析为 proto 中定义的 各种 key；紧接着一个字节如果高位为 1，则表示后面紧接着的字节也表示 value 长度，如果紧接着的字节高位为 0 则当前字节表示 value 长度；最后根据前一步得到的 value 长度截取 value 值。
 
 值得注意的是很多枚举类型的 value 值前后端也有一定的码值规则进行映射。protobuf 和 value 码值都起到了压缩消息体的作用，其实 header 也有压缩算法，可以参考以下说明。
 
 ![](https://nojsja.gitee.io/static-resources/images/interview/protobuf.jpg)
 
-- [01] 采用 `protobuf` 格式 (protocol buffer) 进行数据编码传输和解码
+- [01] body 部分采用 `protobuf` 格式 (protocol buffer) 进行数据编码传输和解码
   - protobuf 是谷歌的一种开源、跨平台的序列化数据格式，其中 proto 文件用于描述数据结构，将冗长的明文字段映射为简短的值表示。
   - proto 文件内部会定义各种 message 结构体，每个结构体会有各个映射字段。比如 `optional int32 page_number = 2;` 表示可选的 int32 字段 page_number，映射值为 2，消息体解码的时候就会把 tag 位为 2 的数据解析为字段 page_number 并作为 key，然后紧接着再解码动态的 length 位，得到后面有多少个字节的 value 数据，最终 key / value 均被解析。
   - SDK 发送消息时每个消息体会存在多个 `key/value` 字段作为参数，各个映射字段的作用就是压缩通信过程中 `key/value` 键值对中 key 的明文定义，并且 value 部分包括中英文、数字、字符、特殊符号等也会根据 ascii 编码转化为二进制字节流传输。
@@ -163,6 +163,10 @@ Protocol Buffer 在传输过程中其实只会传输四个信息，分别是：
     }
   ```
   - 公共定义的 `proto` 规则文件可以编译生成各个语言的 lib 库文件，包括生成前端需要的 js lib，SDK 客户端使用 lib 进行消息的编解码。
+  - 值得注意的是每种类型的消息，有一些属于 SDK 内部使用的字段，他们会按照约定存放在 body 体前面的数个字节中，这些字段值会先被解析出来，然后剩下的其余字节数据再交由 protobuf lib 库对消息内容本身进行解码。
+  - 传输过程中使用 arraybuffer，客户端 SDK 拿到消息数据后，会使用 arraybuffer 生成 Uint8Array 即 8 位无符号整数数组，生成之后根据每种消息实例调用自身的 readMessage 来读取上面一条描述的内部消息字段，解码完内部消息字段后，具体消息内容会调用 protobuf lib 库进行解码。
+  - Uint8Array 数组每一位数表示一个字节，以我们在转化一个时间戳参数 timestrap 为例。时间戳由于很大一般由 8 个字节表示，因此读取 Uint8Array 中的 8 个数字，每个转换为 16 进制数，然后再把这些16进制通过字符串连接起来，最后再把 16 进制数 parseInt 转换为 10 进制的时间戳。其它大部分数据直接通过 utf-8 解码方式获取即可，utf-8 是一种变长的编码方式，是 unicode 编码的一种具体实现。
+  - 整体流程表示为：`明文 -> arraybuffer -> websoket 传输 -> arraybuffer -> Uint8Array -> defined parse step1 -> protobuf parser step2 -> 明文`。
 
 - [02] header 部分使用自定义算法进行编码解码
 
