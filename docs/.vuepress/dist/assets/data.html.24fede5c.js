@@ -1,1 +1,0 @@
-const t={key:"v-33d83ed4",path:"/data.html",title:"\u25CF \u6570\u636E\u7ED3\u6784",lang:"zh-CN",frontmatter:{lang:"zh-CN",title:"\u25CF \u6570\u636E\u7ED3\u6784",description:"\u6570\u636E\u7ED3\u6784\u7684\u63CF\u8FF0"},excerpt:"",headers:[],git:{updatedTime:null,contributors:[]},filePathRelative:"data.md"};export{t as data};
