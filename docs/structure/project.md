@@ -136,13 +136,24 @@ HTTP 长轮询是人为编程实现的一种通信方式，它在短轮询的基
 
 header：用于运算的 int8 数字，header 部分采用自定义算法进行编解码。header 即一个 `int8` 数字 (占 8bit，范围 0-255) 表示各种具有不同参数的 header 实例，位于消息体第一个字节。
 
-body：二进制字节流数据，会使用 protobuf 规范解析。
+body：二进制字节流数据，会使用 protobuf 规范解析。与常见的 xml 和 json 数据类型不同，他们是通过把数据转化成字符串再传输，而Protobuf是把数据通过独特的方式压缩成更短的byte流进行传输。
+
+Protocol Buffer 在传输过程中其实只会传输四个信息，分别是：
+
+- **类型（string, int...)**
+- **字段映射的值（也就是 tag，也叫 key，在 proto 文件中定义）**
+- **value 长度**
+- **value 本身**
+
+简要描述： `00001(tag/key) 111(type) 00000011 (length:3B) 3bytes(value)`，第一个字节3bit 解析为数据类型 type (int/string...)，第一个字节前5bit使用算法解析为 proto 中定义的 各种 key；紧接着一个字节如果高位为1，则表示后面紧接着的字节也表示value长度，如果紧接着的字节高位为0则当前字节表示value长度；最后根据前一步得到的value长度截取 value 值。
+
+值得注意的是很多枚举类型的 value 值前后端也有一定的码值规则进行映射。protobuf 和 value 码值都起到了压缩消息体的作用，其实 header 也有压缩算法，可以参考以下说明。
 
 ![](https://nojsja.gitee.io/static-resources/images/interview/protobuf.jpg)
 
 - [01] 采用 `protobuf` 格式 (protocol buffer) 进行数据编码传输和解码
   - protobuf 是谷歌的一种开源、跨平台的序列化数据格式，其中 proto 文件用于描述数据结构，将冗长的明文字段映射为简短的值表示。
-  - proto 文件内部会定义各种 message 结构体，每个结构体会有各个映射字段。比如 `optional int32 page_number = 2;` 表示可选的 int32 字段 page_number，映射值为 2，消息体解码的时候就会把 type 位为 2 的位置解析为字段 page_number 并作为 key，然后紧接着再解码动态的 length 位，得到后面有多少个字节的 value 数据，最终 key / value 均被解析。
+  - proto 文件内部会定义各种 message 结构体，每个结构体会有各个映射字段。比如 `optional int32 page_number = 2;` 表示可选的 int32 字段 page_number，映射值为 2，消息体解码的时候就会把 tag 位为 2 的数据解析为字段 page_number 并作为 key，然后紧接着再解码动态的 length 位，得到后面有多少个字节的 value 数据，最终 key / value 均被解析。
   - SDK 发送消息时每个消息体会存在多个 `key/value` 字段作为参数，各个映射字段的作用就是压缩通信过程中 `key/value` 键值对中 key 的明文定义，并且 value 部分包括中英文、数字、字符、特殊符号等也会根据 ascii 编码转化为二进制字节流传输。
   ```javascript
     message SearchRequest {
@@ -228,7 +239,7 @@ body：二进制字节流数据，会使用 protobuf 规范解析。
 
 #### 4. 数据加密流程
 
-> 待完善
+protobuf 自带一定的加密特性，并且传输过程中为非明文。
 
 ### 三、消息交互逻辑描述
 
