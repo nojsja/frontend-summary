@@ -163,10 +163,12 @@ Protocol Buffer 在传输过程中其实只会传输四个信息，分别是：
     }
   ```
   - 公共定义的 `proto` 规则文件可以编译生成各个语言的 lib 库文件，包括生成前端需要的 js lib，SDK 客户端使用 lib 进行消息的编解码。
-  - 值得注意的是每种类型的消息，有一些属于 SDK 内部使用的字段，他们会按照约定存放在 body 体前面的数个字节中，这些字段值会先被解析出来，然后剩下的其余字节数据再交由 protobuf lib 库对消息内容本身进行解码。
-  - 传输过程中使用 arraybuffer，客户端 SDK 拿到消息数据后，会使用 arraybuffer 生成 Uint8Array 即 8 位无符号整数数组，生成之后根据每种消息实例调用自身的 readMessage 来读取上面一条描述的内部消息字段，解码完内部消息字段后，具体消息内容会调用 protobuf lib 库进行解码。
-  - Uint8Array 数组每一位数表示一个字节，以我们在转化一个时间戳参数 timestrap 为例。时间戳由于很大一般由 8 个字节表示，因此读取 Uint8Array 中的 8 个数字，每个转换为 16 进制数，然后再把这些16进制通过字符串连接起来，最后再把 16 进制数 parseInt 转换为 10 进制的时间戳。其它大部分数据直接通过 utf-8 解码方式获取即可，utf-8 是一种变长的编码方式，是 unicode 编码的一种具体实现。
-  - 整体流程表示为：`明文 -> arraybuffer -> websoket 传输 -> arraybuffer -> Uint8Array -> defined parse step1 -> protobuf parser step2 -> 明文`。
+  - 值得注意的是每种类型的消息，有一些属于 SDK 内部使用的字段，他们会按照约定存放在 body 体靠前面数个字节中，这些字段值会先被解析出来，然后剩下的其余字节数据再交由 protobuf lib 库对消息内容本身进行解码。
+  - 传输过程中使用 arraybuffer，客户端 SDK 拿到消息数据后，会使用 arraybuffer 生成 Uint8Array 即 8 位无符号整数数组，生成之后根据每种消息实例调用自身的 readMessage 来读取上面一条描述的内部消息字段。解码完内部消息字段后，具体消息内容会调用 protobuf lib 库进行解码。
+  - Uint8Array 数组每一位数表示一个字节，需要先转化各位为 16 进制，再由 16 进制转化为其它 utf-8 字符或数字等。以我们在转化一个时间戳参数 timestrap 为例：时间戳由于很大一般由 8 个字节表示，因此读取 Uint8Array 中的 8 个数字，每个转换为 16 进制数，然后再把这些 16 进制连接为一个字符串，最后再把 16 进制数字符串 parseInt 转换为 10 进制的时间戳。其它大部分数据直接通过 utf-8 解码方式获取即可，utf-8 是一种变长的编码方式，是 unicode 编码的一种具体实现。
+  - utf-8 编码的转换在 js 中需要使用两个方法：`String.fromCharCode()` 和 `String.prototype.charCodeAt()`。
+  - 数据编码和转换原理就是：int8 数字一个占用一个字节，一个 int8 数字转换为一个 16 进制，多个 16 进制组合为一个大的 16 进制字符串， 16 进制字符串 ->  10 进制数字 -> 对应 unicode 编码对应的真实明文字符。比如："严" 的 unicode 编号 `('严').charCodeAt(0) === 20005`。
+  - 整体流程表示为：` 明文 -> arraybuffer -> websoket 传输 -> arraybuffer -> Uint8Array -> defined parse step1 -> protobuf parser step2 -> 明文 `。
 
 - [02] header 部分使用自定义算法进行编码解码
 
