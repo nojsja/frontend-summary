@@ -245,45 +245,46 @@ child.p_print();
 
 ```js
 /* 深拷贝 */
-function deepClone(data) {
-
+function deepClone(object) {
+  const { toString } = Object.prototype;
+  const { hasOwnProperty } = Object.prototype;
   const map = new WeakMap();
-  
-  const isObjType = (obj, type) => {
-    if (typeof obj !== 'object') return false;
-    return Object.prototype.toString.call(obj) === `[object ${type}]`;
-  };
 
-  const _clone = (target) => {
-    if (target === null) return null;
-    if (target !== target) return NaN;
-    if (typeof target !== 'object') return target;
+  function isType(variable, type) {
+    if (variable !== variable) return type === 'nan';
+    if (variable === null) return type === 'null';
+
+    if (typeof variable === 'object') {
+      return toString.call(variable) === `[object ${type}]`;
+    }
+
+    return typeof variable === type;
+  }
+
+  function _clone(obj) {
+    let target;
     
-    let base;
+    if (isType(obj, 'nan')) return NaN;
+    if (isType(obj, 'null')) return null;
 
-    // 对正则对象做特殊处理
-    if (isObjType(target, 'RegExp')) return new RegExp(target.source, target.flags);
-    // 对Date对象做特殊处理
-    if (isObjType(target, 'Date')) return new Date(target.getTime());
+    if (typeof obj !== 'object') return obj;
 
-    base = isObjType(target, 'Array') ? [] : {};
+    target = isType(obj, 'Array') ? [] : {};
 
-    // 处理循环引用
-    if (map.has(target))
-      return map.get(target);
-    map.set(target, base);
-    
-    for (let i in target) {
-      if (Object.prototype.hasOwnProperty.call(target, i)) {
-        base[i] = _clone(target[i]);
+    if (isType(obj, 'RegExp')) return new RegExp(obj.source, obj.flags);
+    if (isType(obj, 'Date')) return new Date(obj.getTime());
+    if (map.has(obj)) return map.get(obj);
+    map.set(obj, target);
+    for (let attr in obj) {
+      if (hasOwnProperty.call(obj, attr)) {
+        target[attr] = _clone(obj[attr]);
       }
     }
-    
-    return base;
-  };
+    return target;
+  }
 
-  return _clone(data);
-};
+  return _clone(object);
+}
 
 /* 浅拷贝 */
 function shallowClone(data) {
@@ -316,6 +317,7 @@ Object.prototype.hasOwnProperty.call(obj, attr);
 ```
 
 ## ➣ 移动端点击穿透问题
+
 1. 问题来源  
 移动浏览器提供一个特殊的功能：双击(double tap)放大，300ms的延迟就来自这里，用户碰触页面之后，需要等待一段时间来判断是不是双击动作，而不是立即响应单击（click），等待的这段时间大约是300ms。为了消除延迟，我们使用touch start / touch end 事件来模拟click事件，这便是造成点击穿透问题的原因，想象一个场景：mask蒙层有个绑定touch start事件的关闭按钮，点击之后蒙层消失，之后300ms后点击位置触发click事件，导致mask下面的元素被误触。
 2. 问题解决  
@@ -323,6 +325,7 @@ Object.prototype.hasOwnProperty.call(obj, attr);
 2）界面只click事件(会造成300ms延迟)  
 3）mask隐藏后，给按钮下面元素添上`pointer-events: none`(会造成元素短时间无法响应)  
 4）使用外部框架`fastclick`解决  
+
 ## ➣ 图片懒加载具体实现方案和思路  
 使用监听器IntersectionObserver来监听界面滚动，当被监听元素处于视口可见区域时，设置图片元素的src为真实的地址。如果不使用这个API的话需要手动监听页面滚动然后通过计算img元素的`offsetTop < document.documentElement.clientHeight + (document.documentElement.scrollTop || document.body.scrollTop)` 来判断元素进入视区实现，并注意配合防抖函数进行优化。
 ```js
@@ -380,7 +383,6 @@ function throttle(fn, time) {
   }
 }
 ```
-
 
 ## ➣ Js事件循环(宏任务、微任务)
 
