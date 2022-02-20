@@ -4,9 +4,9 @@ title: ● 基础知识
 description: Node 的描述
 ---
 
-## ➣ Node.js的模块加载机制
+## ➣ Node.js 的模块加载机制
 
-分为内置模块、外部扩展模块和自定义模块
+Node.js 中模块分为内置模块、外部扩展模块和自定义模块。
 
 大致步骤：
 
@@ -14,7 +14,7 @@ description: Node 的描述
 
 1. 先计算模块路径
 
-&nbsp;&nbsp;&nbsp;&nbsp; 将我们的相对路径和使用path方法生成的路径转换成一个绝对路径，无需转换的路径保留原始名字(比如内置模块和npm模块)。
+&nbsp;&nbsp;&nbsp;&nbsp; 将我们的相对路径和使用 path 方法生成的路径转换成一个绝对路径，无需转换的路径保留原始名字 (比如内置模块和 npm 模块)。
 
 2. 如果模块在缓存里面，取出缓存
 
@@ -22,13 +22,15 @@ description: Node 的描述
 
 3. 查找模块
 
-&nbsp;&nbsp;&nbsp;&nbsp; 内置原生模块会直接从node目录的libs目录下搜索；外部扩展模块即通过npm安装的模块，node会先从当前node_modules目录查找，然后是上层各个node_modules目录下查找，直到根目录；自定义模块我们一般会使用相对路径和绝对路径进行查找，如果没有扩展名node会依次按照['.js', '.node', '.json']进行匹配，自定义模块多为开发者根据commonJs规范编写的代码模块。
+&nbsp;&nbsp;&nbsp;&nbsp; 内置原生模块会直接从 node 目录的 libs 目录下搜索；外部扩展模块即通过 npm 安装的模块，node 会先从当前 node_modules 目录查找，然后是上层各个 node_modules 目录下查找，直到根目录；自定义模块我们一般会使用相对路径和绝对路径进行查找，如果没有扩展名 node 会依次按照 ['.js', '.node', '.json'] 进行匹配，自定义模块多为开发者根据 commonJs 规范编写的代码模块。
 
 4. 加载模块
 
-根据查找模块获取到的文件绝对路径定位到文件之后，node同步加载模块然后编译执行，将编译和执行之后的结果缓存到内存中，注意不同于浏览器仅仅缓存文件。
+&nbsp;&nbsp;&nbsp;&nbsp; 根据查找模块获取到的文件绝对路径定位到文件之后，node 同步加载模块然后解析执行，__将解析和执行之后的结果缓存到内存中__，注意不同于浏览器仅仅缓存文件。
 
-5. 输出模块的exports属性即可
+5. 输出模块的 exports 属性即可
+
+伪代码：
 
 ```js
 // require 其实内部调用 Module._load 方法
@@ -45,16 +47,16 @@ Module._load = function(request, parent, isMain) {
   if (NativeModule.exists(filename)) {
     return NativeModule.require(filename);
   }
-  
-  /********************************这里注意了**************************/
+
+  /******************************** 这里注意了 **************************/
   // 第三步：生成模块实例，存入缓存
-  // 这里的Module就是我们上面的1.1定义的Module
+  // 这里的 Module 就是我们上面的 1.1 定义的 Module
   var module = new Module(filename, parent);
   Module._cache[filename] = module;
 
-  /********************************这里注意了**************************/
+  /******************************** 这里注意了 **************************/
   // 第四步：加载模块
-  // 下面的module.load实际上是Module原型上有一个方法叫Module.prototype.load
+  // 下面的 module.load 实际上是 Module 原型上有一个方法叫 Module.prototype.load
   try {
     module.load(filename);
     hadException = false;
@@ -64,16 +66,16 @@ Module._load = function(request, parent, isMain) {
     }
   }
 
-  // 第五步：输出模块的exports属性
+  // 第五步：输出模块的 exports 属性
   return module.exports;
 };
 ```
 
-## ➣ Node.js创建子进程方法异同
+## ➣ Node.js 创建子进程方法异同
 
 child_process 模块提供了衍生子进程的能力。 此功能主要由 child_process.spawn() 函数提供。
 
-默认情况下， stdin、 stdout 和 stderr 的管道会在父 Node.js 进程和衍生的子进程之间建立。 这些管道具有有限的（且平台特定的）容量。 如果子进程写入 stdout 时超出该限制且没有捕获输出，则子进程会阻塞并等待管道缓冲区接受更多的数据。 这与 shell 中的管道的行为相同。 如果不消费输出，则使用 { stdio: 'ignore' } 选项。
+默认情况下， stdin、 stdout 和 stderr 的管道会在父 Node.js 进程和衍生的子进程之间建立。 这些管道具有有限的（且平台特定的）容量。 如果子进程写入 stdout 时超出该限制且没有捕获输出，则子进程会阻塞并等待管道缓冲区接受更多的数据。 这与 shell 中的管道的行为相同。 如果不消费输出，则使用 {stdio: 'ignore'} 选项。
 
 如果 options 对象中有 options.env.PATH 环境变量，则使用它来执行命令查找。 否则，则使用 process.env.PATH。
 
@@ -87,7 +89,7 @@ child_process.spawn() 方法会异步地衍生子进程，且不阻塞 Node.js �
 
   ![](http://nojsja.gitee.io/static-resources/images/interview/exec_options.png)
 
-- `child_process.execFile(file[, args][, options][, callback])`: 类似于 exec()，但是默认情况下它会直接衍生命令而不先衍生shell。exec() 和 execFile() 之间区别的重要性可能因平台而异，在 Unix 类型的操作系统上，execFile() 可以更高效，因为默认情况下不会衍生 shell。但是在 Windows 上， .bat 和 .cmd 文件在没有终端的情况下不能自行执行，因此无法使用 execFile() 启动。当在 Windows 上运行时，要调用 .bat 和 .cmd 文件，可以使用设置了 shell 选项的 child_process.spawn()、child_process.exec() 或衍生 cmd.exe 并将 .bat 或 .cmd 文件作为参数传入（也就是 shell 选项和 child_process.exec() 所做的）
+- `child_process.execFile(file[, args][, options][, callback])`: 类似于 exec()，但是默认情况下它会直接衍生命令而不先衍生 shell。exec() 和 execFile() 之间区别的重要性可能因平台而异，在 Unix 类型的操作系统上，execFile() 可以更高效，因为默认情况下不会衍生 shell。但是在 Windows 上， .bat 和 .cmd 文件在没有终端的情况下不能自行执行，因此无法使用 execFile() 启动。当在 Windows 上运行时，要调用 .bat 和 .cmd 文件，可以使用设置了 shell 选项的 child_process.spawn()、child_process.exec() 或衍生 cmd.exe 并将 .bat 或 .cmd 文件作为参数传入（也就是 shell 选项和 child_process.exec() 所做的）
 
   ![](http://nojsja.gitee.io/static-resources/images/interview/execFile_options.png)
 
@@ -96,10 +98,10 @@ child_process.spawn() 方法会异步地衍生子进程，且不阻塞 Node.js �
   ![](http://nojsja.gitee.io/static-resources/images/interview/fork_options.png)
 
 - `child_process.spawn(command[, args][, options])`：方法使用给定的 command 衍生新的进程，并传入 args 中的命令行参数，如果省略 args，则其默认为空数组。如果参数 options 选项 shell 为 true，则在 shell 中运行 command，在 Unix 上使用 '/bin/sh'，在 Windows 上使用 process.env.ComSpec。
-  
+
   ![](http://nojsja.gitee.io/static-resources/images/interview/spawn_options.png)
 
-## ➣ Node.js创建子进程参数`stdio`的理解
+## ➣ Node.js 创建子进程参数 `stdio` 的理解
 
 options.stdio 选项用于配置在父进程和子进程之间建立的管道。 默认情况下，子进程的 stdin、 stdout 和 stderr 会被重定向到 ChildProcess 对象上相应的 subprocess.stdin、subprocess.stdout 和 subprocess.stderr 流。 这相当于将 options.stdio 设置为 ['pipe', 'pipe', 'pipe']。
 
@@ -113,20 +115,20 @@ options.stdio 选项用于配置在父进程和子进程之间建立的管道。
 
 1. **'pipe'**：在子进程和父进程之间创建管道。 管道的父端作为 child_process 对象上的 subprocess.stdio[fd] 属性暴露给父进程。 为文件描述符 0、1 和 2 创建的管道也可分别作为 subprocess.stdin、subprocess.stdout 和 subprocess.stderr 使用。
 
-2. **'ipc'**：创建 IPC 通道，用于在父进程和子进程之间传递消息或文件描述符。 一个 ChildProcess 最多可以有一个 IPC stdio 文件描述符。 设置此选项会启用 subprocess.send() 方法。 如果子进程是 Node.js 进程，则 IPC 通道的存在将会启用 process.send() 和 process.disconnect() 方法、以及子进程内的 'disconnect' 和 'message' 事件。以 process.send() 以外的任何方式访问 IPC 通道的文件描述符、或者在不是 Node.js 实例的子进程中使用 IPC 通道，都是不支持的。
+2. **'ipc'**：创建 IPC 通道，用于在父进程和子进程之间传递消息或文件描述符。 一个 ChildProcess 最多可以有一个 IPC stdio 文件描述符。 设置此选项会启用 subprocess.send() 方法。 如果子进程是 Node.js 进程，则 IPC 通道的存在将会启用 process.send() 和 process.disconnect() 方法、以及子进程内的'disconnect' 和'message' 事件。以 process.send() 以外的任何方式访问 IPC 通道的文件描述符、或者在不是 Node.js 实例的子进程中使用 IPC 通道，都是不支持的。
 
-3. **'ignore'**：指示 Node.js 忽略子进程中的文件描述符。 虽然 Node.js 将会始终为其衍生的进程打开文件描述符 0、1 和 2，但将文件描述符设置为 'ignore' 可以使 Node.js 打开 /dev/null 并将其附加到子进程的文件描述符。
+3. **'ignore'**：指示 Node.js 忽略子进程中的文件描述符。 虽然 Node.js 将会始终为其衍生的进程打开文件描述符 0、1 和 2，但将文件描述符设置为'ignore' 可以使 Node.js 打开 /dev/null 并将其附加到子进程的文件描述符。
 
-4. **'inherit'**：将相应的 stdio 流传给父进程或从父进程传入。 在前三个位置中，这分别相当于 process.stdin、 process.stdout 和 process.stderr。 在任何其他位置中，则相当于 'ignore'。
+4. **'inherit'**：将相应的 stdio 流传给父进程或从父进程传入。 在前三个位置中，这分别相当于 process.stdin、 process.stdout 和 process.stderr。 在任何其他位置中，则相当于'ignore'。
 
-5. **`<Stream>`** 对象：与子进程共享指向 tty、文件、 socket 或管道的可读或可写流。 流的底层文件描述符在子进程中会被复制到与 stdio 数组中的索引对应的文件描述符。 该流必须具有底层的描述符（文件流直到触发 'open' 事件才有）。
+5. **`<Stream>`** 对象：与子进程共享指向 tty、文件、 socket 或管道的可读或可写流。 流的底层文件描述符在子进程中会被复制到与 stdio 数组中的索引对应的文件描述符。 该流必须具有底层的描述符（文件流直到触发'open' 事件才有）。
 
-6. **正整数**：整数值会被解释为当前在父进程中打开的文件描述符。 它与子进程共享，类似于共享 `<Stream>`对象的方式。 在 Windows 上不支持传入 socket。
+6. ** 正整数 **：整数值会被解释为当前在父进程中打开的文件描述符。 它与子进程共享，类似于共享 `<Stream>` 对象的方式。 在 Windows 上不支持传入 socket。
 
-7. **null 或 undefined**：使用默认值。 对于 stdio 的文件描述符 0、1 和 2（换句话说，stdin、stdout 和 stderr），将会创建管道。 对于文件描述符 3 及更大的值，则默认为 'ignore'。
+7. **null 或 undefined**：使用默认值。 对于 stdio 的文件描述符 0、1 和 2（换句话说，stdin、stdout 和 stderr），将会创建管道。 对于文件描述符 3 及更大的值，则默认为'ignore'。
 
 ```js
-const { spawn } = require('child_process');
+const {spawn} = require('child_process');
 
 // 子进程使用父进程的 stdio。
 spawn('prg', [], { stdio: 'inherit' });
@@ -137,18 +139,20 @@ spawn('prg', [], { stdio: ['pipe', 'pipe', process.stderr] });
 // 打开一个额外的 fd=4，与呈现启动式界面的程序进行交互。
 spawn('prg', [], { stdio: ['pipe', null, null, null, 'pipe'] });
 ```
-当在父进程和子进程之间建立 IPC 通道，并且子进程是 Node.js 进程时，则子进程启动时不会指向 IPC 通道（使用 unref()），直到子进程为 'disconnect' 事件或 'message' 事件注册了事件句柄。 这使得子进程可以正常退出而不需要通过开放的 IPC 通道保持打开该进程。
+当在父进程和子进程之间建立 IPC 通道，并且子进程是 Node.js 进程时，则子进程启动时不会指向 IPC 通道（使用 unref()），直到子进程为'disconnect' 事件或'message' 事件注册了事件句柄。 这使得子进程可以正常退出而不需要通过开放的 IPC 通道保持打开该进程。
 
 在类 Unix 操作系统上，child_process.spawn() 方法在将事件循环与子进程解耦之前会同步地执行内存操作。 具有大内存占用的应用程序可能会发现频繁的 child_process.spawn() 调用成为瓶颈。 详见 V8 问题 7381。
 
 
-## ➣ Nodejs使用场景
-Nodejs 是单线程，非阻塞 I/O，事件驱动，不适用于CPU密集运算的任务。它的特点决定了它适合做一些大量 I/O 的东西，比如，聊天室，表单提交等不需要大量计算的功能。做一些微信后端开发，或者做消息系统等。可以整个项目用， 也可以根据它的特点在某个模块使用，比如 socketio，打造一个消息系统等。
+## ➣ Nodejs 使用场景
+
+Nodejs 是单线程，非阻塞 I/O，事件驱动，不适用于 CPU 密集运算的任务。它的特点决定了它适合做一些大量 I/O 的东西，比如，聊天室，表单提交等不需要大量计算的功能。做一些微信后端开发，或者做消息系统等。可以整个项目用， 也可以根据它的特点在某个模块使用，比如 socketio，打造一个消息系统等。
 
 ## ➣ Nodejs 中的 Stream 和 Buffer 有什么区别?
+
 Buffer：为数据缓冲对象，是一个类似数组结构的对象，可以通过指定开始写入的位置及写入的数据长度，往其中写入二进制数据。Stream：是对 buffer 对象的高级封装，其操作的底层还是 buffer 对象， stream 可以设置为可读、可写，或者即可读也可写，在 nodejs 中继承了 EventEmitter 接口，可以监听读入、写入的过程。具体实现有文件流，httpresponse 等。
 
-## ➣ Node.js流的概念
+## ➣ Node.js 流的概念
 
 流（stream）是 Node.js 中处理流式数据的抽象接口。 Node.js 提供了多种流对象。 例如，HTTP 服务器的请求和 process.stdout 都是流的实例。流可以是可读的、可写的、或者可读可写的，所有的流都是 EventEmitter 的实例。
 
@@ -201,15 +205,15 @@ myStream.end('完成写入数据');
 
 常见事件：
 - close: 当流或其底层资源（比如文件描述符）被关闭时触发。 表明不会再触发其他事件，也不会再发生操作。
-- drain: 如果调用 stream.write(chunk) 返回 false，则当可以继续写入数据到流时会触发 'drain' 事件。
-- error: 如果在写入或管道数据时发生错误，则会触发 'error' 事件，在 'error' 之后，除 'close' 事件外，不应再触发其他事件。
+- drain: 如果调用 stream.write(chunk) 返回 false，则当可以继续写入数据到流时会触发'drain' 事件。
+- error: 如果在写入或管道数据时发生错误，则会触发'error' 事件，在'error' 之后，除'close' 事件外，不应再触发其他事件。
 - 调用 stream.end() 且缓冲数据都已传给底层系统之后触发。
-- pipe: 可写流被`stream.pipe()`连接
+- pipe: 可写流被 `stream.pipe()` 连接
 
 常见方法：
 
-- writable.end([chunk[, encoding]][, callback]): 调用 writable.end() 表明已没有数据要被写入可写流。 可选的 chunk 和 encoding 参数可以在关闭流之前再写入一块数据。 如果传入了 callback 函数，则会做为监听器添加到 'finish' 事件和 'error' 事件。
-- writable.write(chunk[, encoding][, callback]): writable.write() 写入数据到流，并在数据被完全处理之后调用 callback。 如果发生错误，则 callback 可能被调用也可能不被调用。 为了可靠地检测错误，可以为 'error' 事件添加监听器。 callback 会在触发 'error' 之前被异步地调用。在接收了 chunk 后，如果内部的缓冲小于创建流时配置的 highWaterMark，则返回 true 。 如果返回 false ，则应该停止向流写入数据，直到 'drain' 事件被触发。
+- writable.end([chunk[, encoding]][, callback]): 调用 writable.end() 表明已没有数据要被写入可写流。 可选的 chunk 和 encoding 参数可以在关闭流之前再写入一块数据。 如果传入了 callback 函数，则会做为监听器添加到'finish' 事件和'error' 事件。
+- writable.write(chunk[, encoding][, callback]): writable.write() 写入数据到流，并在数据被完全处理之后调用 callback。 如果发生错误，则 callback 可能被调用也可能不被调用。 为了可靠地检测错误，可以为'error' 事件添加监听器。 callback 会在触发'error' 之前被异步地调用。在接收了 chunk 后，如果内部的缓冲小于创建流时配置的 highWaterMark，则返回 true 。 如果返回 false ，则应该停止向流写入数据，直到'drain' 事件被触发。
 
 ##### 可读流
 可读流运作于两种模式之一：流动模式（flowing）或暂停模式（paused）。 这些模式与对象模式分开。 无论是否处于流动模式或暂停模式，可读流都可以处于对象模式：
@@ -217,7 +221,7 @@ myStream.end('完成写入数据');
 - 在暂停模式中，必须显式调用 stream.read() 读取数据块。
 
 所有可读流都开始于暂停模式，可以通过以下方式切换到流动模式：
-- 添加 'data' 事件句柄。
+- 添加'data' 事件句柄。
 - 调用 stream.resume() 方法。
 - 调用 stream.pipe() 方法将数据发送到可写流。
 
@@ -227,26 +231,26 @@ myStream.end('完成写入数据');
 
 只有提供了消费或忽略数据的机制后，可读流才会产生数据。 如果消费的机制被禁用或移除，则可读流会停止产生数据。
 
-为了向后兼容，移除 'data' 事件句柄不会自动地暂停流。 如果有管道目标，一旦目标变为 drain 状态并请求接收数据时，则调用 stream.pause() 也不能保证流会保持暂停模式。
+为了向后兼容，移除'data' 事件句柄不会自动地暂停流。 如果有管道目标，一旦目标变为 drain 状态并请求接收数据时，则调用 stream.pause() 也不能保证流会保持暂停模式。
 
-如果可读流切换到流动模式，且没有可用的消费者来处理数据，则数据将会丢失。 例如，当调用 readable.resume() 时，没有监听 'data' 事件或 'data' 事件句柄已移除。
+如果可读流切换到流动模式，且没有可用的消费者来处理数据，则数据将会丢失。 例如，当调用 readable.resume() 时，没有监听'data' 事件或'data' 事件句柄已移除。
 
-添加 'readable' 事件句柄会使流自动停止流动，并通过 readable.read() 消费数据。 如果 'readable' 事件句柄被移除，且存在 'data' 事件句柄，则流会再次开始流动。
+添加'readable' 事件句柄会使流自动停止流动，并通过 readable.read() 消费数据。 如果'readable' 事件句柄被移除，且存在'data' 事件句柄，则流会再次开始流动。
 
 常见事件：
 
-- close: 当流或其底层资源（比如文件描述符）被关闭时触发 'close' 事件。 该事件表明不会再触发其他事件，也不会再发生操作。
-- data: 当流将数据块传送给消费者后触发。 当调用 readable.pipe()， readable.resume() 或绑定监听器到 'data' 事件时，流会转换到流动模式。 当调用 readable.read() 且有数据块返回时，也会触发 'data' 事件。
+- close: 当流或其底层资源（比如文件描述符）被关闭时触发'close' 事件。 该事件表明不会再触发其他事件，也不会再发生操作。
+- data: 当流将数据块传送给消费者后触发。 当调用 readable.pipe()， readable.resume() 或绑定监听器到'data' 事件时，流会转换到流动模式。 当调用 readable.read() 且有数据块返回时，也会触发'data' 事件。
 - end: 'end' 事件只有在数据被完全消费掉后才会触发。 要想触发该事件，可以将流转换到流动模式，或反复调用 stream.read() 直到数据被消费完。
 - error: 'error' 事件可能随时由 Readable 实现触发。 通常，如果底层的流由于底层内部的故障而无法生成数据，或者流的实现尝试推送无效的数据块，则可能会发生这种情况。
-- pause: 当调用 stream.pause() 并且 readsFlowing 不为 false 时，就会触发 'pause' 事件。
-- readable: 当有数据可从流中读取时，就会触发 'readable' 事件。 在某些情况下，为 'readable' 事件附加监听器将会导致将一些数据读入内部缓冲区。
-- resume: 当调用 stream.resume() 并且 readsFlowing 不为 true 时，将会触发 'resume' 事件。
+- pause: 当调用 stream.pause() 并且 readsFlowing 不为 false 时，就会触发'pause' 事件。
+- readable: 当有数据可从流中读取时，就会触发'readable' 事件。 在某些情况下，为'readable' 事件附加监听器将会导致将一些数据读入内部缓冲区。
+- resume: 当调用 stream.resume() 并且 readsFlowing 不为 true 时，将会触发'resume' 事件。
 
 常见方法:
 
-- readable.pause:  方法使流动模式的流停止触发 'data' 事件，并切换出流动模式。 任何可用的数据都会保留在内部缓存中。
-- readable.resume:  方法将被暂停的可读流恢复触发 'data' 事件，并将流切换到流动模式。
+- readable.pause:  方法使流动模式的流停止触发'data' 事件，并切换出流动模式。 任何可用的数据都会保留在内部缓存中。
+- readable.resume:  方法将被暂停的可读流恢复触发'data' 事件，并将流切换到流动模式。
 - readable.read([size]): 从内部缓冲拉取并返回数据。 如果没有可读的数据，则返回 null。 默认情况下， readable.read() 返回的数据是 Buffer 对象，除非使用 readable.setEncoding() 指定字符编码或流处于对象模式。如果没有指定 size 参数，则返回内部缓冲中的所有数据。
 - readable.setEncoding(encoding): 方法为从可读流读取的数据设置字符编码。默认情况下没有设置字符编码，流数据返回的是 Buffer 对象。 如果设置了字符编码，则流数据返回指定编码的字符串。 例如，调用 readable.setEncoding('utf-8') 会将数据解析为 UTF-8 数据，并返回字符串。
 
@@ -259,7 +263,7 @@ Duplex 流的例子包括：
 - TCP socket
 - zlib 流
 - crypto 流
-- 
+
 ##### 转换流
 
 转换流（Transform）是一种 Duplex 流，但它的输出与输入是相关联的。 与 Duplex 流一样， Transform 流也同时实现了 Readable 和 Writable 接口。
@@ -282,7 +286,7 @@ Node.js 是一个新的 JS 运行环境，它同样要支持异步逻辑，包�
 
 而 Node.js 任务宏任务之间也是有优先级的，比如定时器 Timer 的逻辑就比 IO 的逻辑优先级高，因为涉及到时间，越早越准确；而 close 资源的处理逻辑优先级就很低，因为不 close 最多多占点内存等资源，影响不大。主线程的 Script 代码最初也会作为一个宏任务执行。
 
-于是就把宏任务队列拆成了五个优先级：Timers、Pending、Poll、Check、Close。
+于是就把宏任务队列拆成了五个优先级：__Timers、Pending、Poll、Check、Close__。
 
 解释一下这五种宏任务：
 
@@ -317,22 +321,23 @@ node 的微任务：
 
 Node.js 的 Event Loop 的完整流程就是这样的：
 
-- Timers 阶段：执行一定数量的定时器，也就是 setTimeout、setInterval 的 callback，太多的话留到下次执行。
-- 微任务：执行所有 nextTick 的微任务，再执行其他的普通微任务。
-- Pending 阶段：执行一定数量的 IO 和网络的异常回调，太多的话留到下次执行。
-- 微任务：执行所有 nextTick 的微任务，再执行其他的普通微任务。
-- Idle/Prepare 阶段：内部用的一个阶段。
-- 微任务：执行所有 nextTick 的微任务，再执行其他的普通微任务。
-- Poll 阶段：执行一定数量的文件的 data 回调、网络的 connection 回调，太多的话留到下次执行。如果没有 IO 回调并且也没有 timers、check 阶段的回调要处理，就阻塞在这里等待 IO 事件。
-微任务：执行所有 nextTick 的微任务，再执行其他的普通微任务
-Check 阶段：执行一定数量的 setImmediate 的 callback，太多的话留到下次执行。
-微任务：执行所有 nextTick 的微任务，再执行其他的普通微任务
-Close 阶段：执行一定数量的 close 事件的 callback，太多的话留到下次执行。
-微任务：执行所有 nextTick 的微任务，再执行其他的普通微任务
+- __Timers 阶段__：执行一定数量的定时器，也就是 setTimeout、setInterval 的 callback，太多的话留到下次执行。
+- __微任务__：执行所有 nextTick 的微任务，再执行其他的普通微任务。
+- __Pending 阶段__：执行一定数量的 IO 和网络的异常回调，太多的话留到下次执行。
+- __微任务__：执行所有 nextTick 的微任务，再执行其他的普通微任务。
+- __Idle/Prepare 阶段__：内部用的一个阶段。
+- __微任务__：执行所有 nextTick 的微任务，再执行其他的普通微任务。
+- __Poll 阶段__：执行一定数量的文件的 data 回调、网络的 connection 回调，太多的话留到下次执行。如果没有 IO 回调并且也没有 timers、check 阶段的回调要处理，就阻塞在这里等待 IO 事件。
+- __微任务__：执行所有 nextTick 的微任务，再执行其他的普通微任务
+- __Check 阶段__：执行一定数量的 setImmediate 的 callback，太多的话留到下次执行。
+- __微任务__：执行所有 nextTick 的微任务，再执行其他的普通微任务
+- __Close 阶段__：执行一定数量的 close 事件的 callback，太多的话留到下次执行。
+- __微任务__：执行所有 nextTick 的微任务，再执行其他的普通微任务。
+
 比起浏览器里的 Event Loop，明显复杂了很多，但是经过我们之前的分析，也能够理解：
 
 Node.js 对宏任务做了优先级划分，从高到低分别是 Timers、Pending、Poll、Check、Close 这 5 种，也对微任务做了划分，也就是 nextTick 的微任务和其他微任务。执行流程是先执行完当前优先级的一定数量的宏任务（剩下的留到下次循环），然后执行 process.nextTick 的微任务，再执行普通微任务，之后再执行下个优先级的一定数量的宏任务。。这样不断循环。其中还有一个 Idle/Prepare 阶段是给 Node.js 内部逻辑用的，不需要关心。
 
 改变了浏览器 Event Loop 里那种一次执行一个宏任务的方式，可以让高优先级的宏任务更早的得到执行，但是也设置了个上限，避免下个阶段一直得不到执行。
 
-还有一个特别要注意的点，就是 poll 阶段：如果执行到 poll 阶段，发现 poll 队列为空并且 timers 队列、check 队列都没有任务要执行，那么就阻塞的等在这里等 IO 事件，而不是空转。 这点设计也是因为服务器主要是处理 IO 的，阻塞在这里可以更早的响应 IO。
+还有一个特别要注意的点，就是 poll 阶段：__如果执行到 poll 阶段，发现 poll 队列为空并且 timers 队列、check 队列都没有任务要执行，那么就阻塞的等在这里等 IO 事件，而不是空转__。 这点设计也是因为服务器主要是处理 IO 的，阻塞在这里可以更早的响应 IO。
