@@ -61,6 +61,22 @@ Node.js 在中间层也可以进入 mock 模式，将前端的接口转发到 ya
 
 在其它方面，中间层还提供近期请求日志记录功能可以用于紧急排查问题。
 
+## ➣ 前公司中间层使用 mono repo 改造的原因 (dt)
+
+首先这个中间层作为聚合服务云平台的业务网关，它承担着多个子项目的网关角色。
+
+为了对多个子项目和公共项目的版本解耦，我们把这些子项目 + 公共项目的代码拆分为多个 npm 仓库，同时为了更好的管理这些子项目，采用了 mono repo 方式。
+
+不解耦前各个发布的大版本都只能对应固定最新版本的子应用，现在可以做到子应用版本分离，子应用和 runtime 环境任意组合。
+
+这样在开发调试时就不用手动进行 npm link 操作，发布版本时也无需手动更新版本依赖。同时 npm 项目依赖模块的安装也在同一个仓库下，减少了重复安装的情况。
+
+同时值得说明的是：生产环境下中间层在 linux 主机上运行着单个实例，服务意外宕机后可以由 pm2 自动重启。而一个本地存储集群对应着多个 linux 主机，单个主机宕机后可以访问其它主机。
+
+## ➣ 前公司 cicd 改造 (dt)
+
+jenkens 服务端监控 git 分支内容变更，然后拉取远程分支，jenkens 服务端上有打包 bash 脚本，然后就自动构建 rpm 包，构建完成后将最新的 rpm 包复制到其他环境，运维人员到其他环境上取 rpm 包。
+
 ## ➣ 前公司 cicd 系统的架构和原理 (hz)
 
 1. 底层基于 k8s 容器化，生产环境的应用可以在线缩容扩容服务节点，版本发布时可以做到无下线热替换。
@@ -557,6 +573,366 @@ var config = {
 RongIMClient.reconnect(callback, config);
 ```
 
+## ➣ Electron 进程管理器的架构和亮点
+
+### 一、架构
+
+![electron-re](http://nojsja.gitee.io/static-resources/images/electron-re/electron-re_arch.png)
+
+### 二、模块说明
+
+#### 1. ProcessManager
+
+进程管理中心，一方面调用外部库 `pidusage` 进行各个已监听进程的资源循环采集，另一方面负责和 UI 部分通信，响应 UI 部分的控制逻辑比如：关闭进程、打开渲染进程 DevTools。同时 ProcessManager 还会将自己采集到的 Memory/CPU 资源占用数据发送给 UI 部分，以便 UI 部分进行即时渲染。
+
+#### 2. MessageChannel
+
+主进程 MessageChannel 用于注册 Service 和提供 Service 查询服务。子进程的 MessageChannel 会向主进程 MessageChannel 查询注册的 Service ID，然后在子进程中可以通过 Service ID 和对应的 Service 通信。
+
+#### 3. BrowserService
+
+BrowserService 中能放入一些独立于主进程的比较占用 CPU 的代码逻辑，当然也可以单纯基于业务进行 Service 代码划分。有了 BrowserService 就不用我们手动创建多个隐藏的 BrowserWindow 实例来运行部分业务代码了。
+
+底层实现为一个允许 Node 注入和远程调用的 BrowserWindow 实例。只不过采用了 dataURL 的方式将 js 脚本注入到页面模板中，从而不必手动声明 .html 文件。
+
+开发环境下内部通过 `inject scripts` 的方式注入了一些代码和主进程的 file watcher 通信，以实现代码更新后 Service 重启。
+
+利用了 `remote.require` 的方式让 Service 中的脚本可以无缝调用主进程方法。因为用到了 Electron Renderer Process 远程调用的特性，因此在 Service 内部对 remote 进行了 polyfill，以便在高于 13 版本的 Electron 中能正常运行 BrowserService。
+
+#### 4. ChildProcessPool
+
+一个基于 Node.js `ChildProcess.fork` 实现的多进程池逻辑，内部支持多种负载均衡算法：比如权重、随机、轮询、加权轮询、加权随机等，子进程在创建后一段时间未使用时会自动进行 sleep 睡眠状态，有新消息时会自动被唤醒。
+
+子进程使用一个 js 文件创建，内部可以和 `ProcessHost` 通信，而不必直接使用 process.send 和 process.on('message') 来进行消息通信。
+
+`ProcessHost` 相当于一个事件注册中心，以观察者模式提供服务，子进程向自己的 ProcessHost 注册时间，然后主进程向子进程发送消息时 ProcessHost 可以感知并进行捕获，然后将传递的数据发送给监听者。
+
+#### 5. BrowserWindow
+
+原生 BrowserWindow 实例，可以使用 MessageChannel 来替代原生 IPC 通信。
+
+#### 6. UI 监控界面
+
+UI 部分主要用于显示各个在 ProcessManager 中注册的进程的资源占用情况，比如：Memory/CPU 使用情况、进程类型、查看进程控制台、查看 MessageChannel 的通信记录、杀死子进程、打开渲染进程 Devtools 等功能。
+
+进程类型包括几种：BroserServer、渲染进程 BroserWindow、主进程、进程池子进程 ChildProcess。如果开启了 Devtools 还会显示 Devtools 对应的进程。
+
+## ➣ shadowsocks-electron 代理软件的难点和亮点
+
+### 一、功能亮点
+
+- 使用 React / Typescript / Material UI 开发。
+- 跨平台，支持 Windows、Mac、Linux。
+- 利用 Node.js `http` 模块 实现了 http / https 代理
+- 利用 Node.js `net` 模块实现了 server ping 功能。
+- 利用 Node.js `net.Socket` 模块实现了端口号占用检测功能。
+- 一键设置系统 Proxy 和 PAC 模式。
+- 利用 Electron 截图 API 获取了图片像素数组并进行分析实现了屏幕二维码读取并导入服务器配置功能。
+- SSR / SS 代理功能是通过子进程的方式调用平台原生 bin 文件实现的，Electron 层做了代理封装，以处理各种异常情况和启停控制。
+
+### 二、难点解析
+
+#### 1. http / https 代理的实现原理
+
+Node.js 使用 http 模块创建个代理服务器，代理服务器可视为隧道网关。它通过监听来自客户端的 `connect` 请求事件，解析出目标服务器地址和端口信息，然后建立 TCP 连接到目标服务器。一旦建立了 TCP 连接，就将服务端连接的 Socket 对象通过 `pipe` 管道的方式连接到客户端响应的 Socket 对象上。代理服务器然后向服务器端 Socket 写入客户端请求的 header 数据，同时向客户端 Socket 写入一条 `HTTP 200 Connection Established` 响应来通知客户端连接成功。最后，HTTP 隧道就在客户端和目标服务器端建立起来了。
+
+之后，客户端通过 HTTP 代理服务器的所有数据都会被直接转发给 HTTP 隧道，服务器发送的所有数据都会通过 HTTP 隧道转发给客户端。
+
+由于 HTTP 隧道工作在传输层，整个流程中转服务器不需要加密 / 解密客户端的请求携带数据，只需要通过 TCP Socket 转发数据即可，因此可以绕过 HTTPS 请求的安全层 TLS/SSL 进行数据盲转。
+
+```javascript
+/**
+    * connect [HTTP CONNECT method for https proxy]
+    * @author nojsja
+    * @param  {http.IncomingMessage} request [request]
+    * @param  {Duplex} cSocket [cSocket]
+    * @param  {Buffer} head [head]
+    * @return {void}
+    */
+  private connect = (request: http.IncomingMessage, cSocket: Duplex, head: Buffer) => {
+    const u = url.parse('http://' + request.url)
+    const {agentConf} = this;
+    const options = {
+      command: 'connect',
+      proxy: agentConf,
+      target: {host: u.hostname, port: u.port},
+    };
+
+    socks.createConnection(options, (error: Error | null, pSocket: Duplex) => {
+      if (error) {
+        cSocket.write(`HTTP/${request.httpVersion} 500 Connection error\r\n\r\n`);
+        return;
+      }
+      pSocket.pipe(cSocket);
+      cSocket.pipe(pSocket);
+      pSocket.write(head);
+      cSocket.write(`HTTP/${request.httpVersion} 200 Connection established\r\n\r\n`)
+      pSocket.resume();
+    });
+
+    /* 不使用外部 socks5 协议绕过流量检测版本代码
+      const serverSocket = net.connect(port || 80, hostname, () => {
+        clientSocket.write('HTTP/1.1 200 Connection Established\r\n' +
+                        'Proxy-agent: Node.js-Proxy\r\n' +
+                        '\r\n');
+        serverSocket.write(head);
+        serverSocket.pipe(pSocket);
+        pSocket.pipe(serverSocket);
+      });
+    */
+  }
+
+```
+
+#### 2. 截屏读取二维码导入配置的原理
+
+扫描屏幕二维码导入功能实现起来稍复杂些。
+
+第一步：先使用 Electron 自带 desktopCapture API 获取桌面截图文件：
+
+```javascript
+import {desktopCapturer} from 'electron';
+...
+/* 获取桌面截图 */
+export function getScreenCapturedResources(): Promise<Electron.DesktopCapturerSource[]> {
+  return desktopCapturer.getSources({
+    types: ['screen'],
+    thumbnailSize: {
+      width: window.screen.width * window.devicePixelRatio,
+      height: window.screen.height * window.devicePixelRatio
+    }
+  });
+}
+```
+
+第二步：将截图数据转换成 bitmap 位图格式 (存储像素点颜色和透明度的数组 [r,g,b,a …])，然后使用 jsqr 库解析位图中的二维码信息，最终会得到二维码位于屏幕中的坐标、宽度和文本值等信息：
+
+
+```javascript
+/* 解析位图数据 */
+export const getQrCodeFromScreenResources = (callback?: (added: boolean) => void): ThunkAction<void, RootState, unknown, AnyAction> => {
+  return (dispatch) => {
+    getScreenCapturedResources().then((resources: Electron.DesktopCapturerSource[]) => {
+      // 可能有多个屏幕资源
+      if (resources && resources.length) {
+        const qrs: {x: number, y: number, width: number, height: number}[] = [];
+        const values: string[] = [];
+        resources.forEach(resource => {
+          const size = resource.thumbnail.getSize();
+          // 使用截图的位图信息进行解析
+          const capturedData = jsqr(resource.thumbnail.getBitmap() as any, size.width, size.height);
+          if (capturedData && capturedData.data) {
+            values.push(capturedData.data);
+            // 保存多个二维码的坐标、宽高和文本值信息
+            qrs.push({
+              x: capturedData.location.topLeftCorner.x,
+              y: capturedData.location.topLeftCorner.y,
+              width: capturedData.location.topRightCorner.x - capturedData.location.topLeftCorner.x,
+              height: capturedData.location.bottomLeftCorner.y - capturedData.location.topLeftCorner.y,
+            });
+          }
+        });
+        // 保存 qrs 二维码数据并发送数据到主进程进行其它操作
+        ...
+        callback && callback(!!qrs.length);
+      } else {
+        callback && callback(false);
+      }
+    });
+  }
+};
+```
+
+第三步：发送二维码数据到主进程，主进程根据坐标和宽高信息生成办透明的全屏窗口 (截图遮罩层)，并在透明窗口加载的 js 文件中根据二维码坐标信息用 canvas 绘制高亮捕获区域：
+
+```javascript
+/* ------ 主进程中创建透明窗口 ------ */
+import {app, BrowserWindow screen} from "electron";
+const screenSize = screen.getPrimaryDisplay().workAreaSize;
+const twin = new BrowserWindow({
+    width: screenSize.width,
+    height: screenSize.height,
+    transparent: true, // 透明
+    alwaysOnTop: true, // 置顶
+    fullscreen: true, // 全屏
+    frame: false, // 无边框
+    titleBarStyle: 'hidden', // 隐藏标题栏
+    ...
+});
+twin.loadURL('path/to/html');
+
+
+/* ------ 渲染进程中绘制高亮二维码区域 ------ */
+const {ipcRenderer} = require('electron');
+const screenWidth = window.screen.availWidth * window.devicePixelRatio;
+const screenHeight = window.screen.availHeight * window.devicePixelRatio;
+const $drawer = document.querySelector('#drawer');
+$drawer.width = screenWidth;
+$drawer.height = screenHeight;
+if (!drawer) return;
+
+const ctx = drawer.getContext('2d');
+const {x, y, width, height} = p;
+if (ctx) {
+  // 全屏填充半透明背景色
+  ctx.fillStyle = 'rgba(0, 0, 0, .3)';
+  ctx.fillRect(0, 0, drawer.width, drawer.height);
+  // 高亮二维码捕获区域
+  ctx.fillStyle = 'rgba(255, 0, 0, .4)';
+  ctx.fillRect(x, y, width, height);
+}
+```
+
+#### 3. 端口占用检测逻辑的原理
+
+使用 `net.Socket` API 尝试建立一条到目标 `host:port` 的 socket 连接，如果成功连接上了表明端口被占用，如果连接错误或超时表明端口未被占用。
+
+```javascript
+import net from 'net';
+
+const {Socket} = net;
+
+type ReturnType = {
+  isInUse: boolean,
+  error: string | null
+};
+
+const socketConnect = (port: number, host: string, timeout: number = 1e3): Promise<ReturnType> => {
+  return new Promise(resolve => {
+    const socket = new Socket();
+    let status = '';
+    let isInUse = false;
+
+    socket.setTimeout(timeout)
+    socket.on('timeout', () => {
+      socket.destroy();
+    });
+    socket.on('error', (err: { code: string}) => {
+      isInUse = false;
+    });
+
+    socket.on('connect', function () {
+      isInUse = true;
+      socket.destroy();
+    });
+
+    socket.on('close', () => {
+      if (status) {
+        resolve({
+          isInUse,
+          error: status
+        });
+      } else {
+        resolve({
+          isInUse,
+          error: null
+        });
+      }
+    });
+
+    socket.connect({
+      port,
+      host
+    });
+  });
+}
+
+const checkPortInUse = (
+  ports: number[], host: string, timeout?: number
+): Promise<ReturnType[]> => {
+  return Promise.all(
+    ports.map(port => socketConnect(port, host, timeout))
+  );
+};
+
+export default checkPortInUse;
+```
+
+#### 4. tcp ping 逻辑的实现原理
+
+封装一个 `tcpConnect` 方法，内部使用 `net.createConnection` API 创建一个到目标服务器的 TCP 连接。连接成功后使用 `process.hrtime` 获取连接建立所需的高精度时间，最后关闭这次打开的 TCP 连接。
+
+调用 10 次 `tcpConnect` 方法发送多个 TCP 连接请求，所有请求均返回后计算平均连接时间，并返回结果。
+
+```javascript
+const net = require('net');
+
+...
+
+const tcpPing = (options: pingOptions): Promise<[pingResult, connectResult[]]> => {
+  const results: connectResult[] = [];
+  const result: pingResult = {
+    max: 0, min: 0, ave: 0, failed: 0
+  };
+
+  const count = options.count ?? 8;
+
+  return new Promise(resolve => {
+    const callback = (error: Error | null, delay: number) => {
+      results.push({
+        error, delay
+      });
+
+      if (results.length === count) {
+        results.forEach((item, index) => {
+          if (item.error) {
+            result.failed += 1
+          } else {
+            result.ave += item.delay;
+            if (item.delay> result.max) result.max = item.delay;
+            if (item.delay < result.min || result.min === 0) result.min = item.delay;
+          }
+
+          if (index === count - 1) {
+            result.ave = +(result.ave / (count - result.failed)).toFixed(0);
+            resolve([result, results]);
+          }
+
+        });
+      }
+    };
+
+    new Array(count).fill(0).forEach((_, i) => {
+      setTimeout(() => {
+        tcpConnect(options, callback)
+      }, i * 100);
+    });
+  });
+
+};
+
+const tcpConnect = (options: pingOptions, callback: (error: Error | null, delay: number) => void) => {
+  const startTime = process.hrtime();
+  let timer: NodeJS.Timeout;
+  let isEnd = false;
+
+  const client = net.createConnection({host: options.host, port: options.port}, () => {
+    isEnd = true;
+    clearTimeout(timer);
+    client.end();
+    callback(null, Math.round(process.hrtime(startTime)[1] / 1e6))
+  });
+  timer = setTimeout(() => {
+    client.end();
+    callback(new Error('Timeout'), 0)
+  }, options.timeout ?? 500);
+  client.on('data', () => {
+    client.end();
+  });
+  client.on('error', (err: Error) => {
+    if (!isEnd) {
+      callback(err, 0);
+    }
+  });
+  client.on('end', () => {
+    isEnd = true;
+  });
+};
+
+export default tcpPing;
+```
+
+
 ## ➣ 前端网关架构
 
 ## ➣ 前端 SEO 优化
@@ -586,12 +962,12 @@ SSR - 静态站点的解析是在构建时执行的，当发出请求时，html 
 
 #### 合理使用文本结构标签 `h1-h6`
 
-一个页面中只能最多出现一次h1标签，h2标签通常作为二级标题或文章的小标题。其余h3-h6标签如要使用应按顺序层层嵌套下去，不可以断层或反序。比如通常在首页的 logo 上加h1标签。
+一个页面中只能最多出现一次 h1 标签，h2 标签通常作为二级标题或文章的小标题。其余 h3-h6 标签如要使用应按顺序层层嵌套下去，不可以断层或反序。比如通常在首页的 logo 上加 h1 标签。
 
 #### 图片 Alt 标签
 
-一般来说，除非是图片仅仅是纯展示类没有任何实际信息的话，alt属性可以为空。否则使用img标签都要添加alt属性，使"蜘蛛"可以抓取到图片的信息。
-当网络加载不出来或者图片地址失效时，alt属性的内容才会代替图片呈现出来，
+一般来说，除非是图片仅仅是纯展示类没有任何实际信息的话，alt 属性可以为空。否则使用 img 标签都要添加 alt 属性，使 "蜘蛛" 可以抓取到图片的信息。
+当网络加载不出来或者图片地址失效时，alt 属性的内容才会代替图片呈现出来，
 
 #### a 标签 title
 
@@ -618,12 +994,12 @@ a 标签的 title 属性其实就是提示文字作用，当鼠标移动到该�
 2. 用于 a 标签，告诉爬虫该页面无需追踪。
 
 ```livecodeserver
-<a href="https://www.xxxx?login" rel="nofollow">登录/注册</a>
+<a href="https://www.xxxx?login" rel="nofollow"> 登录 / 注册 </a>
 ```
 
 通常用在 a 标签比较多，它主要有三个作用：
 
-1. "蜘蛛"分配到每个页面的权重是一定的，为了集中网页权重并将权重分给其他必要的链接，就设置`rel='nofollow'`告诉"蜘蛛"不要爬，来避免爬虫抓取一些无意义的页面，影响爬虫抓取的效率；而且一旦"蜘蛛"爬了外部链接，就不会再回来了。
+1. "蜘蛛" 分配到每个页面的权重是一定的，为了集中网页权重并将权重分给其他必要的链接，就设置 `rel='nofollow'` 告诉 "蜘蛛" 不要爬，来避免爬虫抓取一些无意义的页面，影响爬虫抓取的效率；而且一旦 "蜘蛛" 爬了外部链接，就不会再回来了。
 2. 付费链接：为了防止付费链接影响 Google 的搜索结果排名，Google 建议使用 nofollow 属性。
 3. 防止不可信的内容，最常见的是博客上的垃圾留言与评论中为了获取外链的垃圾链接，为了防止页面指向一些拉圾页面和站点。
 
@@ -644,12 +1020,12 @@ SiteMap: http://www.xxxx.com/sitemap.xml
 3. Allow 应抓取的目录或网页
 4. Sitemap 网站的站点地图的位置
 
-- `User-agent: *`表示对所有的搜索引擎有效
+- `User-agent: *` 表示对所有的搜索引擎有效
 - `User-agent: Baiduspider` 表示百度搜索引擎，还有谷歌 Googlebot 等等搜索引擎名称，通过这些可以设置不同搜索引擎访问的内容
 
-robots 文件是搜索引擎访问网站时第一个访问的，然后根据文件里面设置的规则，进行网站内容的爬取。通过设置`Allow`和`Disallow`访问目录和文件，引导爬虫抓取网站的信息。
+robots 文件是搜索引擎访问网站时第一个访问的，然后根据文件里面设置的规则，进行网站内容的爬取。通过设置 `Allow` 和 `Disallow` 访问目录和文件，引导爬虫抓取网站的信息。
 
-它主要用于使你的网站避免收到过多请求，告诉搜索引擎应该与不应抓取哪些页面。如果你不希望网站的某些页面被抓取，这些页面可能对用户无用，就通过`Disallow`设置。实现定向 SEO 优化，曝光有用的链接给爬虫，将敏感无用的文件保护起来。
+它主要用于使你的网站避免收到过多请求，告诉搜索引擎应该与不应抓取哪些页面。如果你不希望网站的某些页面被抓取，这些页面可能对用户无用，就通过 `Disallow` 设置。实现定向 SEO 优化，曝光有用的链接给爬虫，将敏感无用的文件保护起来。
 
 即使网站上面所有内容都希望被搜索引擎抓取到，也要设置一个空的 robot 文件。因为当蜘蛛抓取网站内容时，第一个抓取的文件 robot 文件，如果该文件不存在，那么蜘蛛访问时，服务器上就会有一条 404 的错误日志，多个搜索引擎抓取页面信息时，就会产生多个的 404 错误，故一般都要创建一个 robots.txt 文件到网站根目录下。
 
