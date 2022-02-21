@@ -1,0 +1,1 @@
+const t={key:"v-3832d1d2",path:"/algorithms/array.html",title:"\u25CF \u6570\u7EC4",lang:"zh-CN",frontmatter:{lang:"zh-CN",title:"\u25CF \u6570\u7EC4",description:"Algorithms \u7684\u63CF\u8FF0"},excerpt:"",headers:[],git:{updatedTime:1641465602e3},filePathRelative:"algorithms/array.md"};export{t as data};

@@ -9,6 +9,7 @@ module.exports = {
   theme: '@vuepress/theme-default',
   themeConfig: {
     logo: 'https://nojsja.gitee.io/blogs/img/avatar/nojsja.jpeg',
+    contributors: false,
     navbar: [
     ],
     navbar: [

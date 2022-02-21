@@ -1,0 +1,1 @@
+const t={key:"v-18508c17",path:"/js.html",title:"\u25CF Javascript",lang:"zh-CN",frontmatter:{lang:"zh-CN",title:"\u25CF Javascript",description:"Javascript \u7684\u63CF\u8FF0"},excerpt:"",headers:[],git:{updatedTime:164457403e4},filePathRelative:"js.md"};export{t as data};

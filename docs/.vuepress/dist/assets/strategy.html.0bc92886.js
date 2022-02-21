@@ -1,0 +1,1 @@
+const t={key:"v-00831682",path:"/design_pattern/strategy.html",title:"\u25CF \u7B56\u7565\u6A21\u5F0F",lang:"zh-CN",frontmatter:{lang:"zh-CN",title:"\u25CF \u7B56\u7565\u6A21\u5F0F",description:"Design Pattern \u7684\u63CF\u8FF0"},excerpt:"",headers:[],git:{updatedTime:1641465602e3},filePathRelative:"design_pattern/strategy.md"};export{t as data};
