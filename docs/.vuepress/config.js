@@ -71,8 +71,8 @@ module.exports = {
         text: '➣ 前端工程化和架构',
         link: '/structure',
         children: [
-          '/structure/base.md',
-          '/structure/keys.md',
+          '/structure/arch.md',
+          '/structure/engineered.md',
           '/structure/project.md',
         ],
       },
