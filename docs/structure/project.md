@@ -619,6 +619,8 @@ UI 部分主要用于显示各个在 ProcessManager 中注册的进程的资源�
 
 ## ➣ shadowsocks-electron 代理软件的难点和亮点
 
+一个跨平台网络代理工具，基于 shadowsocks 通信库实现，可实现网络 socks5 代理、http(s) 代理、系统代理设置、服务器配置二维码导入。
+
 ### 一、功能亮点
 
 - 使用 React / Typescript / Material UI 开发。
