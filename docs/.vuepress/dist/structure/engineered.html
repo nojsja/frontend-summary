@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <meta name="generator" content="VuePress 2.0.0-beta.32">
     <title>● 工程化 | NoJsJa Frontend Summary</title><meta name="description" content="structure 的描述">
-    <link rel="modulepreload" href="/frontend-summary/assets/app.f9b776ce.js"><link rel="modulepreload" href="/frontend-summary/assets/engineered.html.bfac3125.js"><link rel="modulepreload" href="/frontend-summary/assets/plugin-vue_export-helper.21dcd24c.js"><link rel="modulepreload" href="/frontend-summary/assets/engineered.html.d5f59216.js">
+    <link rel="modulepreload" href="/frontend-summary/assets/app.cad762ed.js"><link rel="modulepreload" href="/frontend-summary/assets/engineered.html.23841926.js"><link rel="modulepreload" href="/frontend-summary/assets/plugin-vue_export-helper.21dcd24c.js"><link rel="modulepreload" href="/frontend-summary/assets/engineered.html.d5f59216.js">
     <link rel="stylesheet" href="/frontend-summary/assets/style.c7eaaf18.css">
   </head>
   <body>
@@ -391,6 +391,6 @@ SiteMap: http://www.xxxx.com/sitemap.xml
 </code></pre><div class="line-numbers"><span class="line-number">1</span><br><span class="line-number">2</span><br><span class="line-number">3</span><br></div></div><p>关键词：</p><ol><li>User-agent 表示网页抓取工具的名称</li><li>Disallow 表示不应抓取的目录或网页</li><li>Allow 应抓取的目录或网页</li><li>Sitemap 网站的站点地图的位置</li></ol><ul><li><code>User-agent: *</code> 表示对所有的搜索引擎有效</li><li><code>User-agent: Baiduspider</code> 表示百度搜索引擎，还有谷歌 Googlebot 等等搜索引擎名称，通过这些可以设置不同搜索引擎访问的内容</li></ul><p>robots 文件是搜索引擎访问网站时第一个访问的，然后根据文件里面设置的规则，进行网站内容的爬取。通过设置 <code>Allow</code> 和 <code>Disallow</code> 访问目录和文件，引导爬虫抓取网站的信息。</p><p>它主要用于使你的网站避免收到过多请求，告诉搜索引擎应该与不应抓取哪些页面。如果你不希望网站的某些页面被抓取，这些页面可能对用户无用，就通过 <code>Disallow</code> 设置。实现定向 SEO 优化，曝光有用的链接给爬虫，将敏感无用的文件保护起来。</p><p>即使网站上面所有内容都希望被搜索引擎抓取到，也要设置一个空的 robot 文件。因为当蜘蛛抓取网站内容时，第一个抓取的文件 robot 文件，如果该文件不存在，那么蜘蛛访问时，服务器上就会有一条 404 的错误日志，多个搜索引擎抓取页面信息时，就会产生多个的 404 错误，故一般都要创建一个 robots.txt 文件到网站根目录下。</p><p>空 robots.txt 文件</p><div class="language-makefile ext-makefile line-numbers-mode"><pre class="language-makefile"><code><span class="token symbol">User-agent</span><span class="token punctuation">:</span> *
 <span class="token symbol">Disallow</span><span class="token punctuation">:</span>
 </code></pre><div class="line-numbers"><span class="line-number">1</span><br><span class="line-number">2</span><br></div></div><!--]--></div><footer class="page-meta"><!----><div class="meta-item last-updated"><span class="meta-item-label">Last Updated: </span><!----></div><!----></footer><nav class="page-nav"><p class="inner"><span class="prev"><a href="/frontend-summary/structure/arch.html" class="" aria-label="● 架构"><!--[--><!--]--> ● 架构 <!--[--><!--]--></a></span><span class="next"><a href="/frontend-summary/structure/project.html" class="" aria-label="● 前项目梳理"><!--[--><!--]--> ● 前项目梳理 <!--[--><!--]--></a></span></p></nav><!--[--><!--]--></main><!--]--></div><!----><!--]--></div>
-    <script type="module" src="/frontend-summary/assets/app.f9b776ce.js" defer></script>
+    <script type="module" src="/frontend-summary/assets/app.cad762ed.js" defer></script>
   </body>
 </html>
