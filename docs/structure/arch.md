@@ -186,9 +186,25 @@ shouldEmit 会被传入 compilation 参数；done 会被传入 stats 参数；ad
 
 ## ➣ Webpack 编译流程
 
-流程图：
+本质上,webpack 是一个现代 JavaScript 应用程序的静态模块打包器(module bundler)。当 webpack 处理应用程序时，它会递归地构建一个依赖关系图(dependency graph)，其中包含应用程序需要的每个模块，然后将所有这些模块打包成一个或多个 bundle。
+
+webpack 就像一条生产线，要经过一系列处理流程后才能将源文件转换成输出结果。这条生产线上的每个处理流程的职责都是单一的，多个流程之间有存在依赖关系，只有完成当前处理后才能交给下一个流程去处理。插件就像是一个插入到生产线中的一个功能，在特定的时机对生产线上的资源做处理。
+
+webpack 通过 Tapable 来组织这条复杂的生产线。 webpack 在运行过程中会广播事件，插件只需要监听它所关心的事件，就能加入到这条生产线中，去改变生产线的运作。 webpack 的事件流机制保证了插件的有序性，使得整个系统扩展性很好。
 
 ![](https://nojsja.gitee.io/static-resources/images/webpack/webpack-process.png)
+
+Webpack 的运行流程是一个串行的过程，从启动到结束会依次执行以下流程 :
+
+- 初始化参数：从配置文件和 Shell 语句中读取与合并参数，得出最终的参数。
+- 开始编译：用上一步得到的参数初始化 Compiler 对象，加载所有配置的插件，执行对象的 run 方法开始执行编译。
+- 确定入口：根据配置中的 entry 找出所有的入口文件。
+- 编译模块：从入口文件出发，调用所有配置的 Loader 对模块进行翻译，再找出该模块依赖的模块，再递归本步骤直到所有入口依赖的文件都经过了本步骤的处理。
+- 完成模块编译：在经过第 4 步使用 Loader 翻译完所有模块后，得到了每个模块被翻译后的最终内容以及它们之间的依赖关系。
+- 输出资源：根据入口和模块之间的依赖关系，组装成一个个包含多个模块的 Chunk，再把每个 Chunk 转换成一个单独的文件加入到输出列表，这步是可以修改输出内容的最后机会。
+- 输出完成：在确定好输出内容后，根据配置确定输出的路径和文件名，把文件内容写入到文件系统。
+
+在以上过程中，Webpack 会在特定的时间点广播出特定的事件，插件在监听到感兴趣的事件后会执行特定的逻辑，并且插件可以调用 Webpack 提供的 API 改变 Webpack 的运行结果。
 
 ### 一、构建的核心流程
 
@@ -350,6 +366,8 @@ compile(callback) {
 - WHEN: 什么时间点会有什么钩子被触发？
 - HOW: 在钩子回调中，如何影响编译状态？
 
+关于编写插件，可以查看：[官网](https://www.webpackjs.com/contribute/writing-a-plugin/)
+
 #### 1. What: 什么是插件
 
 从形态上看，插件通常是一个带有 `apply` 函数的类：
@@ -438,4 +456,142 @@ const {
 流程图中， runLoaders 会调用用户所配置的 loader 集合读取、转译资源，此前的内容可以千奇百怪，但转译之后理论上应该输出标准 JavaScript 文本或者 AST 对象，webpack 才能继续处理模块依赖。
 理解了这个基本逻辑之后，loader 的职责就比较清晰了，不外乎是将内容 A 转化为内容 B，但是在具体用法层面还挺多讲究的，有 pitch、pre、post、inline 等概念用于应对各种场景。
 
+关于编写 loader，可以查看：[官网](https://www.webpackjs.com/contribute/writing-a-loader/)
+
 ![](https://nojsja.gitee.io/static-resources/images/webpack/webpack-loader.png)
+
+
+## ➣ Webpack Plugin 和 Loader 编写
+
+### 一、Plugin 编写
+
+在插件开发中最重要的两个资源就是 compiler 和 compilation 对象。理解它们的角色是扩展 webpack 引擎重要的第一步，这两个组件是任何 webpack 插件不可或缺的部分（特别是 compilation）：
+
+- compiler 对象代表了完整的 webpack 环境配置。这个对象在启动 webpack 时被一次性建立，并配置好所有可操作的设置，包括 options，loader 和 plugin。当在 webpack 环境中应用一个插件时，插件将收到此 compiler 对象的引用。可以使用它来访问 webpack 的主环境。
+
+- compilation 对象代表了一次资源版本构建。当运行 webpack 开发环境中间件时，每当检测到一个文件变化，就会创建一个新的 compilation，从而生成一组新的编译资源。一个 compilation 对象表现了当前的模块资源、编译生成资源、变化的文件、以及被跟踪依赖的状态信息。compilation 对象也提供了很多关键时机的回调，以供插件做自定义处理时选择使用。
+
+#### 1. 基本插件架构
+插件是由「具有 apply 方法的 prototype 对象」所实例化出来的。这个 apply 方法在安装插件时，会被 webpack compiler 调用一次。apply 方法可以接收一个 webpack compiler 对象的引用，从而可以在回调函数中访问到 compiler 对象。一个简单的插件结构如下：
+
+```javascript
+function HelloWorldPlugin(options) {
+  // 使用 options 设置插件实例……
+}
+
+HelloWorldPlugin.prototype.apply = function(compiler) {
+  compiler.plugin('done', function() {
+    console.log('Hello World!');
+  });
+};
+
+module.exports = HelloWorldPlugin;
+```
+
+然后，要安装这个插件，只需要在你的 webpack 配置的 plugin 数组中添加一个实例：
+
+```javascript
+var HelloWorldPlugin = require('hello-world');
+
+var webpackConfig = {
+  // ... 这里是其他配置 ...
+  plugins: [
+    new HelloWorldPlugin({options: true})
+  ]
+};
+```
+
+#### 2. 访问 compilation 对象
+
+使用 compiler 对象时，你可以绑定提供了编译 compilation 引用的回调函数，然后拿到每次新的 compilation 对象。这些 compilation 对象提供了一些钩子函数，来钩入到构建流程的很多步骤中。
+
+```javascript
+function HelloCompilationPlugin(options) {}
+
+HelloCompilationPlugin.prototype.apply = function(compiler) {
+
+  // 设置回调来访问 compilation 对象：
+  compiler.plugin("compilation", function(compilation) {
+
+    // 现在，设置回调来访问 compilation 中的步骤：
+    compilation.plugin("optimize", function() {
+      console.log("Assets are being optimized.");
+    });
+  });
+};
+
+module.exports = HelloCompilationPlugin;
+```
+
+关于 compiler，compilation 的可用回调，和其它重要的对象的更多信息，请查看 插件 文档。
+
+#### 3. 异步编译插件
+
+有一些编译插件中的步骤是异步的，这样就需要额外传入一个 callback 回调函数，并且在插件运行结束时，_必须_调用这个回调函数。
+
+```javascript
+function HelloAsyncPlugin(options) {}
+
+HelloAsyncPlugin.prototype.apply = function(compiler) {
+  compiler.plugin("emit", function(compilation, callback) {
+
+    // 做一些异步处理……
+    setTimeout(function() {
+      console.log("Done with async work...");
+      callback();
+    }, 1000);
+
+  });
+};
+
+module.exports = HelloAsyncPlugin;
+```
+
+#### 4. 插件的不同类型
+
+webpack 插件可以按照它所注册的事件分成不同的类型。每一个事件钩子决定了它该如何应用插件的注册。
+
+- 同步(synchronous) Tapable 实例应用插件时会使用：
+
+  ```javascript
+  applyPlugins(name: string, args: any...)
+  applyPluginsBailResult(name: string, args: any...)
+
+  ```
+  这意味着每个插件回调，都会被特定的 args 一个接一个地调用。 这是插件的最基本形式。许多有用的事件（例如 "compile", "this-compilation"），预期插件会同步执行。
+
+- 瀑布流(waterfall) 插件应用时会使用：
+
+  ```javascript
+  applyPluginsWaterfall(name: string, init: any, args: any...)
+  ```
+  这种类型，每个插件都在其他插件依次调用之后调用，前一个插件调用的返回值，作为参数传入后一个插件。这类插件必须考虑其执行顺序。 必须等前一个插件执行后，才能接收参数。第一个插件的值是初始值(init)。这个模式用在与 webpack 模板相关的 Tapable 实例中（例如 ModuleTemplate, ChunkTemplate 等）。
+
+- 异步(asynchronous)
+
+  ```javascript
+  applyPluginsAsync(name: string, args: any..., callback: (err?: Error) -> void)
+  ```
+  这种类型，插件处理函数在调用时，会传入所有的参数和一个签名为 (err?: Error) -> void 的回调函数。处理函数按注册时的顺序调用。在调用完所有处理程序后，才会调用 callback。 这也是 "emit", "run" 等事件的常用模式。
+
+- 异步瀑布流(async waterfall) 插件将以瀑布方式异步应用。
+
+  ```javascript
+  applyPluginsAsyncWaterfall(name: string, init: any, callback: (err: Error, result: any) -> void)
+  ```
+  这种类型，插件处理函数在调用时，会传入当前值(current value)和一个带有签名为 (err: Error, nextValue: any) -> void. 的回调函数。当调用的 nextValue 是下一个处理函数的当前值(current value)时，第一个处理程序的当前值是 init。在调用完所有处理函数之后，才会调用 callback，并将最后一个值传入。如果其中任何一个处理函数传入一个 err 值，则会调用此 callback 并将此 error 对象传入，并且不再调用其他处理函数。 这种插件模式适用于像 "before-resolve" 和 "after-resolve" 这样的事件。
+
+- 异步串联(async series)
+  ```javascript
+  applyPluginsAsyncSeries(name: string, args: any..., callback: (err: Error, result: any) -> void)
+  ```
+  它与异步(asynchronous)相同，但如果任何插件注册失败，则不再调用其他插件。
+
+- 并行(parallel)
+
+  ```javascript
+  applyPluginsParallel(name: string, args: any..., callback: (err?: Error) -> void)
+  applyPluginsParallelBailResult(name: string, args: any..., callback: (err: Error, result: any) -> void)
+  ```
+
+### 二、Loader 编写

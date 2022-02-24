@@ -5,6 +5,27 @@ module.exports = {
   base: '/frontend-summary/',
   description: '',
 
+  // 插件
+  plugins: [
+    [
+      'vuepress-plugin-zooming',
+      {
+        selector: '.nojsja-zooming .nojsja-img',
+        delay: 1000,
+        options: {
+          bgColor: 'black',
+          zIndex: 10000,
+        },
+      },
+    ],
+    ['vuepress-plugin-smooth-scroll'],
+    [
+      'vuepress-plugin-reading-time',
+      {
+        includes: ["/docs/.*"]
+      }
+    ]
+  ],
   // 主题和它的配置
   theme: '@vuepress/theme-default',
   themeConfig: {
