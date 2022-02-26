@@ -575,21 +575,19 @@ RongIMClient.reconnect(callback, config);
 
 ## ➣ Electron 进程管理器的架构和亮点
 
-### 一、架构
+架构：
 
 ![electron-re](http://nojsja.gitee.io/static-resources/images/electron-re/electron-re_arch.png)
 
-### 二、模块说明
-
-#### 1. ProcessManager
+### 一、ProcessManager
 
 进程管理中心，一方面调用外部库 `pidusage` 进行各个已监听进程的资源循环采集，另一方面负责和 UI 部分通信，响应 UI 部分的控制逻辑比如：关闭进程、打开渲染进程 DevTools。同时 ProcessManager 还会将自己采集到的 Memory/CPU 资源占用数据发送给 UI 部分，以便 UI 部分进行即时渲染。
 
-#### 2. MessageChannel
+### 二、MessageChannel
 
 主进程 MessageChannel 用于注册 Service 和提供 Service 查询服务。子进程的 MessageChannel 会向主进程 MessageChannel 查询注册的 Service ID，然后在子进程中可以通过 Service ID 和对应的 Service 通信。
 
-#### 3. BrowserService
+### 三、BrowserService
 
 BrowserService 中能放入一些独立于主进程的比较占用 CPU 的代码逻辑，当然也可以单纯基于业务进行 Service 代码划分。有了 BrowserService 就不用我们手动创建多个隐藏的 BrowserWindow 实例来运行部分业务代码了。
 
@@ -599,19 +597,68 @@ BrowserService 中能放入一些独立于主进程的比较占用 CPU 的代码
 
 利用了 `remote.require` 的方式让 Service 中的脚本可以无缝调用主进程方法。因为用到了 Electron Renderer Process 远程调用的特性，因此在 Service 内部对 remote 进行了 polyfill，以便在高于 13 版本的 Electron 中能正常运行 BrowserService。
 
-#### 4. ChildProcessPool
+### 四、ChildProcessPool
 
 一个基于 Node.js `ChildProcess.fork` 实现的多进程池逻辑，内部支持多种负载均衡算法：比如权重、随机、轮询、加权轮询、加权随机等，子进程在创建后一段时间未使用时会自动进行 sleep 睡眠状态，有新消息时会自动被唤醒。
 
 子进程使用一个 js 文件创建，内部可以和 `ProcessHost` 通信，而不必直接使用 process.send 和 process.on('message') 来进行消息通信。
 
-`ProcessHost` 相当于一个事件注册中心，以观察者模式提供服务，子进程向自己的 ProcessHost 注册时间，然后主进程向子进程发送消息时 ProcessHost 可以感知并进行捕获，然后将传递的数据发送给监听者。
+`ProcessHost` 相当于一个事件注册中心，以观察者模式提供服务，子进程向自己的 ProcessHost 注册时间，然后主进程向子进程发送消息时 ProcessHost 感知并进行捕获 `message` 事件，然后将传递的数据发送给监听者。
 
-#### 5. BrowserWindow
+#### 1. 进程睡眠的实现
+
+每个进程池有自己的生命周期实例：`ProcessLifeCycle`，进程池在向子进程发送消息时会实时更新实例上子进程的被调用时间。实例中维持着一个 30s 的定时器，定期检查所有子进程是否在超时时间内，超时时间即子进程未被主进程调用的最大空闲时间，如果超时触发 `sleep` 事件，进程池作为事件监听者会执行对应子进程的睡眠逻辑。
+
+睡眠的实现依赖操作系统的 `SIGSTOP` 进程信号，子进程收到该信号后会被冻结，直到下次收到消息时会再次被唤醒然后处理新消息。
+
+#### 2. 负载均衡策略
+
+
+- 支持的策略：
+  - POLLING - 轮询：子进程轮流处理请求
+  - WEIGHTS - 权重：子进程根据设置的权重来处理请求
+  - RANDOM - 随机：子进程随机处理请求
+  - SPECIFY - 指定：子进程根据指定的进程 id 处理请求
+  - WEIGHTS_POLLING - 权重轮询：权重轮询策略与轮询策略类似，但是权重轮询策略会根据权重来计算子进程的轮询次数，从而稳定每个子进程的平均处理请求数量。
+  - WEIGHTS_RANDOM - 权重随机：权重随机策略与随机策略类似，但是权重随机策略会根据权重来计算子进程的随机次数，从而稳定每个子进程的平均处理请求数量。
+  - MINIMUM_CONNECTION - 最小连接数：选择子进程上具有最小连接活动数量的子进程处理请求。
+  - WEIGHTS_MINIMUM_CONNECTION - 权重最小连接数：权重最小连接数策略与最小连接数策略类似，不过各个子进程被选中的概率由连接数和权重共同决定。
+
+- 实现：
+  - 轮询策略(POLLING)：索引值递增，每次调用时会自动加 1，超出任务数组长度时会自动取模，保证平均调用。时间复杂度 O(n) = 1。
+  - 权重策略(WEIGHTS)：每个进程根据 (权重值 + (权重总和 * 随机因子)) 生成最终计算值，最终计算值中的最大值被命中。时间复杂度 O(n) = n。
+  - 随机策略(RANDOM)：随机函数在 [0, length) 中任意选取一个索引即可。时间复杂度 O(n) = 1。
+  - 权重轮询策略(WEIGHTS_POLLING)：类似轮询策略，不过轮询的区间为：[最小权重值, 权重总和]，根据各项权重累加值进行命中区间计算。每次调用时权重索引会自动加 1，超出权重总和时会自动取模。时间复杂度 O(n) = n。
+  - 权重随机策略(WEIGHTS_RANDOM)：由 (权重总和 * 随机因子) 产生计算值，将各项权重值与其相减，第一个不大于零的最终值即被命中。时间复杂度 O(n) = n。
+  - 最小连接数策略(MINIMUM_CONNECTION)：直接选择当前连接数最小的项即可。时间复杂度 O(n) = n。
+  - 权重最小连接数(WEIGHTS_MINIMUM_CONNECTION)：权重 + ( 随机因子 * 权重总和 ) + ( 连接数占比 * 权重总和 ) 三个因子，计算出最终值，根据最终值的大小进行比较，最小值所代表项即被命中。
+  时间复杂度 O(n) = n。
+
+- 用于负载均衡器 LoadBalancer 计算的参数：
+  - 权重值：每个子进程的权重值，创建进程池时可以指定 `weights` 数组，默认为 1。
+  - 索引值：用于轮询相关的策略，均衡器内部会在每次执行负载均衡计算后更新索引，索引会被索引最大值取模，索引最大值可以为权重和、子进程数量。
+  - CPU/Memory：负载均衡器作为监听者监听 `ProcessManager` 的 `refresh` 事件更新各个子进程的资源占用情况。
+  - 子进程正在处理的任务数量（连接数）：由于此值无法精确度量，因此借用进程池 `send` 方法 和 `message` 事件粗率估计子进程中实时进行的任务数量，调用 send ，task 数量加 1，收到子进程 message 事件，task 数量减 1。
+
+#### 3. 进程互斥基本原理
+
+AsyncLock 对象需要在子进程中引入，创建 AsyncLock 的构造函数中有一个参数 sab 需要注意。这个参数是一个 SharedArrayBuffer 共享数据块，这个共享数据快需要在主进程创建，然后通过 IPC 通信发送到各个子进程，通常 IPC 通信会序列化一般的诸如 Object / Array 等数据，导致消息接受者和消息发送者拿到的不是同一个对象，但是经由 IPC 发送的 SharedArrayBuffer 对象却会指向同一个内存块。
+
+在子进程中使用 SharedArrayBuffer 数据创建 AsyncLock 实例后，任意一个子进程对共享数据的修改都会导致其它进程内指向这块内存的 SharedArrayBuffer 数据内容变化，这就是我们使用它实现进程锁的基本要点。
+
+先对 Atomic API 做个简单说明：
+
+- __Atomics.compareExchange(typedArray, index, expectedValue, newValue)__：Atomics.compareExchange() 静态方法会在数组的值与期望值相等的时候，将给定的替换值替换掉数组上的值，然后返回旧值。此原子操作保证在写上修改的值之前不会发生其他写操作。
+- __Atomics.waitAsync(typedArray, index, value[, timeout])__：静态方法 Atomics.wait() 确保了一个在 Int32Array 数组中给定位置的值没有发生变化且仍然是给定的值时进程将会睡眠，直到被唤醒或超时。该方法返回一个字符串，值为"ok", “not-equal”, 或 “timed-out” 之一。
+- __Atomics.notify(typedArray, index[, count])__：静态方法 Atomics.notify() 唤醒指定数量的在等待队列中休眠的进程，不指定 count 时默认唤醒所有。
+
+AsyncLock 即异步锁，等待锁释放的时候不会阻塞主线程。主要关注 executeAfterLocked() 这个方法，调用该方法并传入回调函数，该回调函数会在锁被获取后执行，并且在执行完毕后自动释放锁。其中一步的关键就是 tryGetLock() 函数，它返回了一个 Promise 对象，因此我们等待锁释放的逻辑在微任务队列中执行而并不阻塞主线程。
+
+### 五、BrowserWindow
 
 原生 BrowserWindow 实例，可以使用 MessageChannel 来替代原生 IPC 通信。
 
-#### 6. UI 监控界面
+### 六、UI 监控界面
 
 UI 部分主要用于显示各个在 ProcessManager 中注册的进程的资源占用情况，比如：Memory/CPU 使用情况、进程类型、查看进程控制台、查看 MessageChannel 的通信记录、杀死子进程、打开渲染进程 Devtools 等功能。
 
