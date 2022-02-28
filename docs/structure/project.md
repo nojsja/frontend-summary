@@ -82,8 +82,8 @@ jenkens 服务端监控 git 分支内容变更，然后拉取远程分支，jenk
 1. 底层基于 k8s 容器化，生产环境的应用可以在线缩容扩容服务节点，版本发布时可以做到无下线热替换。
 2. 有一个 k8s 服务创建界面，可以创建 `Java / Nodejs / Nodejs_static / Python / Static_web` 服务，之后这里创建的服务需要绑定到构建流水线。
 3. 每个项目可以创建自己的流水线并绑定之前创建的 k8s 微服务，流水线分为 `dev / test / preview / prod` 流水线。每次流水线构建完成之后会将打包结果生成为一个镜像，与应用绑定的 k8s 容器会引用这个最新的构建镜像。
-4. 有一个 nginx 配置系统，外层多个 nginx 服务指向不同的环境：`dev / test / preview / prod`，各个环境配置可以进行同步，并且每个环境下的可以配置很多子域名指向各个 k8s 应用。示例说明：一个不依赖于 Node 的 Static_web 前端项目 ，需要在某个环境下的 nginx 主域名下指定一个 ` 子域名 ` 与其绑定，具体操作就是将这个子域名 nginx 配置里面的 root 路径 `location /` 指向一个 nginx `upstream` 上游配置，这个上游配置即 k8s 内部 `Static_web` 服务对应集群容器内部 IP。另外可以配置 ` 子域名 / api` 指向后端另一个 service 网关之类的微服务用于接口调用。
-5. 单个 k8s 实例容器内部可以自定义 nginx 的 `static file` 路径和其它配置等。
+4. 有一个 nginx 配置系统，外层多个 nginx 服务指向不同的环境：`dev / test / preview / prod`，各个环境 nginx 配置可以进行同步。公司有一些已经备案的主域名，并且每个环境 nginx 配置下的可以配置很多子域名(无需备案)指向各个 k8s 应用，外部使用子域名访问网关时，网关就会根据域名将用户导航到相应的应用上。单个 k8s 容器实例内部可以自定义内部 nginx 的 `static file` 路径和其它配置比如：为了适配 React 的 BrowserRouter 可以设置 `location /` - `try_files $uri $uri/ /index.html`，这样子以非根路由访问 React 网页时，如果路由在服务端没有映射到一个静态文件上，那么就会直接返回 index.html，客户端 Router 就可以根据路由路径正确渲染配置的单页应用的指定界面。
+5. 示例说明：一个不依赖于 Node 的 Static_web 前端项目 ，需要在某个环境下的 nginx 主域名下指定一个 ` 子域名 ` 与其绑定，具体操作就是将这个子域名 nginx 配置里面的 root 路径 `location /` 指向一个 nginx `upstream` 上游配置，这个上游配置即 k8s 内部 `Static_web` 服务对应集群容器外部部 IP。另外可以配置 ` 子域名 / api` 指向后端另一个 service 微服务网关之类的服务用于接口调用。
 
 ## ➣ IM 系统 前端 SDK 的设计要点 (hz)
 
