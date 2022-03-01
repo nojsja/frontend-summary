@@ -57,7 +57,7 @@ description: structure 的描述
 
 这里主要探讨基座模式的架构设计，基座模式在前端框架中的方案也比较多，比如乾坤和 single-spa 等都是基于基座模式实现的。
 
-而不论种方式,都需要提供一个查找应用的机制，在微前端中称为服务的注册表模式。和微服务架构相似，不论是哪种微前端方式，也都需要有一个应用注册表的服务，它可以是一个固定值的配置文件，如 JSON 文件，又或者是一个可动态更新的配置，又或者是一种动态的服务。它主要做这么一些内容：
+而不论哪种方式,都需要提供一个查找应用的机制，在微前端中称为服务的注册表模式。和微服务架构相似，不论是哪种微前端方式，也都需要有一个应用注册表的服务，它可以是一个固定值的配置文件，如 JSON 文件，又或者是一个可动态更新的配置，又或者是一种动态的服务。它主要做这么一些内容：
 
 - 应用发现：让主应用可以寻找到其它应用。
 - 应用注册：即提供新的微前端应用，向应用注册表注册的功能。
@@ -67,6 +67,43 @@ description: structure 的描述
 应用在部署的时候，便可以在注册表服务中注册。如果是基于注册表来管理应用，那么使用基座模式来开发比较方便。
 
 ### 一、基座应用
+
+基座应用中需要注册子应用信息：
+
+```javascript
+import { registerMicroApps, start } from 'qiankun';
+
+registerMicroApps([
+  {
+    name: 'react app', // app name registered
+    entry: '//localhost:7100',
+    container: '#yourContainer',
+    activeRule: '/yourActiveRule',
+  },
+  {
+    name: 'vue app',
+    entry: { scripts: ['//localhost:7100/main.js'] },
+    container: '#yourContainer2',
+    activeRule: '/yourActiveRule2',
+  },
+]);
+
+start();
+```
+
+当微应用信息注册完之后，一旦浏览器的 url 发生变化，便会自动触发 qiankun 的匹配逻辑，所有 activeRule 规则匹配上的微应用就会被插入到指定的 container 中，同时依次调用微应用暴露出的生命周期钩子。
+
+如果微应用不是直接跟路由关联的时候，比如如果想想在微应用中渲染微应用的时候，你也可以选择手动加载微应用的方式：
+
+```javascript
+import { loadMicroApp } from 'qiankun';
+
+loadMicroApp({
+  name: 'app',
+  entry: '//localhost:7100',
+  container: '#yourContainer',
+});
+```
 
 #### 1. 生命周期
 
@@ -85,13 +122,46 @@ description: structure 的描述
 
 ### 二、子应用
 
+微应用需要在自己的入口 js (通常就是你配置的 webpack 的 entry js) 导出 bootstrap、mount、unmount 三个生命周期钩子，以供主应用在适当的时机调用。
+
+```javascript
+/**
+ * bootstrap 只会在微应用初始化的时候调用一次，下次微应用重新进入时会直接调用 mount 钩子，不会再重复触发 bootstrap。
+ * 通常我们可以在这里做一些全局变量的初始化，比如不会在 unmount 阶段被销毁的应用级别的缓存等。
+ */
+export async function bootstrap() {
+  console.log('react app bootstraped');
+}
+
+/**
+ * 应用每次进入都会调用 mount 方法，通常我们在这里触发应用的渲染方法
+ */
+export async function mount(props) {
+  ReactDOM.render(<App />, props.container ? props.container.querySelector('#root') : document.getElementById('root'));
+}
+
+/**
+ * 应用每次 切出/卸载 会调用的方法，通常在这里我们会卸载微应用的应用实例
+ */
+export async function unmount(props) {
+  ReactDOM.unmountComponentAtNode(
+    props.container ? props.container.querySelector('#root') : document.getElementById('root'),
+  );
+}
+
+/**
+ * 可选生命周期钩子，仅使用 loadMicroApp 方式加载微应用时生效
+ */
+export async function update(props) {
+  console.log('update props', props);
+}
+```
+
 #### 1. 生命周期
 
 - bootstrap：首次应用加载触发，常用于配置子应用全局信息。
 - mount：应用挂载时触发，常用于渲染子应用。
 - unmount：应用卸载时触发，常用于销毁子应用。
-
-
 
 ### 三、隔离机制
 
@@ -110,9 +180,24 @@ description: structure 的描述
 
 #### 2. 样式隔离
 
-当主应用和微应用同屏渲染时，就可能会有一些样式会相互污染，如果要彻底隔离 CSS 污染，可以采用 CSS Module 或者命名空间的方式，给每个微应用模块以特定前缀，即可保证不会互相干扰，可以采用 webpack 的 postcss 插件，在打包时添加特定的前缀。
+当主应用和微应用、微应用之间同屏渲染时，就可能会有一些样式会相互污染，如果要彻底隔离 CSS 污染，可以采用 CSS Module 或者命名空间的方式，给每个微应用模块以特定前缀，即可保证不会互相干扰，可以采用 webpack 的 postcss 插件，在打包时添加特定的前缀。
 
-而对于微应用与微应用之间的 CSS 隔离就非常简单，在每次应用加载时，将该应用所有的 link 和 style 内容进行标记。在应用卸载后，同步卸载页面上对应的 link 和 style 即可。
+而对于不会同屏渲染的微应用与微应用之间的 CSS 隔离就非常简单，在每次应用加载时，将该应用所有的 link 和 style 内容进行标记。在应用卸载后，同步卸载页面上对应的 link 和 style 即可。
+
+在乾坤框架中，当配置为 `{ strictStyleIsolation: true }` 时表示开启严格的样式隔离模式。这种模式下 qiankun 会为每个微应用的容器包裹上一个 `shadow dom` 节点，从而确保微应用的样式不会对全局造成影响，这种方式需要浏览器支持 Web Components 技术。
+
+另外，如果配置 `{ experimentalStyleIsolation: true }` 时，qiankun 会改写子应用所添加的样式为所有样式规则增加一个特殊的选择器规则来限定其影响范围，因此改写后的代码会表达类似为如下结构：
+
+```javascript
+.app-main {
+  font-size: 14px;
+}
+
+// react16 - 应用名
+div[data-qiankun-react16] .app-main {
+  font-size: 14px;
+}
+```
 
 ### 四、子应用之间的通信
 
@@ -159,6 +244,67 @@ description: structure 的描述
 `Shared` 通信方案要求父子应用都各自维护一份属于自己的 `shared` 实例，同样会增加项目的复杂度。好处是子应用可以完全独立于父应用运行（不依赖状态池），子应用也能以最小的改动被嵌入到其他 `第三方应用` 中。
 
 `Shared` 通信方案也可以帮助主应用更好的管控子应用。子应用只可以通过 `shared` 实例来操作状态池，可以避免子应用对状态池随意操作引发的一系列问题。主应用的 `Shared` 相对于子应用来说是一个黑箱，子应用只需要了解 `Shared` 所暴露的 `API` 而无需关心实现细节。
+
+### 五、子应用部署
+
+具体查看乾坤文档：[子应用部署](https://qiankun.umijs.org/zh/cookbook#%E5%A6%82%E4%BD%95%E9%83%A8%E7%BD%B2)
+
+#### 场景 1：主应用和微应用部署到同一个服务器（同一个 IP 和端口）
+
+如果服务器数量有限，或不能跨域等原因需要把主应用和微应用部署到一起。
+
+通常的做法是主应用部署在一级目录，微应用部署在二/三级目录。
+
+微应用想部署在非根目录，在微应用打包之前需要做两件事：
+
+- 必须配置 webpack 构建时的 publicPath 为目录名称，更多信息请看 webpack 官方说明 和 vue-cli3 的官方说明
+
+- history 路由的微应用需要设置 base ，值为目录名称，用于独立访问时使用。
+
+部署之后注意三点：
+
+- activeRule 不能和微应用的真实访问路径一样，否则在主应用页面刷新会直接变成微应用页面。
+- 微应用的真实访问路径就是微应用的 entry，entry 可以为相对路径。
+- 微应用的 entry 路径最后面的 / 不可省略，否则 publicPath 会设置错误，例如子项的访问路径是 http://localhost:8080/app1,那么 entry 就是 http://localhost:8080/app1/。
+
+#### 场景 2：主应用和微应用部署在不同的服务器，使用 Nginx 代理访问
+
+一般这么做是因为不允许主应用跨域访问微应用，做法就是将主应用服务器上一个特殊路径的请求全部转发到微应用的服务器上，即通过代理实现“微应用部署在主应用服务器上”的效果。
+
+例如，主应用在 A 服务器，微应用在 B 服务器，使用路径 /app1 来区分微应用，即 A 服务器上所有 /app1 开头的请求都转发到 B 服务器上。
+
+此时主应用的 Nginx 代理配置为：
+
+```javascript
+/app1/ {
+  proxy_pass http://www.b.com/app1/;
+  proxy_set_header Host $host:$server_port;
+}
+```
+
+主应用注册微应用时，entry 可以为相对路径，activeRule 不可以和 entry 一样（否则主应用页面刷新就变成微应用）：
+
+```javascript
+registerMicroApps([
+  {
+    name: 'app1',
+    entry: '/app1/', // http://localhost:8080/app1/
+    container: '#container',
+    activeRule: '/child-app1',
+  },
+]);
+```
+
+对于 webpack 构建的微应用，微应用的 webpack 打包的 publicPath 需要配置成 /app1/，否则微应用的 index.html 能正确请求，但是微应用 index.html 里面的 js/css 路径不会带上 /app1/。
+```javascript
+module.exports = {
+  output: {
+    publicPath: `/app1/`,
+  },
+};
+```
+
+微应用打包的 publicPath 加上 /app1/ 之后，必须部署在 /app1 目录，否则无法独立访问。
 
 ## ➣ 前端网关
 
