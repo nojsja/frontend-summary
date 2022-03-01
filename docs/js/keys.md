@@ -770,20 +770,20 @@ function new_instance_of(leftVaule, rightVaule) {
 
 其实 instanceof 主要的实现原理就是只要右边变量的 prototype 在左边变量的原型链上即可。因此，instanceof 在查找的过程中会遍历左边变量的原型链，直到找到右边变量的 prototype，如果查找失败，则会返回 false，告诉我们左边变量并非是右边变量的实例。
 
-### ➣ for...in 和 for ... of 区别和使用场景
+## ➣ for...in 和 for ... of 区别和使用场景
 
-#### 1. for...in 遍历
+### 1. for...in 遍历
 
 - for...in 可以用于遍历对象，不过会获取到原型链上的属性，必要时可以用 `Object.hasOwnProperty` 进行二次判断，不适合用于遍历数组。
 - for...in 遍历的 index 索引为字符串型数字，不能直接进行几何运算。
 - for...in 遍历顺序有可能不是按照实际数组的内部顺序。
 
-#### 2. for...of 遍历
+### 2. for...of 遍历
 
 - for...of 适用遍历数 / 数组对象 / 字符串 / map/set 等拥有迭代器对象的集合。但是不能遍历对象，因为没有迭代器对象。 与 forEach() 不同的是，它可以正确响应 break、continue 和 return 语句。
 - for...of 循环不支持普通对象，但如果你想迭代一个对象的属性，你可以用 for-in 循环（这也是它的本职工作）或内建的 Object.keys() 方法。
 
-### ➣ Symbol 的作用
+## ➣ Symbol 的作用
 
 - Symbol 的作用非常的专一，换句话说其设计出来就只有一个目的——作为对象属性的唯一标识符，防止对象属性冲突发生。
 - Symbol 不是构造器，只能直接包装其它值使用：`Symbol(key)`。

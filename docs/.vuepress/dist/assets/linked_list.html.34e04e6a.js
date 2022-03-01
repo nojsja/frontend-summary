@@ -1,1 +1,0 @@
-import{o,a as t,F as l,b as e}from"./app.a1a5b165.js";import{_ as n}from"./plugin-vue_export-helper.21dcd24c.js";const a={},c=e("blockquote",null,[e("p",null,"\u94FE\u8868")],-1),r=e("blockquote",null,[e("p",null,"\u5C1A\u5F85\u5B8C\u5584")],-1);function s(_,p){return o(),t(l,null,[c,r],64)}var i=n(a,[["render",s]]);export{i as default};
