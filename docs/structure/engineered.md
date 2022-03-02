@@ -857,7 +857,7 @@ Snowpack 是一个用在现代 Web 应用上的，快如闪电的前端构建工
 
 Snowpack 是一个用于提升 Web 开发效率的轻量级新型构建工具。传统的 JavaScript 构建工具如 Webpack 和 Parcel，在你每次保存一个文件时都需要重建和打包整个应用程序。这个重建步骤会在保存修改和浏览器响应之间产生明显滞后。
 
-在开发过程中，Snowpack 为你的项目提供了免打包式 (unbundled development) 的服务。每个文件只需构建一次就被永远缓存起来。当文件发生变化时，Snowpack 重新构建发生变化的文件然后在浏览器中直接更新，而没有在重新打包上浪费时间(通过模块热替换(HMR) 实现)。
+在开发过程中，Snowpack 为你的项目提供了免打包式 (unbundled development) 的服务。每个文件只需构建一次就被永远缓存起来。当文件发生变化时，Snowpack 重新构建发生变化的文件然后在浏览器中直接更新，而没有在重新打包上浪费时间 (通过模块热替换 (HMR) 实现)。
 
 Snowpack 的免打包式工具仍支持你在生产中所习惯的打包式构建。当你为生产环境构建项目时，你可以通过 Webpack 或 Rollup（即将推出）的官方 Snowpack 插件插入你喜欢的打包器。由于 Snowpack 已经处理了构建，所以不需要复杂的打包器配置。
 
@@ -867,9 +867,35 @@ Snowpack 为你带来了两全其美的效果: 快速、免打包式的开发，
 
 ### 一、Express
 
+Express 是最流行的 Node 框架，是许多其它流行 Node 框架 的底层库。它提供了以下机制：
+
+- 为不同 URL 路径中使用不同 HTTP 路由处理程序。
+- 集成了“视图”渲染引擎，以便通过将数据插入模板来生成响应，比如：Ejs 和 Jade 等。
+- 在请求处理管道的任何位置添加额外的请求处理“中间件”。
+
+虽然 Express 本身是极简风格的，但是开发人员通过创建各类兼容的中间件包解决了几乎所有的 web 开发问题。这些库可以实现 cookie、会话、用户登录、URL 参数、POST 数据、安全头等功能。可在 Express 中间件 网页中找到由 Express 团队维护的中间件软件包列表（还有一张流行的第三方软件包列表）。
 
 ### 二、Next
 
+要从头开始使用 React 构建一个完整的 Web 应用程序，需要考虑许多重要的细节：
+
+- 必须使用打包程序（例如 webpack）打包代码，并使用 Babel 等编译器进行代码转换。
+- 你需要针对生产环境进行优化，例如代码拆分。
+- 你可能需要对一些页面进行预先渲染以提高页面性能和 SEO。你可能还希望使用服务器端渲染或客户端渲染。
+- 你可能必须编写一些服务器端代码才能将 React 应用程序连接到数据存储。
+
+Next.js 是一个同构 React 开发框架。Next.js 为上述所有问题提供了解决方案。
+
+Next.js 具有同类框架中最佳的“开发人员体验”和许多内置功能。列举其中一些如下：
+
+- 直观的、 基于页面 的路由系统（并支持 动态路由）
+- 预渲染。支持在页面级的 静态生成 (SSG) 和 服务器端渲染 (SSR)
+- 自动代码拆分，提升页面加载速度
+- 具有经过优化的预取功能的 客户端路由
+- 内置 CSS 和 Sass 的支持，并支持任何 CSS-in-JS 库
+- 开发环境支持快速刷新
+- 利用 Serverless Functions 及 API 路由 构建 API 功能
+- 完全可扩展
 
 ### 三、Nest
 
@@ -879,3 +905,124 @@ Nest 内置并完全支持 TypeScript 并结合了 OOP（面向对象编程）�
 
 Nest 提供了一个开箱即用的应用程序体系结构，允许开发者及其团队创建高度可测试、可扩展、松散耦合且易于维护的应用。
 
+- Controllers：控制器负责处理传入的请求并将响应返回给客户端。
+- Providers：
+
+## ➣ 前端错误捕获和上报
+
+### 一、错误类型
+
+#### Js 执行错误
+
+- 语法错误。
+- 运行时同步错误。
+- 普通异步任务错误，比如回调函数。
+- Promise 任务错误。
+- async 异步任务任务错误，比如定时器。
+
+#### 资源加载错误
+
+- img
+- script
+- link
+- audio
+- video
+- iframe
+
+### 二、错误捕获
+
+#### 1. 浏览器端
+
+| 捕获方式                              | 同步任务 | 普通异步任务 | Promise 任务 | Async 任务 | 资源加载 | 语法错误 |
+|---------------------------------------|----------|--------------|--------------|------------|----------|----------|
+| try...catch                          | √        | ×            | ×            |    ×        |    ×      |    ×      |
+| onerror()                             | √        | √            | ×            |      ×      |    ×      |    ×      |
+| addEventListener('error')             | √        | √            | ×            |      √    |      √    |     ×    |
+| addEventListener('unhandlerejection') | ×        | ×            | √            |     ×       |     ×     |    ×     |
+
+表格说明：
+
+- 语法错误无法捕获，语法错误应该在编译阶段解决，不应该出现在生产环境中。
+- 一般的同步错误可以直接通过内联 try...catch 捕获，也可以通过统一的全局处理时间捕获。
+- Promise 任务可以通过 .then / .catch 捕获，未添加处理语句的 Promise 可以通过全局 `unhandlerejection` 事件捕获。
+- 异步任务比如定时器、回调函数等可以通过 `addEventListener('error')` 捕获。
+- 资源加载错误可以通过 `addEventListener('error')` 捕获。
+- 异步任务无法被 try...catch 捕获的原因不是异步任务发生在其它线程，而是异步任务由于事件循环机制不是和同步代码一起执行的，也就无法由同步代码捕获，异步任务中回调函数执行也同样是在主线程。
+
+#### 2. Node 服务端
+
+在Node服务端的收集其实和客户端上大同小异，只是一些方法上的区别：
+
+uncaughtException：
+
+通过Node的全局处理，捕获所有未被处理的错误,这是最后一层关卡，兜底的操作，如果还不处理的话往往会导致程序崩溃。
+
+```javascript
+process.on('uncaughtException', err => {
+  //do something
+});
+```
+
+unhandledRejection：
+
+```javascript
+process.on('unhandledRejection', err => {
+  //do something
+});
+```
+
+在Node中，Promise中的错误同样不能被try...catch和uncaughtException捕获。这时候我们就需要unhandledRejection来帮我们捕获这部分错误。
+
+
+### 三、错误上报
+
+#### 1. XMLHttpRequest
+
+我们想要将数据传回服务器，最通用的方式当然就是 ajax 请求，通过浏览器的 XMLHttpRequest（这里我们不讨论 IE）的 send 方法，发送 post 请求数据给服务端，这里我们不再给出实现。
+
+其缺点也很明显：
+
+- 有严格的跨域限制、携带 cookie 问题。
+- 上报请求可能会阻塞业务。
+- 请求容易丢失（被浏览器强制 cancel）。
+
+#### 2. Image 方式
+
+由于浏览器对资源文件的区别对待，为了解决上面的几个问题，我们可以通过创建一个 1x1 大小的图片进行异步加载的方式来上报。图片天然可跨域，又能兼容所有的浏览器，而 js 和 css 等其他资源文件则可能出现安全拦截和跨域加载问题。
+
+```javascript
+var img = new Image();
+img.width = 1;
+img.height = 1;
+img.src = 'https://domain.com/api/report?data=xxx';
+```
+
+但由于是一个 get 请求，上报的数据量在不同的浏览器下上限不一致（2kb-8kb），这就可能出现超出长度限制而无法上报完整数据的情况。因此，图片上报也是一个 “不安全” 的方式。
+
+#### 3. SendBeacon
+
+这个方法天生就是为了数据统计而设计的，它解决了 XMLHttpRequest 和图片上报的绝大部分弊端：
+
+- 没有跨域问题。
+- 不阻塞页面刷新 / 跳转等操作，甚至能在页面 unload 阶段 (页面关闭) 继续发送数据，完美地解决了普通请求在 unload 阶段被 cancel 导致丢数据的问题。
+- 浏览器将 Beacon 请求排队让它在空闲的时候执行并立即返回控制
+- navigator 在 web worker 中也能使用，因此使用场景很广泛。
+- IE 并不支持。
+
+```javascript
+// 创建一个新的 FormData 并添加一个键值对
+let data = new FormData();
+data.append('hello', 'world');
+let result = navigator.sendBeacon('./src', data);
+if (result) {
+  console.log('请求成功排队 等待执行');
+} else {
+  console.log('失败');
+}
+```
+
+这里需要注意的是，sendBeacon 并不像 XMLHttpRequest 一样可以直接指定 Content-Type，且不支持 application/json 等常见格式。data 的数据类型必须是 ArrayBufferView 或 Blob, DOMString 或者 FormData 类型的。这里给出 Blob 类型的示例。
+
+#### 错误上报方式总结
+
+于以上 3 种上报方式，我们可以基本总结出，上报数据建议优先使用 sendBeacon 的方式，不支持的浏览器（例如 IE）则降级使用图片上报，尽量避免直接使用 XMLHttpRequest 进行上报。
