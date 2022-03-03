@@ -51,6 +51,405 @@ let message = {text: expectedTextButGotJSON};
 
 ![](https://nojsja.gitee.io/static-resources/images/react/HOC.png)
 
+### 一、高阶组件解决了什么问题？
+
+1. 复用逻辑：高阶组件更像是一个加工 react 组件的工厂，批量对原有组件进行加工，包装处理。我们可以根据业务需求定制化专属的 HOC，这样可以解决复用逻辑。
+2. 强化 props：这个是 HOC 最常用的用法之一，高阶组件返回的组件，可以劫持上一层传过来的 props, 然后混入新的 props, 来增强组件的功能。代表作 react-router 中的 withRouter。
+3. 赋能组件：HOC 有一项独特的特性，就是可以给被 HOC 包裹的业务组件，提供一些拓展功能，比如说额外的生命周期，额外的事件，但是这种 HOC，可能需要和业务组件紧密结合。典型案例 react-keepalive-router 中的 keepaliveLifeCycle 就是通过 HOC 方式，给业务组件增加了额外的生命周期。
+4. 控制渲染：劫持渲染是 hoc 一个特性，在 wrapComponent 包装组件中，可以对原来的组件，进行条件渲染，节流渲染，懒加载等功能，后面会详细讲解，典型代表做 react-redux 中 connect 和 dva 中 dynamic 组件懒加载。
+
+### 二、高阶组件实现的方式
+
+#### 1. mixin 模式
+
+![](https://nojsja.gitee.io/static-resources/images/react/mixin.png)
+
+老版本的 mixin，在 react 初期提供一种组合方法。通过 React.createClass 加入 mixins 属性，如下：
+
+```javascript
+const customMixin = {
+  componentDidMount() {},
+  say() {
+    console.log(this.state.name)
+  }
+}
+
+const APP = React.createClass({
+  mixins: [customMixin],
+  getInitialState(){
+    return {
+      name: 'alien'
+    }
+  },
+  render() {
+    const {name} = this.state
+    return <div> hello ,world , my name is { name } </div>
+  }
+});
+```
+
+这种方式有些缺点：
+
+- mixin 引入了隐式依赖关系。
+- 不同 mixins 之间可能会有先后顺序甚至代码冲突覆盖的问题。
+- mixin 代码会导致滚雪球式的复杂性。
+- 只能存在 createClass 方式创建的组件中
+
+虽然 mixin 已经被 react 废弃了，但是我们仍能够通过 prototype 原型方式实现：
+
+```javascript
+const customMixin = {  /* 自定义 mixins */
+  componentDidMount(){},
+  say(){
+    console.log(this.state.name)
+  }
+}
+
+function componentClassMixins(Component,mixin){ /* 继承 */
+  for(let key in mixin){
+    if (Object.prototype.hasOwnProperty.call(mixin, key)){
+      Component.prototype[key] = mixin[key]
+    }
+  }
+}
+
+class Index extends React.Component{
+  constructor(){
+    super()
+    this.state={name:'alien'}
+  }
+  render(){
+    return <div> hello,world
+      <button onClick={ this.say.bind(this) } > to say </button>
+    </div>
+  }
+}
+```
+
+#### 2. extends 模式
+
+![](https://nojsja.gitee.io/static-resources/images/react/extend.png)
+
+在 class 组件盛行之后，我们可以通过继承的方式进一步的强化我们的组件。这种模式的好处在于，可以封装基础功能组件，然后根据需要去 extends 我们的基础组件，按需强化组件，但是值得注意的是，必须要对基础组件有足够的掌握，否则会造成一些列意想不到的情况发生。
+
+```javascript
+class Base extends React.Component{
+  constructor() {
+    super()
+    this.state = {
+      name: 'alien'
+    }
+  }
+  say() {
+    console.log('base components')
+  }
+  render(){
+    return <div> hello,world <button onClick={ this.say.bind(this) } > 点击 </button>  </div>
+  }
+}
+
+class Index extends Base{
+  componentDidMount(){
+    console.log(this.state.name)
+  }
+  say(){ /* 会覆盖基类中的 say  */
+    console.log('extends components')
+  }
+
+  render() {
+    return (
+      <div>
+        <h1>title</h1>
+        { super.render() }
+      </div>
+    )
+  }
+}
+```
+
+#### 3. HOC 模式
+
+![](https://nojsja.gitee.io/static-resources/images/react/HO.png)
+
+HOC 即 React 高阶组件，是一种将组件逻辑抽象成一个函数的方式。函数接收组件作为参数，返回一个新的组件，新组件可以拥有组件的所有特性，并且可以自定义自己的属性和方法。
+
+以下示例采用了注解的方式实现了 HOC 组件：
+
+```javascript
+function HOC(Component) {
+  return class wrapComponent extends React.Component{
+     constructor(){
+       super()
+       this.state={
+         name:'alien'
+       }
+     }
+     render=()=><Component { ...this.props } { ...this.state } />
+  }
+}
+
+@HOC
+class Index extends React.Component{
+  say(){
+    const {name} = this.props
+    console.log(name)
+  }
+  render(){
+    return <div> hello,world <button onClick={ this.say.bind(this) } > 点击 </button>  </div>
+  }
+}
+```
+
+#### 4. 自定义 hooks 模式
+
+![](https://nojsja.gitee.io/static-resources/images/react/customHooks.png)
+
+hooks 的诞生，一大部分原因是解决无状态组件没有 state 和逻辑难以复用问题。hooks 可以将一段逻辑封装起来，做到开箱即用。
+
+### 三、高阶组件的实际应用
+
+#### 1. 强化 props
+
+可用于：
+
+- 增加组件的 props 属性
+- 抽离内部 state 到外层
+
+```javascript
+function classHOC(WrapComponent){
+    return class  Idex extends React.Component{
+        state={
+            name:'alien'
+        }
+        componentDidMount(){
+           console.log('HOC')
+        }
+        render(){
+            return <WrapComponent { ...this.props }  { ...this.state }   />
+        }
+    }
+}
+function Index(props){
+  const { name } = props
+  useEffect(()=>{
+     console.log( 'index' )
+  },[])
+  return <div>
+    hello,world , my name is { name }
+  </div>
+}
+
+export default classHOC(Index);
+```
+
+#### 2. 控制渲染
+
+- 复杂组件的渲染节流
+
+```javascript
+function HOC (Component){
+     return function renderWrapComponent(props){
+       const { num } = props
+       const RenderElement = useMemo(() =>  <Component {...props}  /> ,[ num ])
+       return RenderElement
+     }
+}
+class Index extends React.Component{
+  render(){
+     console.log(`当前组件是否渲染`,this.props)
+     return <div>hello,world, my name is alien </div>
+  }
+}
+const IndexHoc = HOC(Index)
+
+export default ()=> {
+    const [ num ,setNumber ] = useState(0)
+    const [ num1 ,setNumber1 ] = useState(0)
+    const [ num2 ,setNumber2 ] = useState(0)
+    return <div>
+        <IndexHoc  num={ num } num1={num1} num2={ num2 }  />
+        <button onClick={() => setNumber(num + 1) } >num++</button>
+        <button onClick={() => setNumber1(num1 + 1) } >num1++</button>
+        <button onClick={() => setNumber2(num2 + 1) } >num2++</button>
+    </div>
+}
+```
+
+- 分片渲染
+
+> 不至于一次渲染大量组件造成白屏效果
+
+```javascript
+const renderQueue = []
+let isFirstrender = false
+
+const tryRender = ()=>{
+  const render = renderQueue.shift()
+  if(!render) return
+  setTimeout(()=>{
+    render() /* 执行下一段渲染 */
+  },300)
+} 
+/* HOC */
+function renderHOC(WrapComponent){
+    return function Index(props){
+      const [ isRender , setRender ] = useState(false)
+      useEffect(()=>{
+        renderQueue.push(()=>{  /* 放入待渲染队列中 */
+          setRender(true)
+        })
+        if(!isFirstrender) {
+          tryRender() /**/
+          isFirstrender = true
+        }
+      },[])
+      return isRender ? <WrapComponent tryRender={tryRender}  { ...props }  /> : <div className='box' ><div className="icon" ><SyncOutlined   spin /></div></div>
+    }
+}
+/* 业务组件 */
+class Index extends React.Component{
+  componentDidMount(){
+    const { name , tryRender} = this.props
+    /* 上一部分渲染完毕，进行下一部分渲染 */
+    tryRender()
+    console.log( name+'渲染')
+  }
+  render(){
+    return <div>
+        <img src="https://ss2.bdstatic.com/70cFvnSh_Q1YnxGkpoWK1HF6hhy/it/u=294206908,2427609994&amp;fm=26&amp;gp=0.jpg" />
+    </div>
+  }
+}
+/* 高阶组件包裹 */
+const Item = renderHOC(Index)
+
+export default () => {
+  return <React.Fragment>
+      <Item name="组件一" />
+      <Item name="组件二" />
+      <Item name="组件三" />
+  </React.Fragment>
+}
+```
+
+- 异步渲染
+
+```javascript
+/* 路由懒加载HOC */
+export default function AsyncRouter(loadRouter) {
+  return class Content extends React.Component {
+    state = {Component: null}
+    componentDidMount() {
+      if (this.state.Component) return
+      loadRouter()
+        .then(module => module.default)
+        .then(Component => this.setState({Component},
+         ))
+    }
+    render() {
+      const {Component} = this.state
+      return Component ? <Component {
+      ...this.props
+      }
+      /> : null
+    }
+  }
+}
+```
+
+- 反向继承：渲染劫持
+
+```javascript
+const HOC = (WrapComponent) =>
+  class Index  extends WrapComponent {
+    render() {
+      if (this.props.visible) {
+        return super.render()
+      } else {
+        return <div>暂无数据</div>
+      }
+    }
+  }
+```
+
+#### 3. 赋能组件
+
+- 添加额外生命周期职责
+
+```javascript
+function HOC (Component){
+  const didMount = Component.prototype.componentDidMount
+  return class wrapComponent extends Component{
+      componentDidMount(){
+        console.log('------劫持生命周期------')
+        if (didMount) {
+           didMount.apply(this) /* 注意 `this` 指向问题。 */
+        }
+      }
+      render(){
+        return super.render()
+      }
+  }
+}
+
+@HOC
+class Index extends React.Component{
+   componentDidMount(){
+     console.log('———didMounted———')
+   }
+   render(){
+     return <div>hello,world</div>
+   }
+}
+```
+
+- 事件监听，添加错误上报功能等
+
+```javascript
+function ClickHoc (Component){
+  return  function Wrap(props){
+    const dom = useRef(null)
+    useEffect(()=>{
+     const handerClick = () => console.log('发生点击事件') 
+     dom.current.addEventListener('click',handerClick)
+     return () => dom.current.removeEventListener('click',handerClick)
+    },[])
+    return  <div ref={dom}  ><Component  {...props} /></div>
+  }
+}
+
+@ClickHoc
+class Index extends React.Component{
+   render(){
+     return <div  className='index'  >
+       <p>hello，world</p>
+       <button>组件内部点击</button>
+    </div>
+   }
+}
+export default ()=>{
+  return <div className='box'  >
+     <Index />
+     <button>组件外部点击</button>
+  </div>
+}
+```
+
+#### 总结
+
+对于属性代理HOC，我们可以：
+
+- 强化props & 抽离state。
+- 条件渲染，控制渲染，分片渲染，懒加载。
+- 劫持事件和生命周期
+- ref控制组件实例
+- 添加事件监听器，日志
+
+对于反向代理的HOC,我们可以：
+
+- 劫持渲染，操纵渲染树
+- 控制/替换生命周期，直接获取组件状态，绑定事件。
+
 ## ➣ hooks 优缺点？
 
 ** 优点：**

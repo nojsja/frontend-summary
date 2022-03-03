@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <meta name="generator" content="VuePress 2.0.0-beta.32">
     <title>● 工程化 | NoJsJa Frontend Summary</title><meta name="description" content="structure 的描述">
-    <link rel="modulepreload" href="/frontend-summary/assets/app.02a09a85.js"><link rel="modulepreload" href="/frontend-summary/assets/engineered.html.08c264ed.js"><link rel="modulepreload" href="/frontend-summary/assets/plugin-vue_export-helper.21dcd24c.js"><link rel="modulepreload" href="/frontend-summary/assets/engineered.html.5f07bcb3.js">
+    <link rel="modulepreload" href="/frontend-summary/assets/app.e1740985.js"><link rel="modulepreload" href="/frontend-summary/assets/engineered.html.e76845de.js"><link rel="modulepreload" href="/frontend-summary/assets/plugin-vue_export-helper.21dcd24c.js"><link rel="modulepreload" href="/frontend-summary/assets/engineered.html.4dae0af1.js">
     <link rel="stylesheet" href="/frontend-summary/assets/style.c7eaaf18.css">
   </head>
   <body>
@@ -476,6 +476,6 @@ data<span class="token punctuation">.</span><span class="token function">append<
   console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span><span class="token string">&#39;失败&#39;</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
 <span class="token punctuation">}</span>
 </code></pre><div class="line-numbers"><span class="line-number">1</span><br><span class="line-number">2</span><br><span class="line-number">3</span><br><span class="line-number">4</span><br><span class="line-number">5</span><br><span class="line-number">6</span><br><span class="line-number">7</span><br><span class="line-number">8</span><br><span class="line-number">9</span><br></div></div><p>这里需要注意的是，sendBeacon 并不像 XMLHttpRequest 一样可以直接指定 Content-Type，且不支持 application/json 等常见格式。data 的数据类型必须是 ArrayBufferView 或 Blob, DOMString 或者 FormData 类型的。这里给出 Blob 类型的示例。</p><h4 id="错误上报方式总结" tabindex="-1"><a class="header-anchor" href="#错误上报方式总结" aria-hidden="true">#</a> 错误上报方式总结</h4><p>于以上 3 种上报方式，我们可以基本总结出，上报数据建议优先使用 sendBeacon 的方式，不支持的浏览器（例如 IE）则降级使用图片上报，尽量避免直接使用 XMLHttpRequest 进行上报。</p><!--]--></div><footer class="page-meta"><!----><div class="meta-item last-updated"><span class="meta-item-label">Last Updated: </span><!----></div><!----></footer><nav class="page-nav"><p class="inner"><span class="prev"><a href="/frontend-summary/structure/arch.html" class="" aria-label="● 架构"><!--[--><!--]--> ● 架构 <!--[--><!--]--></a></span><span class="next"><a href="/frontend-summary/structure/project.html" class="" aria-label="● 前项目梳理"><!--[--><!--]--> ● 前项目梳理 <!--[--><!--]--></a></span></p></nav><!--[--><!--]--></main><!--]--></div><!----><!--]--></div>
-    <script type="module" src="/frontend-summary/assets/app.02a09a85.js" defer></script>
+    <script type="module" src="/frontend-summary/assets/app.e1740985.js" defer></script>
   </body>
 </html>
