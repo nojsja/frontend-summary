@@ -62,7 +62,7 @@ description: Javascript 的描述
 引用类型：function/object(date|regexp|obj)/array
 */
 function getTypeOf(data) {
-  if (data !== data) return 'nan';
+  if (Number.isNaN(data)) return 'nan';
   switch(Object.prototype.toString.call(data)) {
     case '[object Null]':
       return 'null';
@@ -70,10 +70,10 @@ function getTypeOf(data) {
       return 'array';
     case '[object Object]':
       return 'object';
-    case '[object RegExp]':
-      return 'regexp';
     case '[object Date]':
       return 'date';
+    case '[object RegExp]':
+      return 'regexp';
     default:
       return (typeof data);
   }
@@ -122,13 +122,15 @@ function New(func) {
 
   var empty, args, res;
 
-  empty = new Object();
   args = Array.prototype.slice.call(arguments, 1);
 
-  res = func.apply(empty, args);
+  // 这两步也可简化为 Object.create(func.prototype)
+  empty = new Object();
   empty.__proto__ = func.prototype;
 
-  return res || empty;
+  res = func.apply(empty, args);
+
+  return res instanceof Object ? res : empty;
 }
 ```
 
@@ -211,7 +213,7 @@ function check2n(num) {
 ## ➣ Js 实现继承
 ```js
 function Inherit (parent, child) {
-  function Empty() {};
+  function Empty() {}; // 继承原型链的干净的构造函数
   Empty.prototype = parent.prototype;
   var empty = new Empty();
   empty.constructor = child;
@@ -247,44 +249,56 @@ child.p_print();
 ```js
 /* 深拷贝 */
 function deepClone(object) {
-  const {toString} = Object.prototype;
-  const {hasOwnProperty} = Object.prototype;
-  const map = new WeakMap();
+    const map = new WeakMap();
+    const { hasOwnProperty } = Object.prototype;
 
-  function isType(variable, type) {
-    if (variable !== variable) return type === 'nan';
-    if (variable === null) return type === 'null';
+    const getType = (data) => {
+        if (Number.isNaN(data)) return 'nan';
+        switch(Object.prototype.toString.call(data)) {
+            case '[object Null]':
+                return 'null';
+            case '[object Object]':
+                return 'object';
+            case '[object Array]':
+                return 'array';
+            case '[object RegExp]':
+                return 'regexp';
+            case '[object Date]':
+                return 'date';
+            default:
+                return typeof data;
+        }
+    };
 
-    if (typeof variable === 'object') {
-      return toString.call(variable) === `[object ${type}]`;
-    }
+    const _clone = (data) => {
+        const typeStr = getType(data);
+        if (typeStr === 'nan') return NaN;
+        if (typeStr === 'null') return null;
+        let newObj;
 
-    return typeof variable === type;
-  }
+        if (typeof data === 'object') {
+            if (typeStr === 'regexp')
+                return new RegExp(data.source, data.flags);
+            if (typeStr === 'date')
+                return new Date(data.getTime());
+            if (map.has(data)) {
+                return map.get(data);
+            } else {
+                newObj = typeStr === 'array' ? [] : {};
+                map.set(data, newObj);
+            }
+            for (let attr in data) {
+                if (hasOwnProperty.call(data, attr)) {
+                    newObj[attr] = _clone(data[attr]);
+                }
+            }
+            return newObj;
+        } else {
+            return data;
+        }
+    };
 
-  function _clone(obj) {
-    let target;
-
-    if (isType(obj, 'nan')) return NaN;
-    if (isType(obj, 'null')) return null;
-
-    if (typeof obj !== 'object') return obj;
-
-    target = isType(obj, 'Array') ? [] : {};
-
-    if (isType(obj, 'RegExp')) return new RegExp(obj.source, obj.flags);
-    if (isType(obj, 'Date')) return new Date(obj.getTime());
-    if (map.has(obj)) return map.get(obj);
-    map.set(obj, target);
-    for (let attr in obj) {
-      if (hasOwnProperty.call(obj, attr)) {
-        target[attr] = _clone(obj[attr]);
-      }
-    }
-    return target;
-  }
-
-  return _clone(object);
+    return _clone(object);
 }
 
 /* 浅拷贝 */
