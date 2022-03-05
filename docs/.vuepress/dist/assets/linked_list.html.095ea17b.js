@@ -1,1 +1,0 @@
-const t={key:"v-ad8b82f2",path:"/algorithms/linked_list.html",title:"\u25CF \u94FE\u8868",lang:"zh-CN",frontmatter:{lang:"zh-CN",title:"\u25CF \u94FE\u8868",description:"Algorithms \u7684\u63CF\u8FF0"},excerpt:"",headers:[],git:{updatedTime:1641465602e3},filePathRelative:"algorithms/linked_list.md"};export{t as data};
