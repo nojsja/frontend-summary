@@ -7,9 +7,9 @@ description: React 的描述
 ## ➣ React 中 setState 什么时候是同步的，什么时候是异步的？
 
 react 为了解决跨平台，兼容性和性能问题，自己封装了一套事件机制，代理了原生的事件。
-
 - setState 只在合成事件和钩子函数中是 “异步” 的，在原生事件和 setTimeout 中都是同步的。
 - setState 的 “异步” 并不是说内部由异步代码实现，其实本身执行的过程和代码都是同步的，只是合成事件和钩子函数的调用顺序在更新之前，导致在合成事件和钩子函数中没法立马拿到更新后的值，形式了所谓的 “异步”，当然可以通过第二个参数 setState(partialState, callback) 中的 callback 拿到更新后的结果。
+- 通过传入 setState 一个函数可以实现多次点击按钮时触发多个更新，而不会造成更新覆盖。
 - setState 的批量更新优化也是建立在 “异步”（合成事件、钩子函数）之上的，在原生事件和 setTimeout 中不会批量更新，在 “异步” 中如果对同一个值进行多次 setState ， setState 的批量更新策略会对其进行覆盖，取最后一次的执行，如果是同时 setState 多个不同的值，在更新时会对其进行合并批量更新。
 
 ## ➣ React 中父组件如何调用子组件的方法？
@@ -529,7 +529,7 @@ babel 的转译过程分为三个阶段：parsing、transforming、generating，
 - 强大: 强大的路由管理机制，体现在如下方面：
   - 路由配置: 可以通过组件、配置对象来进行路由的配置
   - 路由切换: 可以通过 `<Link>` Redirect 进行路由的切换
-  - 路由加载: 可以同步记载，也可以异步加载，这样就可以实现按需加载
+  - 路由加载: 可以同步加载，也可以异步加载，这样就可以实现按需加载
 - 使用方式: 不仅可以在浏览器端的使用，而且可以在服务器端的使用。
 
 ### 一、history 库
@@ -656,6 +656,103 @@ window.addEventListener('hashchange',function(e){
 为了简单说明，只描述使用 browserHistory 的实现，hashHistory 的实现过程是类似的，就不在说明。
 
 ![](https://nojsja.gitee.io/static-resources/images/react/react-router-process2.png)
+
+## ➣ React-Router V4 版本路由中心化声明，分布式渲染实现
+
+### Route Config 配置
+
+```javascript
+import Page1 from '../pages/page1/index';
+import HomePage from '../pages/home';
+
+const routes =
+  {
+    path: "/",
+    component: HomePage,
+    routes: [
+      {
+        path: "/page1",
+        component: Page1,
+      },
+    ]
+  };
+
+export default routes;
+```
+
+### RouteWithSubRoutes 递归渲染组件
+
+```javascript
+import React from 'react';
+import { Route } from 'react-router-dom';
+import { RouteConfig } from '../types/index';
+
+function RouteWithSubRoutes({ route }: { route: RouteConfig }) {
+  return (
+    <Route
+      path={route.path}
+      exact={route.exact}
+      render={props => (
+        <route.component {...props} routes={route.routes} />
+      )}
+    />
+  );
+}
+
+export default RouteWithSubRoutes;
+```
+
+### 入口 Entry
+
+```javascript
+import React from 'react';
+import { Route, Router } from 'react-router-dom';
+import route from './router/index';
+
+export const history = createHashHistory();
+
+function App() {
+  return (
+    <Provider store={store}>
+      <Router history={history}>
+        <RouteWithSubRoutes route={route} />
+      </Router>
+    </Provider>
+  );
+}
+
+export default App;
+```
+
+### HomePage 页面
+
+```javascript
+export default function Home(props: AppProps) {
+
+  const { routes } = props;
+
+  useEffect(() => {
+    console.log('Home: useEffect');
+  }, []);
+
+  return (
+    <Row className="App">
+      <Col span={24}>
+        <header className="App-header">
+          ...
+          <p>
+            {
+              routes && routes.map((route, i) =>
+                <RouteWithSubRoutes key={`${route.path}_${i}`} route={route} />
+              )
+            }
+          </p>
+        </header>
+      </Col>
+    </Row>
+  )
+}
+```
 
 ## ➣ React-Router Browser/Hash 两种路由模式的区别
 
