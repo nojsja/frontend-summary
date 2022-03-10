@@ -24,7 +24,21 @@ module.exports = {
       {
         includes: ["/docs/.*"]
       }
-    ]
+    ],
+    [
+      '@vuepress/plugin-search',
+      {
+        maxSuggestions: 10,
+        locales: {
+          '/': {
+            placeholder: 'Search',
+          },
+          '/zh/': {
+            placeholder: '搜索',
+          },
+        },
+      },
+    ],
   ],
   // 主题和它的配置
   theme: '@vuepress/theme-default',
