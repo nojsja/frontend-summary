@@ -935,10 +935,10 @@ Nest 提供了一个开箱即用的应用程序体系结构，允许开发者及
 
 | 捕获方式                              | 同步任务 | 普通异步任务 | Promise 任务 | Async 任务 | 资源加载 | 语法错误 |
 |---------------------------------------|----------|--------------|--------------|------------|----------|----------|
-| try...catch                          | √        | ×            | ×            |    ×        |    ×      |    ×      |
-| onerror()                             | √        | √            | ×            |      ×      |    ×      |    ×      |
-| addEventListener('error')             | √        | √            | ×            |      √    |      √    |     ×    |
-| addEventListener('unhandlerejection') | ×        | ×            | √            |     ×       |     ×     |    ×     |
+| try...catch                           | √        | ×            | ×            | ×          | ×        | ×        |
+| onerror()                             | √        | √            | ×            | ×          | ×        | ×        |
+| addEventListener('error')             | √        | √            | ×            | √          | √        | ×        |
+| addEventListener('unhandlerejection') | ×        | ×            | √            | ×          | ×        | ×        |
 
 表格说明：
 
@@ -1026,6 +1026,142 @@ if (result) {
 #### 错误上报方式总结
 
 于以上 3 种上报方式，我们可以基本总结出，上报数据建议优先使用 sendBeacon 的方式，不支持的浏览器（例如 IE）则降级使用图片上报，尽量避免直接使用 XMLHttpRequest 进行上报。
+
+## ➣ 前端监控平台
+
+前端监控平台可用于一些监控和数据统计追踪，比如：日活跃、用户行为记录、访问日志、JS错误日志、API请求详情、访问性能评估，开发者必须关心的各种运营数据等。
+
+### 一、监控内容
+
+> 待完善
+
+#### 1. 日活跃 PV/UV
+
+#### 2. 用户行为记录
+
+#### 3. 访问日志
+
+#### 3. 错误日志
+
+#### 4. API请求详情
+
+#### 5. 性能评估
+
+### 二、资源采集方式
+
+> 待完善
+
+#### 1. Web 端性能采集
+
+通过 `window.performance` 来获取 `Performance` 对象实现对浏览器内部性能统计对象的访问。
+
+```js
+window.performance
+// Performance {
+//   timeOrigin: 1611749316627.347, 
+//   onresourcetimingbufferfull: null, 
+//   eventCounts: EventCounts, 
+//   timing: PerformanceTiming, 
+//   navigation: PerformanceNavigation, 
+//   ...
+// }
+```
+
+1）使用 PerformanceTiming 对象评估页面各阶段响应时间
+
+表格描述了从用户开始路由到这个页面，到这个页面完全加载完成，总过经历的所有过程，根据图片，我们可以划分出各个有意义的考察性能的时间节点：
+
+| 时间段                                        | 描述                                                                                                                                                                                                            |
+|-----------------------------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `navigationStart` ~ `unloadEventEnd`          | 上一页面的卸载耗时                                                                                                                                                                                              |
+| `fetchStart` ~ `domainLookupStart`            | 查询 app DNS 缓存耗时                                                                                                                                                                                           |
+| `domainLookupStart` ~ `domainLookupEnd`       | dns 查询耗时                                                                                                                                                                                                    |
+| `connectStart` ~ `connectEnd`                 | TCP 连接耗时                                                                                                                                                                                                    |
+| `connectEnd` ~ `secureConnectionStart`        | 针对 https 协议，在 tcp 握手后，传输真正的内容前，建立安全连接的耗时                                                                                                                                               |
+| `fetchStart` ~ `responseStart`                | `TTFB`（time to first byte）, 即首包时长（从用户代理发出第一个请求开始，到页面读取到第一个字节的耗时）。在一个 web 程序中，用户代理发送的第一个 get 请求一般是 index.html，即接收到这个 html 文件的第一个字节的耗费时间 |
+| `responseStart` ~ `responseEnd`               | 内容响应时长                                                                                                                                                                                                    |
+| `domLoading` ~ `domInteractive`               | dom 解析完成，即 `DOM` 树构建完成的时长                                                                                                                                                                          |
+| `domContentLoadedEventEnd` ~ `loadEventStart` | 渲染时长，`domContentLoaded` 表示 `DOM`，`CSSOM` 均准备就绪（`CSSOM` 就绪意味着没有样式表阻止 js 脚本执行），开始构建渲染树                                                                                          |
+| `navigationStart` ~ `domLoading`              | `FPT`（first paint time）, 即首次渲染时间，或白屏时间，从用户打开页面开始，到第一次渲染出可见元素为止                                                                                                                |
+| `navigationStart` ~ `domInteractive`          | `TTI`（time to interact），首次可交互时间                                                                                                                                                                          |
+| `fetchStart` ~ `domContentLoadedEventEnd`     | `html` 加载完成时间，此时 `DOM` 已经解析完成                                                                                                                                                                     |
+| `navigationStart` ~ `loadEventStart`          | 页面完全加载完成的时间                                                                                                                                                                                          |
+
+2）使用 lighthouse 校本化运行性能测试并生成评估报告
+
+lighthouse 可以分析 Web 应用程序和网页，收集有关开发人员最佳实践的现代性能指标和见解。
+
+在浏览器端，可以直接从浏览器 Devtools 打开 lighthouse 标签页运行页面测试，也可以命令行 npm 安装 lighthouse 使用 cli 脚本配置化运行测试脚本然后生成规定格式的统计报告。
+
+#### 2. Node.js 服务端性能采集
+
+使用 perf_hooks 可以访问 Node 应用性能事件节点。
+
+加入性能时间轴的第一类PerformanceEntry条目叫作性能重要事件节点(Performance Milestones)，类型是节点。这种特殊类型的条目记录了Node.js进程启动过程中重要事件发生的时间点。要读取这个特殊类型的条目有几种方法，但最快的是用perf_hooks.performance.nodeTime属性。
+
+> perf_hooks.performance.nodeTiming
+
+```javascript
+PerformanceNodeTiming {
+  duration: 4512.380027,
+  startTime: 158745518.63114,
+  entryType: 'node',
+  name: 'node',
+  arguments: 158745518.756349,
+  initialize: 158745519.09161,
+  inspectorStart: 158745522.408488,
+  loopStart: 158745613.442409,
+  loopExit: 0,
+  loopFrame: 158749857.025862,
+  bootstrapComplete: 158745613.439273,
+  third_party_main_start: 0,
+  third_party_main_end: 0,
+  cluster_setup_start: 0,
+  cluster_setup_end: 0,
+  module_load_start: 158745583.850295,
+  module_load_end: 158745583.851643,
+  preload_modules_load_start: 158745583.852331,
+  preload_modules_load_end: 158745583.879369 }
+```
+
+目前这种类型条目支持的属性包括这些：
+
+- 时长`duration`：处于活动状态下的进程持续时间，单位是毫秒。
+- 参数`arguments`：命令行参数处理结束的时间点。
+- 初始化`initialize`：Node.js平台完成初始化的时间点。
+- 检查工具开始`inspectorStart`：Node.js检查工具启动完成的时间点。
+- 循环开始`loopStart`：Node.js事件循环开始的时间点。
+- 循环退出`loopExit`：Node.js事件循环退出的时间点。
+- 循环帧`loopFrame`：Node.js事件循环中当前一轮循环开始的时间点。
+- 引导程序完成`bootstrapComplete`：Node.js引导程序完成的时间点。
+- 第三方主启动`third_party_main_start`：第三方主模块处理过程启动的时间点。
+- 第三方主完结`third_party_main_end` : 第三方主模块处理过程完成的时间点。
+- 进程簇设置开始`cluster_setup_start` : 进程簇中子进程设置开始的时间。
+- 进程簇设置结束`cluster_setup_end`：进程簇中子进程设置结束的时间点。
+- 模块载入开始`module_load_start` : 本模块载入开始的时间点。
+- 模块载入结束`module_load_end` : 本模块载入结束的时间点。
+- 预载入模块的载入开始`preload_modules_load_start`：预载入模块载入开始的时间点。
+- 预载入模块的载入结束`preload_modules_load_end`：预载入模块载入结束的时间点。
+
+#### 3. Web 端错误捕获
+
+#### 4. Node.js 端错误捕获
+
+### 三、资源上报方式
+
+> 待完善
+
+#### 1. Web 端
+
+#### 2. Node.js 端
+
+### 四、可视化监控平台
+
+> 待完善
+
+#### 1. 数据可视化展示
+
+#### 2. 监控数据实时传输方式
 
 ## ➣ Redux 和 Mobx 状态管理库
 
