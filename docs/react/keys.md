@@ -458,6 +458,7 @@ export default ()=>{
 2. 传统 Class 组件需要学习 ES6 原生 API，不利于初学者快速上手。
 3. 更加扁平化，传统组件利用 `renderProps`(传入一个可渲染函数作为 props) 和 高阶组件 ( ** 组件组合包裹 ** 和 ** 反向继承 **) 的方式实现逻辑复用和职责添加，容易形成 "嵌套地狱"。
 4. 不用处理 this 的指向的问题。
+5. 与 componentDidMount 或 componentDidUpdate 不同，使用 useEffect 调度的 effect 不会阻塞浏览器更新屏幕，这让你的应用看起来响应更快。大多数情况下，effect 不需要同步地执行，在个别情况下（例如测量布局），有单独的 useLayoutEffect Hook 供使用。
 
 ** 缺点：**
 
