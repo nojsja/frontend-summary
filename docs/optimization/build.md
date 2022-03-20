@@ -277,6 +277,8 @@ module.exports = {
 
 ## ➣ webpack：使用 sideEffects + treeShaking 减少代码体积
 
+利用 esmodule 的静态分析能力，也就是说通过静态语法分析，就能找到模块之前的依赖点，进而找出不需要的依赖，在构建阶段就删除不需要的依赖。
+
 treeShaking 字面意思上可以理解为 ` 树摇 `。webpack 做的事儿其实就是从入口文件开始递归地查找和解析模块，可以将入口文档当成是树的树干，然后分布在文件中的各个模块就是树的树枝和树叶。treeShaking 这个特性就是用于将一些没有与树干有关系的叶子模块去掉，即已在模块文件中定义，但是没被我们实际导入使用的模块。
 
 ![treeshaking-before](https://nojsja.gitee.io/static-resources/images/interview/treeshaking-before.png)
@@ -284,6 +286,8 @@ treeShaking 字面意思上可以理解为 ` 树摇 `。webpack 做的事儿其�
 ![treeshaking-after](https://nojsja.gitee.io/static-resources/images/interview/treeshaking-after.png)
 
 ### 1. treeShaking 配置
+
+首先我们在代码里需要使用 `import/export` 语法而不是使用 commonJs 语法 `require`。
 
 使用 treeShaking，开发环境 development 下，需要启用 `optimization.usedExports`，生产环境则会被自动启用，无须手动配置。
 
@@ -300,6 +304,23 @@ module.exports = {
 module.exports = {
  mode: 'production',
 };
+```
+
+如果使用了 babel-loader 来进行 js 模块转译的话，babel可能会改变模块类型，也就是说代码写了import / export语法的ES模块，在Babel处理后会变成CommonJS 的模块。而webapck是无法对动态的CommonJS模块进行语法分析的。
+
+为了是 babel 不把代码转化为 commonJs 规范，babel-preset中有一个modules配置，默认是'cjs'，会把ESModule转成CommonJS。如果不想转成Cjs，就配置babel-preset -> modules: false。
+
+```json
+{
+  "presets": [
+    [
+      "@babel/preset-env",
+      {
+        "modules": false
+      }
+    ]
+  ]
+}
 ```
 
 ### 2. 更高效的 sideEffects

@@ -45,11 +45,13 @@ console.log('B: after log a');
 
 ```
 
-##### Node.js 的处理
+### 一、Node.js 的处理
 
-1. 工作方式
+#### 1. 工作方式
 
-&nbsp;&nbsp;&nbsp;&nbsp; Node.js 具有两个特性：运行时加载和缓存已加载模块。为了避免无限循环的模块依赖，在 Node.js 运行 A.js 之后，它就被缓存了，但需要注意的是，此时缓存的仅仅是一个未完工的 A.js（an unfinished copy of the a.js）。所以在 B.js require A.js 时，得到的仅仅是缓存中一个未完工的 A.js，具体来说，它并没有明确被导出的具体内容（A.js 尾端）。所以 B.js 中输出的 a 是一个空对象。之后，B.js 顺利执行完，回到 A.js 的 require 语句之后，继续执行完成。
+Node.js 具有两个特性：__运行时加载和缓存已加载模块__。
+
+为了避免无限循环的模块依赖，在 Node.js 运行 A.js 之后，它就被缓存了，但需要注意的是，此时缓存的仅仅是一个未完工的 A.js（an unfinished copy of the a.js）。所以在 B.js require A.js 时，得到的仅仅是缓存中一个未完工的 A.js，具体来说，它并没有明确被导出的具体内容（A.js 尾端）。所以 B.js 中输出的 a 是一个空对象。之后，B.js 顺利执行完，回到 A.js 的 require 语句之后，继续执行完成。
 
 ```js
 // a.js
@@ -69,7 +71,7 @@ var a = require('./a')
 console.log(a)
 ```
 
-执行过程：
+#### 2. 执行过程
 
 - 执行 node main.js -> 第一行 require(a.js)，（node 执行也可以理解为调用了 require 方法，我们省略 require(main.js) 内容）
 - 进入 require(a) 方法： 判断缓存（无） -> 初始化一个 module -> 将 module 加入缓存 -> 执行模块 a.js 内容，（需要注意 是先加入缓存， 后执行模块内容）
@@ -81,24 +83,40 @@ console.log(a)
 - a.js：第二行 require 完毕 获取到 b -> 第三行 输出 {b: 22} -> 第四行 导出 a = 2 -> 执行完毕回到 main.js
 - main.js：获取 a -> 第二行 输出 {a: 2} -> 执行完毕
 
-2. 解决方案
+#### 3. 解决方案
 
 &nbsp;&nbsp;&nbsp;&nbsp; 想要解决这个问题有一个很简明的方法，那就是在循环依赖的每个模块中先导出自身，然后再导入其他模块（对于本文的举例来说，实际只需改动 A.js，先使用 module.exports 导出，然后再 require B.js）。
 
-##### Webpack 的处理
+### 二、Webpack 的处理
 
-1. 工作方式
+#### 1. 工作方式
 
-&nbsp;&nbsp;&nbsp;&nbsp; ES Modules 模块输出的是值的引用，输出接口动态绑定，在编译时执行。
+__ES Modules 模块输出的是值的引用，输出接口动态绑定，在编译时执行。__
 
-&nbsp;&nbsp;&nbsp;&nbsp; webpack 的头部启动代码中，通过闭包中的 installedModules 对象，将模块名或者 id 作为对象的 key 来缓存各个模块的 export 的值，通过判断 installedModules 上是否缓存了对应模块的 key 来判断是否已经加载了模块。
+webpack 的头部启动代码中，通过闭包中的 installedModules 对象，将模块名或者 id 作为对象的 key 来缓存各个模块的 export 的值，通过判断 installedModules 上是否缓存了对应模块的 key 来判断是否已经加载了模块。
 
-2. 解决方案
-- 1）webpack 尚未解决循环依赖问题，可以使用 circular-dependency-plugin 插件进行循依赖检测，减少 debug 时间。
-- 2）打破文件间的依赖关系的闭环
-- 3）依赖关系闭环的情况下，将变量改为 function 导出，利用 function 的变量提升机制
+installedModules：
+
+```json
+{
+    moduleId : {
+            exports : {你的模块内容}，
+            loaded : boolean// 是否已加载，
+            id : moduleId
+    }
+｝
+```
+
+模块加载时从 installModules 找是不是存在 moduleId 这个模块，找到了就直接返回这个 module 的 exports 内容，找不到就新建一个空的模块内容，然后放在 installModules 中。模块加载过程就是调用记录在 modules 中下标为 moduleId 的函数，所以 webpack 需要将我们的模块都包装成一个可以链接执行的函数。加载结束后，将 loaded 标为 true，并返回 module.exports。
+
+#### 2. 解决方案
+
+- 1）webpack 的模块缓存机制尚未完全解决循环依赖问题，打包不报错的情况下，生产环境下可能出现各种 undefined 变量错误。可以使用 circular-dependency-plugin 插件进行循依赖检测，减少 debug 时间。
+- 2）打破文件间的依赖关系的闭环。
+- 3）依赖关系闭环的情况下，将变量改为 function 导出，利用 function 的变量提升机制。
 
 ## ➣ Webpack 怎么处理 require 和 import 语法混用的
+
 对于 es6 规范和 commonJs 规范来说，经过 babel 编译以后，都会转化成 commonJs 规范，然后在此基础上，用__esModule 区分了是属于 es6 模块还是 commonJs 模块。并切为了保证 es6 规范用 import 导入值的正确性和统一性，babel 还做了一些策略去处理这两者之前的差异。
 
 ## ➣ 前端模块化历程

@@ -897,16 +897,19 @@ Next.js 具有同类框架中最佳的 “开发人员体验” 和许多内置�
 - 利用 Serverless Functions 及 API 路由 构建 API 功能
 - 完全可扩展
 
-### 三、Nest
+## ➣ Nest 框架的设计哲学
+
+Node.js 提供了 http 模块用于监听端口、处理 http 请求，返回响应，这也是它主要做的事情。
+
+但是 http 模块的 api 太过原始，直接基于它来处理请求响应比较麻烦，所以我们会用 express 等库封装一层。
+
+这一层做的事情就是给 request 和 response 添加了很多处理请求响应的方法，满足各种场景的需求，并且对路由做了处理，而且，也提供了中间件的调用链便于复用一些代码，这种中间件的调用链叫做洋葱模型。
+
+洋葱模型下在一定程度上解决了一些业务处理和职责分离问题，但这没有解决架构问题：当模块多了怎么办，怎么管理？如何划分 Model、View、Controller？一些分布于 Controller 之间的通用逻辑比如鉴权和限流等怎么组织和处理？Nest.js 的诞生就是为了解决这些问题。
 
 在底层，Nest 构建在强大的 HTTP 服务器框架上，如 Express。由于直接暴露了底层框架的 API，因此它天然享有 Express 丰富的第三方插件。
 
-Nest 内置并完全支持 TypeScript 并结合了 OOP（面向对象编程），FP（函数式编程）和 FRP（函数式响应编程）的元素。
-
-Nest 提供了一个开箱即用的应用程序体系结构，允许开发者及其团队创建高度可测试、可扩展、松散耦合且易于维护的应用。
-
-- Controllers：控制器负责处理传入的请求并将响应返回给客户端。
-- Providers：
+Nest 内置并完全支持 TypeScript 并结合了 __AOP__（ Asepct-Orentid-Programming 面向切面编程）和 __IOC__（Inversion of Control 控制反转，依赖注入）等思想 。
 
 ## ➣ 前端错误捕获和上报
 
