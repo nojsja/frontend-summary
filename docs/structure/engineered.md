@@ -899,17 +899,122 @@ Next.js 具有同类框架中最佳的 “开发人员体验” 和许多内置�
 
 ## ➣ Nest 框架的设计哲学
 
+### MVC 架构
+
+MVC 是 Model View Controller 的简写。MVC 架构下，请求会先发送给 Controller，由它调度 Model 层的 Service 来完成业务逻辑，然后返回对应的 View。
+
+![](https://nojsja.gitee.io/static-resources/images/arch/mvc.png)
+
+### 洋葱模型
+
 Node.js 提供了 http 模块用于监听端口、处理 http 请求，返回响应，这也是它主要做的事情。
 
 但是 http 模块的 api 太过原始，直接基于它来处理请求响应比较麻烦，所以我们会用 express 等库封装一层。
 
 这一层做的事情就是给 request 和 response 添加了很多处理请求响应的方法，满足各种场景的需求，并且对路由做了处理，而且，也提供了中间件的调用链便于复用一些代码，这种中间件的调用链叫做洋葱模型。
 
+![](https://nojsja.gitee.io/static-resources/images/arch/onion1.png)
+
+![](https://nojsja.gitee.io/static-resources/images/arch/onion2.png)
+
 洋葱模型下在一定程度上解决了一些业务处理和职责分离问题，但这没有解决架构问题：当模块多了怎么办，怎么管理？如何划分 Model、View、Controller？一些分布于 Controller 之间的通用逻辑比如鉴权和限流等怎么组织和处理？Nest.js 的诞生就是为了解决这些问题。
 
-在底层，Nest 构建在强大的 HTTP 服务器框架上，如 Express。由于直接暴露了底层框架的 API，因此它天然享有 Express 丰富的第三方插件。
+在底层，Nest 构建在强大的 HTTP 服务器框架上，如 Express。由于直接暴露了底层框架的 API，因此它天然享有 Express 丰富的第三方插件。为了实现底层框架的灵活应用，Nest 使用了适配器 (Adapter) 模式，其内部定义了一些抽象类，比如 AbstractHttpAdapter，然后 express 或者别的平台比如 fastify 只要继承这个适配器的类，实现其中的抽象方法，就能接入到 Nest.js 里。
 
 Nest 内置并完全支持 TypeScript 并结合了 __AOP__（ Asepct-Orentid-Programming 面向切面编程）和 __IOC__（Inversion of Control 控制反转，依赖注入）等思想 。
+
+### IOC 依赖注入
+
+Nest.js 提供了 @Controller 装饰器用来声明 Controller：
+
+```javascript
+@Controller('nest')
+export class NestController {
+    ...
+}
+```
+
+而 Service 会用 @Injectable 装饰器来声明：
+
+```javascript
+@Injectable('nest')
+export class NestService {
+    ...
+}
+```
+
+通过 @Controller、@Injectable 装饰器声明的 class 会被 Nest.js 扫描，创建对应的对象并加到一个容器里，这些所有的对象会根据构造器里声明的依赖自动注入，也就是 DI（dependency inject）。
+
+IOC 架构的好处是不需要手动创建对象和根据依赖关系传入不同对象的构造器中，一切都是自动扫描并创建、自动注入的。
+
+### AOP 面向切面编程
+
+![](https://nojsja.gitee.io/static-resources/images/arch/AOP.png)
+
+AOP 就是使用上图所示的 “横切” 技术，AOP 把软件系统分为两个部分：__核心关注点__ 和 __横切关注点__。业务处理的主要流程是核心关注点，与之关系不大的部分是横切关注点。横切关注点的一个特点是，经常发生在核心关注点的多处，而各处都基本相似。比如权限认证、日志、事务处理。Aop 的作用在于分离系统中的各种关注点，将核心关注点和横切关注点分离开来。AOP 的核心思想就是 “`将应用程序中的业务逻辑同对其提供支持的通用服务进行分离`”。
+
+一个请求过来，可能会经过 Controller（控制器）、Service（服务）、Repository（数据库访问） 的逻辑，这些可以称为系统的核心逻辑也就是核心关注。其它比如：日志、验证、入参转换、错误捕获处理等这些通用处理逻辑可能分布在各个核心关注点的业务过程前或后，但是如果直接加入到业务代码中不做分离的话又会造成功能代码冗余，也不利于维护和更改。因此需要将其抽离为横切关注点，抽离为一个或多个公共处理切面。
+
+![](https://nojsja.gitee.io/static-resources/images/arch/MVC_AOP.png)
+
+而 Nest.js 实现 AOP 的方式更多，一共有五种，包括 Middleware、Guard、Pipe、Inteceptor、ExceptionFilter。
+
+#### 1. Middleware
+
+Middleware 中间件是在路由处理程序之前调用的函数，中间件函数可以访问请求和响应对象，以及使用 next() 访问下一个应用的中间件函数。
+
+Nest.js 基于 Express 自然也可以使用中间件，在中间件函数中可以进行以下此类操作：
+- 执行任意代码。
+- 更改请求和响应对象。
+- 结束请求-响应链路。
+- 调用堆栈中的下一个中间件函数。
+
+如果当前中间件函数没有结束请求-响应链路，它必须调用 next() 将控制权传递给下一个中间件函数。否则，请求将被挂起，客户端将收不到服务端的响应直到请求超时。
+
+中间件需要继承 Nest 提供的中间件接口类：
+
+```javascript
+import { Injectable, NestMiddleware } from '@nestjs/common';
+import { Request, Response, NextFunction } from 'express';
+
+@Injectable()
+export class LoggerMiddleware implements NestMiddleware {
+  use(req: Request, res: Response, next: NextFunction) {
+    console.log('Request...');
+    next();
+  }
+}
+```
+
+为了做了进一步的细分，分为了全局中间件和路由中间件。局部中间件可以服务于单个模块和路由：
+
+```javascript
+export class AppModule implements NestModule {
+  configure(consumer: MiddlewareConsumer) {
+    consumer
+      .apply(LoggerMiddleware)
+      .forRoutes({ path: 'cats', method: RequestMethod.GET });
+  }
+}
+```
+
+全局中间件就是 Express 的那种中间件，在请求之前和之后加入一些处理逻辑，每个请求都会走到这里：
+
+```javascript
+const app = await NestFactory.create(AppModule);
+app.use(logger);
+await app.listen(3000);
+```
+
+#### 2. Guard
+
+
+
+#### 3. Pipe
+
+#### 4. Interceptor
+
+#### 5. ExceptionFilter
 
 ## ➣ 前端错误捕获和上报
 
@@ -1032,7 +1137,7 @@ if (result) {
 
 ## ➣ 前端监控平台
 
-前端监控平台可用于一些监控和数据统计追踪，比如：日活跃、用户行为记录、访问日志、JS错误日志、API请求详情、访问性能评估，开发者必须关心的各种运营数据等。
+前端监控平台可用于一些监控和数据统计追踪，比如：日活跃、用户行为记录、访问日志、JS 错误日志、API 请求详情、访问性能评估，开发者必须关心的各种运营数据等。
 
 ### 一、监控内容
 
@@ -1046,7 +1151,7 @@ if (result) {
 
 #### 3. 错误日志
 
-#### 4. API请求详情
+#### 4. API 请求详情
 
 #### 5. 性能评估
 
@@ -1061,11 +1166,11 @@ if (result) {
 ```js
 window.performance
 // Performance {
-//   timeOrigin: 1611749316627.347, 
-//   onresourcetimingbufferfull: null, 
-//   eventCounts: EventCounts, 
-//   timing: PerformanceTiming, 
-//   navigation: PerformanceNavigation, 
+//   timeOrigin: 1611749316627.347,
+//   onresourcetimingbufferfull: null,
+//   eventCounts: EventCounts,
+//   timing: PerformanceTiming,
+//   navigation: PerformanceNavigation,
 //   ...
 // }
 ```
@@ -1100,7 +1205,7 @@ lighthouse 可以分析 Web 应用程序和网页，收集有关开发人员最�
 
 使用 perf_hooks 可以访问 Node 应用性能事件节点。
 
-加入性能时间轴的第一类PerformanceEntry条目叫作性能重要事件节点(Performance Milestones)，类型是节点。这种特殊类型的条目记录了Node.js进程启动过程中重要事件发生的时间点。要读取这个特殊类型的条目有几种方法，但最快的是用perf_hooks.performance.nodeTime属性。
+加入性能时间轴的第一类 PerformanceEntry 条目叫作性能重要事件节点 (Performance Milestones)，类型是节点。这种特殊类型的条目记录了 Node.js 进程启动过程中重要事件发生的时间点。要读取这个特殊类型的条目有几种方法，但最快的是用 perf_hooks.performance.nodeTime 属性。
 
 > perf_hooks.performance.nodeTiming
 
@@ -1129,22 +1234,22 @@ PerformanceNodeTiming {
 
 目前这种类型条目支持的属性包括这些：
 
-- 时长`duration`：处于活动状态下的进程持续时间，单位是毫秒。
-- 参数`arguments`：命令行参数处理结束的时间点。
-- 初始化`initialize`：Node.js平台完成初始化的时间点。
-- 检查工具开始`inspectorStart`：Node.js检查工具启动完成的时间点。
-- 循环开始`loopStart`：Node.js事件循环开始的时间点。
-- 循环退出`loopExit`：Node.js事件循环退出的时间点。
-- 循环帧`loopFrame`：Node.js事件循环中当前一轮循环开始的时间点。
-- 引导程序完成`bootstrapComplete`：Node.js引导程序完成的时间点。
-- 第三方主启动`third_party_main_start`：第三方主模块处理过程启动的时间点。
-- 第三方主完结`third_party_main_end` : 第三方主模块处理过程完成的时间点。
-- 进程簇设置开始`cluster_setup_start` : 进程簇中子进程设置开始的时间。
-- 进程簇设置结束`cluster_setup_end`：进程簇中子进程设置结束的时间点。
-- 模块载入开始`module_load_start` : 本模块载入开始的时间点。
-- 模块载入结束`module_load_end` : 本模块载入结束的时间点。
-- 预载入模块的载入开始`preload_modules_load_start`：预载入模块载入开始的时间点。
-- 预载入模块的载入结束`preload_modules_load_end`：预载入模块载入结束的时间点。
+- 时长 `duration`：处于活动状态下的进程持续时间，单位是毫秒。
+- 参数 `arguments`：命令行参数处理结束的时间点。
+- 初始化 `initialize`：Node.js 平台完成初始化的时间点。
+- 检查工具开始 `inspectorStart`：Node.js 检查工具启动完成的时间点。
+- 循环开始 `loopStart`：Node.js 事件循环开始的时间点。
+- 循环退出 `loopExit`：Node.js 事件循环退出的时间点。
+- 循环帧 `loopFrame`：Node.js 事件循环中当前一轮循环开始的时间点。
+- 引导程序完成 `bootstrapComplete`：Node.js 引导程序完成的时间点。
+- 第三方主启动 `third_party_main_start`：第三方主模块处理过程启动的时间点。
+- 第三方主完结 `third_party_main_end` : 第三方主模块处理过程完成的时间点。
+- 进程簇设置开始 `cluster_setup_start` : 进程簇中子进程设置开始的时间。
+- 进程簇设置结束 `cluster_setup_end`：进程簇中子进程设置结束的时间点。
+- 模块载入开始 `module_load_start` : 本模块载入开始的时间点。
+- 模块载入结束 `module_load_end` : 本模块载入结束的时间点。
+- 预载入模块的载入开始 `preload_modules_load_start`：预载入模块载入开始的时间点。
+- 预载入模块的载入结束 `preload_modules_load_end`：预载入模块载入结束的时间点。
 
 #### 3. Web 端错误捕获
 
