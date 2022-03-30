@@ -23,7 +23,7 @@
 			}
     </script>
     <title>● 编码优化 | NoJsJa Frontend Summary</title><meta name="description" content="optimization 的描述">
-    <link rel="modulepreload" href="/frontend-summary/assets/app.fd3326d4.js"><link rel="modulepreload" href="/frontend-summary/assets/code.html.2dbff461.js"><link rel="modulepreload" href="/frontend-summary/assets/code.html.14e70d44.js"><link rel="modulepreload" href="/frontend-summary/assets/plugin-vue_export-helper.21dcd24c.js">
+    <link rel="modulepreload" href="/frontend-summary/assets/app.880de4d7.js"><link rel="modulepreload" href="/frontend-summary/assets/code.html.2dbff461.js"><link rel="modulepreload" href="/frontend-summary/assets/code.html.d61be5e3.js"><link rel="modulepreload" href="/frontend-summary/assets/plugin-vue_export-helper.21dcd24c.js">
     <link rel="stylesheet" href="/frontend-summary/assets/style.d832ff6d.css">
   </head>
   <body>
@@ -843,6 +843,6 @@ obj<span class="token punctuation">.</span><span class="token function">getAttr<
   <span class="token punctuation">)</span>
 <span class="token punctuation">}</span>
 </code></pre><div class="line-numbers" aria-hidden="true"><span class="line-number">1</span><br><span class="line-number">2</span><br><span class="line-number">3</span><br><span class="line-number">4</span><br><span class="line-number">5</span><br><span class="line-number">6</span><br><span class="line-number">7</span><br><span class="line-number">8</span><br><span class="line-number">9</span><br><span class="line-number">10</span><br><span class="line-number">11</span><br><span class="line-number">12</span><br><span class="line-number">13</span><br><span class="line-number">14</span><br></div></div><ul><li>iii. 容器能正确显示滚动高度了，那么如何让我们在滚动的时候能知道应该显示哪些元素呢？一个巧妙的方法就是根据当前滚动条的<code>scrollTop</code>(滚动容器的固有属性：表示能够向上滚动的高度值，可以直接获取)计算首个应该渲染的元素的索引<code>startIndex</code>以及最后需要渲染的元素的索引<code>endIndex</code>，然后再根据两个索引分别计算 paddingTop 和 paddingBottom 即可： <ul><li>startIndex = Math.ceil(scrollTop / 滚动容器元素总高度)</li><li>可视元素个数 = 可视区域高度 / 滚动元素高度</li><li>endIndex = startIndex + 可视区域元素个数</li><li>当前渲染元素renderItems = data.slice(startIndex, endIndex)</li><li>paddingTop = startIndex * 滚动元素高度</li><li>paddingBottom = (this.data.length - this.endIndex - 1) * 滚动元素高度</li></ul></li></ul><p>     以上为虚拟化滚动简化的描述模型，实际实现时还要考虑：缓存已经加载的列表元素的位置信息、列表元素的高度是否可变、增加缓冲元素来减少白屏情况(缓冲元素就是预加载的几个接近视口可显示元素的上下部分其它元素)、容器元素resize后的处理等。处理情况还是比较复杂，使用成熟的库处理而不是自己造轮子是比较好的方案，不过个中原理还是要理解。</p><!--]--></div><footer class="page-meta"><!----><div class="meta-item last-updated"><span class="meta-item-label">Last Updated: </span><!----></div><!----></footer><nav class="page-nav"><p class="inner"><!----><span class="next"><a href="/frontend-summary/optimization/http.html" class="" aria-label="● http 优化"><!--[--><!--]--> ● http 优化 <!--[--><!--]--></a></span></p></nav><!--[--><!--]--></main><!--]--></div><!----><!--]--></div>
-    <script type="module" src="/frontend-summary/assets/app.fd3326d4.js" defer></script>
+    <script type="module" src="/frontend-summary/assets/app.880de4d7.js" defer></script>
   </body>
 </html>
