@@ -359,7 +359,7 @@ setTimeout(() => {
 
 useEffect 在渲染时是异步执行，并且要等到浏览器将所有变化渲染到屏幕后才会被执行。
 
-useLayoutEffect 在渲染时是同步执行，其执行时机与 componentDidMount，componentDidUpdate 一致
+useLayoutEffect 在渲染时是同步执行，其执行时机与 componentDidMount，componentDidUpdate 一致。最好把操作 dom 的相关操作放到 useLayouteEffect 中去，避免重复渲染导致闪烁。
 
 #### 对于 useEffect 和 useLayoutEffect 哪一个与 componentDidMount，componentDidUpdate 的是等价的？
 
