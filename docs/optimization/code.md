@@ -6,7 +6,7 @@ description: optimization 的描述
 
 ## ➣ 前端如何优化大量数据的加载和渲染
 
-1. 如果有使用Node.js中间层的话，可以利用服务器的多核渲染能力进行同构JS服务端渲染。
+1. 如果有使用 Node.js 中间层的话，可以利用服务器的多核渲染能力进行同构 JS 服务端渲染。
 2. 界面使用虚拟列表技术，动态显示部分数据。
 3. 使用懒加载技术，每次只加载部分数据，配合加载动画提升用户体验。
 4. 使用分页组件，用户自由选择需要加载的部分。
@@ -19,12 +19,12 @@ description: optimization 的描述
 
 ##### 1）抽离内联样式内联脚本
   - 内联资源不利于浏览器缓存，造成重复的资源请求
-  - 内联资源会造成HTML臃肿，不利于HTTP传输
+  - 内联资源会造成 HTML 臃肿，不利于 HTTP 传输
   - 内联资源的下载和解析可能会阻塞导致界面渲染，导致界面白屏
   - 内联资源不好管理和维护
 
-##### 2）defer脚本和async脚本  
-  &nbsp;&nbsp;&nbsp;&nbsp; HTML在解析时遇到声明的`<script>`脚本会立即下载和执行，往往会延迟界面剩余部分的解析，造成界面白屏的情况。比较古老的优化方式之一就是将脚本放到HTML文档末尾，这样子解决了白屏的问题，可是在DOM文档结构复杂冗长时，也会造成一定的界面脚本下载和执行延迟，script标签新属性`async`和`defer`可以解决此类问题：
+##### 2）defer 脚本和 async 脚本
+  &nbsp;&nbsp;&nbsp;&nbsp; HTML 在解析时遇到声明的 `<script>` 脚本会立即下载和执行，往往会延迟界面剩余部分的解析，造成界面白屏的情况。比较古老的优化方式之一就是将脚本放到 HTML 文档末尾，这样子解决了白屏的问题，可是在 DOM 文档结构复杂冗长时，也会造成一定的界面脚本下载和执行延迟，script 标签新属性 `async` 和 `defer` 可以解决此类问题：
   ```html
   <!DOCTYPE html>
   <html>
@@ -36,23 +36,22 @@ description: optimization 的描述
     </body>
   </html>
   ```
-  - defer脚本  
-  &nbsp;&nbsp;&nbsp;&nbsp; 延迟脚本-声明`defer`属性的外部`<script>`脚本下载时不会阻塞HTML的解析和渲染，并且会在HTML渲染完成并且可实际操作之后开始执行(`DOMContentLoaded`事件被触发之前)，各个脚本解析执行顺序对应声明时的位置顺序，执行完成后会触发页面`DOMContentLoaded`事件。
-  - async脚本  
-  &nbsp;&nbsp;&nbsp;&nbsp; 异步脚本-声明`async`属性的外部`<script>`脚本下载时不会阻塞HTML的解析和渲染，各个脚本的下载和执行完全独立，下载完成后即开始执行，所以执行顺序不固定，与`DOMContentLoaded`事件的触发没有关联性。
-  - 动态脚本加载技术  
-  &nbsp;&nbsp;&nbsp;&nbsp; 在脚本执行时动态运行`loadScript`函数可以实现类似延迟脚本和异步脚本的效果：`isDefer`为真值时脚本的执行顺序为脚本位置顺序，为假值时效果同于异步脚本。
+  - defer 脚本
+  &nbsp;&nbsp;&nbsp;&nbsp; 延迟脚本 - 声明 `defer` 属性的外部 `<script>` 脚本下载时不会阻塞 HTML 的解析和渲染，并且会在 HTML 渲染完成并且可实际操作之后开始执行 (`DOMContentLoaded` 事件被触发之前)，各个脚本解析执行顺序对应声明时的位置顺序，执行完成后会触发页面 `DOMContentLoaded` 事件。
+  - async 脚本
+  &nbsp;&nbsp;&nbsp;&nbsp; 异步脚本 - 声明 `async` 属性的外部 `<script>` 脚本下载时不会阻塞 HTML 的解析和渲染，各个脚本的下载和执行完全独立，下载完成后即开始执行，所以执行顺序不固定，与 `DOMContentLoaded` 事件的触发没有关联性。
+  - 动态脚本加载技术
+  &nbsp;&nbsp;&nbsp;&nbsp; 在脚本执行时动态运行 `loadScript` 函数可以实现异步载入脚本的效果，也就是说，在加载脚本的同时，主页面的脚本继续运行。如果多个异步脚本之间前后依赖的话可能需要编程控制脚本之间的加载顺序。
   ```js
     function loadScript(src, isDefer) {
       let script = document.createElement('script');
       script.src = src;
-      script.async = !isDefer;
       document.body.append(script);
     }
   ```
 
-##### 3）压缩HTML/CSS代码资源  
-&nbsp;&nbsp;&nbsp;&nbsp; 代码资源中存在很多无用的空格和符号等，去除他们带来的效益是可观的，另一方面压缩资源也能起到源代码保护的作用。现代前端工程化框架一般继承了此类压缩功能，比如webpack框架的`html-loader`。
+##### 3）压缩 HTML/CSS 代码资源
+&nbsp;&nbsp;&nbsp;&nbsp; 代码资源中存在很多无用的空格和符号等，去除他们带来的效益是可观的，另一方面压缩资源也能起到源代码保护的作用。现代前端工程化框架一般继承了此类压缩功能，比如 webpack 框架的 `html-loader`。
 ```json
 module.exports = {
   module: {
@@ -70,8 +69,8 @@ module.exports = {
 
 ```
 
-##### 4）压缩图片/音视频等多媒体资源  
-&nbsp;&nbsp;&nbsp;&nbsp; 其实网页带宽往往被图片等资源大量占用，压缩他们能带来超出预期的优化效益。现代前端工程化框架一般继承了此类压缩插件，如`imagemin-webpack-plugin`插件。
+##### 4）压缩图片 / 音视频等多媒体资源
+&nbsp;&nbsp;&nbsp;&nbsp; 其实网页带宽往往被图片等资源大量占用，压缩他们能带来超出预期的优化效益。现代前端工程化框架一般继承了此类压缩插件，如 `imagemin-webpack-plugin` 插件。
 ```js
 import ImageminPlugin from 'imagemin-webpack-plugin'
 
@@ -88,8 +87,8 @@ module.exports = {
 }
 ```
 
-##### 5）使用雪碧图  
-&nbsp;&nbsp;&nbsp;&nbsp; 使用雪碧图本质上优化了HTTP请求的数量，将众多图片拼贴为一张作为背景图片引用，然后我们给一个元素设置固定大小，让它的背景图片位置进行变化，只截取大图一部分进行显示，就好像显示出了不同的图片，这就是雪碧图的原理。
+##### 5）使用雪碧图
+&nbsp;&nbsp;&nbsp;&nbsp; 使用雪碧图本质上优化了 HTTP 请求的数量，将众多图片拼贴为一张作为背景图片引用，然后我们给一个元素设置固定大小，让它的背景图片位置进行变化，只截取大图一部分进行显示，就好像显示出了不同的图片，这就是雪碧图的原理。
 
 ![](http://nojsja.gitee.io/static-resources/images/optimization/sprite.png)
 
@@ -103,11 +102,11 @@ module.exports = {
 }
 ```
 
-##### 6）避免空的 src 和 href 值  
-&nbsp;&nbsp;&nbsp;&nbsp; 当link标签的href属性为空、script标签的src属性为空的时候，浏览器渲染的时候会把当前页面的URL作为它们的属性值，从而把页面的内容加载进来作为它们的值。
+##### 6）避免空的 src 和 href 值
+&nbsp;&nbsp;&nbsp;&nbsp; 当 link 标签的 href 属性为空、script 标签的 src 属性为空的时候，浏览器渲染的时候会把当前页面的 URL 作为它们的属性值，从而把页面的内容加载进来作为它们的值。
 
-##### 7）避免使用`@import`来引入css  
-&nbsp;&nbsp;&nbsp;&nbsp; 这种语法会阻止多个css文件的并行下载，被`@import`引入的css文件会在引入它的css文件下载并渲染好之后才开始下载渲染自身。并且`@import`引入的css文件的下载顺序会被打乱，排列在`@import`之后的JS文件会先于`@import`下载。
+##### 7）避免使用 `@import` 来引入 css
+&nbsp;&nbsp;&nbsp;&nbsp; 这种语法会阻止多个 css 文件的并行下载，被 `@import` 引入的 css 文件会在引入它的 css 文件下载并渲染好之后才开始下载渲染自身。并且 `@import` 引入的 css 文件的下载顺序会被打乱，排列在 `@import` 之后的 JS 文件会先于 `@import` 下载。
 ```css
 /* css file */
 @import 'custom.css';
@@ -115,47 +114,47 @@ module.exports = {
 
 ##### 8）使用 CDN 服务来存放静态资源
 
-&nbsp;&nbsp;&nbsp;&nbsp; CDN 即内容分发网络。CDN 服务商将静态资源缓存到遍布全国的高性能加速节点上，当用户访问相应的业务资源时，CDN系统能够实时地根据网络流量和各节点的连接负载状况、到用户的距离和响应时间 等综合信息将用户的请求重新导向离用户最近的服务节点上，使内容能够传输的更快，更加稳定。可以提升首次请求的响应能力。
+&nbsp;&nbsp;&nbsp;&nbsp; CDN 即内容分发网络。CDN 服务商将静态资源缓存到遍布全国的高性能加速节点上，当用户访问相应的业务资源时，CDN 系统能够实时地根据网络流量和各节点的连接负载状况、到用户的距离和响应时间 等综合信息将用户的请求重新导向离用户最近的服务节点上，使内容能够传输的更快，更加稳定。可以提升首次请求的响应能力。
 
 CDN 的核心点有两个：
 - 缓存：把资源 copy 一份到 CDN 服务器上这个过程。
-- 回源：CDN节点 发现自己没有这个资源（一般是缓存的数据过期了），转头向根服务器（或者它的上层服务器）去要这个资源的过程。
+- 回源：CDN 节点 发现自己没有这个资源（一般是缓存的数据过期了），转头向根服务器（或者它的上层服务器）去要这个资源的过程。
 
 CDN 的优点：
 - 突破单域名文件加载并发请求限制
 - 减少服务器本身的流量消耗
 - 更快的资源加载速度
-- CDN内置版本控制，可以通过版本号加载指定版本的静态资源
+- CDN 内置版本控制，可以通过版本号加载指定版本的静态资源
 - 提供静态资源使用情况分析功能
 - 提供安全服务有效防止网站被攻击
 
 ##### 9）使用 SVG 矢量图和 base64 图片
 
-\> SVG图优点：
+\> SVG 图优点：
   - 任意放缩：用户可以任意缩放图像显示，而不会破坏图像的清晰度、细节等。
-  - 较小文件：总体来讲，SVG文件比那些GIF和JPEG格式的文件要小很多，因而下载也很快。
-  - 超强显示效果：SVG图像在屏幕上总是边缘清晰，它的清晰度适合任何屏幕分辨力和打印分辨力。
+  - 较小文件：总体来讲，SVG 文件比那些 GIF 和 JPEG 格式的文件要小很多，因而下载也很快。
+  - 超强显示效果：SVG 图像在屏幕上总是边缘清晰，它的清晰度适合任何屏幕分辨力和打印分辨力。
 
-\> base64图片:
+\> base64 图片:
 
 - base64 图片不会触发网络请求，因为图片被硬编码到代码中。
-- 一些复用性不高的小图片可以转成base64，webpack中可以使用 url-loader 进行自动转换。
+- 一些复用性不高的小图片可以转成 base64，webpack 中可以使用 url-loader 进行自动转换。
 
 ##### 10) 使用缓存
 
-&nbsp;&nbsp;&nbsp;&nbsp; 除了使用浏览器强缓存、协商缓存等(可以参考[这篇文章](https://nojsja.gitee.io/blogs/2021/01/29/%E5%89%8D%E7%AB%AF123%EF%BC%9A%E6%B5%8F%E8%A7%88%E5%99%A8%E7%BC%93%E5%AD%98%E7%9A%84%E5%B7%A5%E4%BD%9C%E6%96%B9%E5%BC%8F/))进行一些静态资源的缓存，合理利用localStorage、sessionStorage、indexedDb、web SQL等缓存技术也很重要，浏览器本地存储可以存放一些非实时性的、不常更改的数据，只在必要的时候通过http请求获取最新的数据以减少后端的访问压力。  
+&nbsp;&nbsp;&nbsp;&nbsp; 除了使用浏览器强缓存、协商缓存等 (可以参考[这篇文章](https://nojsja.gitee.io/blogs/2021/01/29/%E5%89%8D%E7%AB%AF123%EF%BC%9A%E6%B5%8F%E8%A7%88%E5%99%A8%E7%BC%93%E5%AD%98%E7%9A%84%E5%B7%A5%E4%BD%9C%E6%96%B9%E5%BC%8F/)) 进行一些静态资源的缓存，合理利用 localStorage、sessionStorage、indexedDb、web SQL 等缓存技术也很重要，浏览器本地存储可以存放一些非实时性的、不常更改的数据，只在必要的时候通过 http 请求获取最新的数据以减少后端的访问压力。
 
-&nbsp;&nbsp;&nbsp;&nbsp; cookie作为一种与后端通信息息相关的数据存储方式，每次我们发送请求时浏览器都会在请求 header 中自动携带上，所以非必要数据尽量不要存放在cookie中，以减轻http请求的传输负载。
+&nbsp;&nbsp;&nbsp;&nbsp; cookie 作为一种与后端通信息息相关的数据存储方式，每次我们发送请求时浏览器都会在请求 header 中自动携带上，所以非必要数据尽量不要存放在 cookie 中，以减轻 http 请求的传输负载。
 
 #### 2. 渲染层面
 
 ##### 1）减少页面的回流和重绘
-  - 使用CSS3属性`transform`来实现元素位移
-  - 让动画效果应用到`position: fixed/absolute`的元素上，原理是让其脱离文档流
-  - 向界面插入大量dom节点时先将dom元素添加到虚拟dom操作节点`DocumentFragment`上，最后再将虚拟节点实际添加到界面上。
-  - 避免直接使用JS操作dom元素的style样式，可以使用class一次性改变dom样式类。
-  - 将会引起页面回流、重绘的操作尽量放到DOM树的后面，减少级联反应。
-  - 使用CSS3动画Animation来实现一些复杂元素的动画效果，原理是利用了硬件加速
+  - 使用 CSS3 属性 `transform` 来实现元素位移
+  - 让动画效果应用到 `position: fixed/absolute` 的元素上，原理是让其脱离文档流
+  - 向界面插入大量 dom 节点时先将 dom 元素添加到虚拟 dom 操作节点 `DocumentFragment` 上，最后再将虚拟节点实际添加到界面上。
+  - 避免直接使用 JS 操作 dom 元素的 style 样式，可以使用 class 一次性改变 dom 样式类。
+  - 将会引起页面回流、重绘的操作尽量放到 DOM 树的后面，减少级联反应。
+  - 使用 CSS3 动画 Animation 来实现一些复杂元素的动画效果，原理是利用了硬件加速
   - 重复读取一些容易引起回流的元素属性时注意使用变量缓存
   ```html
   <!-- 几何属性相关 -->
@@ -168,45 +167,45 @@ CDN 的优点：
   elem.scrollLeft, elem.scrollTop 除了读取，设置也会触发
   ...
   ```
-##### 2）减少DOM结构的层级
+##### 2）减少 DOM 结构的层级
 
-##### 3）尽量不使用`table`布局和`iframe`内联网页
+##### 3）尽量不使用 `table` 布局和 `iframe` 内联网页
   ```js
-  /* table布局 */
-  table布局不灵活，不利于css样式定制
-  table布局渲染性能较低，可能触发多次重绘
-  table布局不利于html语义化
+  /* table 布局 */
+  table 布局不灵活，不利于 css 样式定制
+  table 布局渲染性能较低，可能触发多次重绘
+  table 布局不利于 html 语义化
 
   /* iframe */
-  iframe会阻塞主页面的onload事件
-  iframe和主页面共享HTTP连接池，而浏览器对相同域的连接有限制，所以会影响页面的并行加载
-  iframe不利于网页布局
-  iframe对移动端不友好
-  iframe的反复重新加载可能导致一些浏览器的内存泄露
-  iframe中的数据传输复杂
-  iframe不利于SEO
+  iframe 会阻塞主页面的 onload 事件
+  iframe 和主页面共享 HTTP 连接池，而浏览器对相同域的连接有限制，所以会影响页面的并行加载
+  iframe 不利于网页布局
+  iframe 对移动端不友好
+  iframe 的反复重新加载可能导致一些浏览器的内存泄露
+  iframe 中的数据传输复杂
+  iframe 不利于 SEO
   ```
 
-##### 4）flex布局的性能比`inline-block`和`float`布局都要好
-##### 5）CSS选择器的使用策略
+##### 4）flex 布局的性能比 `inline-block` 和 `float` 布局都要好
+##### 5）CSS 选择器的使用策略
 
-&nbsp;&nbsp;&nbsp;&nbsp; 浏览器是从选择器的右边到左边读取，选择器最右边的部分被称为关键选择器，与CSS选择器规则的效率相关。
+&nbsp;&nbsp;&nbsp;&nbsp; 浏览器是从选择器的右边到左边读取，选择器最右边的部分被称为关键选择器，与 CSS 选择器规则的效率相关。
 
-  **效率排序如下：**
+  ** 效率排序如下：**
   内联样式 > ID 选择器 > 类选择器 = 属性选择器 = 伪类选择器 > 标签选择器 = 伪元素选择器
 
-  **要点：**
-  - 关键选择器避免使用通用选择器*，其查询开销较大
-  - 使用ID/Class选择器时尽量使其独立，因为无用的上层规则(标签、类名)只会增加查找时间，ID/Class已经具有单独筛选元素的能力
+  ** 要点：**
+  - 关键选择器避免使用通用选择器 *，其查询开销较大
+  - 使用 ID/Class 选择器时尽量使其独立，因为无用的上层规则 (标签、类名) 只会增加查找时间，ID/Class 已经具有单独筛选元素的能力
   - 避免使用子选择器，尤其是将其与标签、通配符组合使用，性能开销较大
-  - 利用CSS元素属性继承的特性，是多个元素复用多一种规则
-  - 移除无匹配样式，否则会造成无用的样式解析和匹配，同时增大CSS文件体积
+  - 利用 CSS 元素属性继承的特性，是多个元素复用多一种规则
+  - 移除无匹配样式，否则会造成无用的样式解析和匹配，同时增大 CSS 文件体积
 
-##### 6）css的书写顺序也会对其解析渲染性能造成影响
-&nbsp;&nbsp;&nbsp;&nbsp; 浏览器从上到下开始解析一段css规则，将容易造成回流、重绘的属性放在上部可以让渲染引擎更高效地工作，可以按照下列顺序来进行书写，使用编辑器的`csslint`插件可以辅助完成这一过程：
+##### 6）css 的书写顺序也会对其解析渲染性能造成影响
+&nbsp;&nbsp;&nbsp;&nbsp; 浏览器从上到下开始解析一段 css 规则，将容易造成回流、重绘的属性放在上部可以让渲染引擎更高效地工作，可以按照下列顺序来进行书写，使用编辑器的 `csslint` 插件可以辅助完成这一过程：
   - 定位属性
   ```css
-  position  display  float  left  top  right  bottom 
+  position  display  float  left  top  right  bottom
   overflow  clear  z-index
   ```
   - 几何属性
@@ -221,7 +220,7 @@ CDN 的优点：
   ```css
   text-align   vertical-align   text-wrap   text-transform   text-indent    text-decoration   letter-spacing    word-spacing    white-space   text-overflow
   ```
-  - CSS3中新增属性
+  - CSS3 中新增属性
   ```css
   content   box-shadow   border-radius  transform
   ```
@@ -230,9 +229,9 @@ CDN 的优点：
 
 #### 1. 网络层面
 
-##### 1）压缩JS代码资源  
+##### 1）压缩 JS 代码资源
 
-&nbsp;&nbsp;&nbsp;&nbsp; 代码资源中存在很多无用的空格和符号等，去除他们带来的效益是可观的，另一方面压缩资源也能起到源代码保护的作用。现代前端工程化框架一般继承了此类压缩插件，比如webpack框架的`uglifyjs`插件。
+&nbsp;&nbsp;&nbsp;&nbsp; 代码资源中存在很多无用的空格和符号等，去除他们带来的效益是可观的，另一方面压缩资源也能起到源代码保护的作用。现代前端工程化框架一般继承了此类压缩插件，比如 webpack 框架的 `uglifyjs` 插件。
 ```js
 const UglifyJsPlugin = require('uglifyjs-webpack-plugin');
 
@@ -245,12 +244,12 @@ module.exports = {
 
 #### 2. 渲染层面
 
-##### 1）使用函数节流和函数去抖处理一些函数的高频触发调用  
+##### 1）使用函数节流和函数去抖处理一些函数的高频触发调用
 
-  &nbsp;&nbsp;&nbsp;&nbsp; 在面对一些需要进行调用控制的函数高频触发场景时，可能有人会对何时使用节流何时使用去抖产生疑问。这里通过一个特性进行简单区分：如果你需要保留短时间内高频触发的最后一次结果时，那么使用去抖函数，如果你需要对函数的调用次数进行限制，以最佳的调用间隔时间保持函数的持续调用而不关心是否是最后一次调用结果时，请使用节流函数。  
+  &nbsp;&nbsp;&nbsp;&nbsp; 在面对一些需要进行调用控制的函数高频触发场景时，可能有人会对何时使用节流何时使用去抖产生疑问。这里通过一个特性进行简单区分：如果你需要保留短时间内高频触发的最后一次结果时，那么使用去抖函数，如果你需要对函数的调用次数进行限制，以最佳的调用间隔时间保持函数的持续调用而不关心是否是最后一次调用结果时，请使用节流函数。
 
-  &nbsp;&nbsp;&nbsp;&nbsp; 比如echarts图常常需要在窗口resize之后重新使用数据渲染，但是直接监听resize事件可能导致短时间内渲染函数被触发多次。我们可以使用函数去抖的思想，监听resize事件后在监听器函数里获取参数再使用参数调用事先初始化好了的throttle函数，保证resize过程结束后能触发一次实际的echarts重渲染即可。
-  - 节流`throttle`
+  &nbsp;&nbsp;&nbsp;&nbsp; 比如 echarts 图常常需要在窗口 resize 之后重新使用数据渲染，但是直接监听 resize 事件可能导致短时间内渲染函数被触发多次。我们可以使用函数去抖的思想，监听 resize 事件后在监听器函数里获取参数再使用参数调用事先初始化好了的 throttle 函数，保证 resize 过程结束后能触发一次实际的 echarts 重渲染即可。
+  - 节流 `throttle`
   ```js
   function throttle(fn, time) {
     let canRun = true;
@@ -266,7 +265,7 @@ module.exports = {
     };
   }
   ```
-  - 去抖`debounce`
+  - 去抖 `debounce`
   ```js
   function debounce(fn, time) {
     let timer;
@@ -280,22 +279,22 @@ module.exports = {
   }
   ```
 
-##### 2）Js实现动画时使用`requestAnimationFrame`替代定时器  
+##### 2）Js 实现动画时使用 `requestAnimationFrame` 替代定时器
 
-&nbsp;&nbsp;&nbsp;&nbsp; `window.requestAnimationFrame()`告诉浏览器你希望执行一个动画，并且要求浏览器在下次重绘之前(每帧之前)调用指定的回调函数更新动画。该方法需要传入一个回调函数作为参数，该回调函数会在浏览器下一次重绘之前执行。  
+&nbsp;&nbsp;&nbsp;&nbsp; `window.requestAnimationFrame()` 告诉浏览器你希望执行一个动画，并且要求浏览器在下次重绘之前 (每帧之前) 调用指定的回调函数更新动画。该方法需要传入一个回调函数作为参数，该回调函数会在浏览器下一次重绘之前执行。
 
-&nbsp;&nbsp;&nbsp;&nbsp; 设置的回调函数在被调用时会被传入触发的时间戳，在同一个帧中的多个回调函数，它们每一个都会接受到一个相同的时间戳，即使在计算上一个回调函数的工作负载期间已经消耗了一些时间，我们可以记录前后时间戳差值来控制元素动画的速度和启停。  
+&nbsp;&nbsp;&nbsp;&nbsp; 设置的回调函数在被调用时会被传入触发的时间戳，在同一个帧中的多个回调函数，它们每一个都会接受到一个相同的时间戳，即使在计算上一个回调函数的工作负载期间已经消耗了一些时间，我们可以记录前后时间戳差值来控制元素动画的速度和启停。
 
-&nbsp;&nbsp;&nbsp;&nbsp; 如果换用过定时器`setTimeout/setInterval`来控制帧动画的话，一般我们采用60帧进行动画绘制，所以设置的定时时间就应该是`1000 / 60 = 17ms`。不过由于定时器本身只是把回调函数放入了`宏任务队列`，其精确度受到主进程代码执行栈影响，可能导致帧动画的回调函数在浏览器的一次渲染过程中才被触发(理想情况是渲染前调用回调函数获得计算值，渲染时执行计算值绘制)，因此本应在当前帧呈现的绘制效果被延迟到了下一帧，产生丢帧卡顿的情况。  
+&nbsp;&nbsp;&nbsp;&nbsp; 如果换用过定时器 `setTimeout/setInterval` 来控制帧动画的话，一般我们采用 60 帧进行动画绘制，所以设置的定时时间就应该是 `1000 / 60 = 17ms`。不过由于定时器本身只是把回调函数放入了 ` 宏任务队列 `，其精确度受到主进程代码执行栈影响，可能导致帧动画的回调函数在浏览器的一次渲染过程中才被触发 (理想情况是渲染前调用回调函数获得计算值，渲染时执行计算值绘制)，因此本应在当前帧呈现的绘制效果被延迟到了下一帧，产生丢帧卡顿的情况。
 
-&nbsp;&nbsp;&nbsp;&nbsp; 这里让我们使用`requestAnimationFrame`来实现一个[动画处理类](https://github.com/nojsja/javascript-learning/blob/master/js-animation/animation.js)作为例子，使用方式如下：  
+&nbsp;&nbsp;&nbsp;&nbsp; 这里让我们使用 `requestAnimationFrame` 来实现一个 [动画处理类](https://github.com/nojsja/javascript-learning/blob/master/js-animation/animation.js) 作为例子，使用方式如下：
 ```js
 var anime = new Animation();
 anime.setTarget('#animationTarget');
-// 右下角移动50px
-anime.push('#animationTarget', { x: 50, y: 50, duration: 1000, func: 'easeIn' });
-// 右上角移动50px
-anime.push('#animationTarget', { x: -50, y: -50, duration: 500, func: 'linear' });
+// 右下角移动 50px
+anime.push('#animationTarget', { x: 50, y: 50, duration: 1000, func: 'easeIn'});
+// 右上角移动 50px
+anime.push('#animationTarget', { x: -50, y: -50, duration: 500, func: 'linear'});
 ```
 预览图：
 ![](http://nojsja.gitee.io/static-resources/images/optimization/animation.gif)
@@ -308,11 +307,11 @@ anime.push('#animationTarget', { x: -50, y: -50, duration: 500, func: 'linear' }
  * @param {[Number]}  duration [动画总持续时间]
  */
 var tween = {
-  linear: function( time, start, distance, duration ) { return distance*time/duration + start; },
-  easeIn: function( time, start, distance, duration ) { return distance * ( time /= duration ) * time + start; },
+  linear: function(time, start, distance, duration) { return distance*time/duration + start; },
+  easeIn: function(time, start, distance, duration) { return distance * ( time /= duration ) * time + start; },
   strongEaseIn: function(time, start, distance, duration) { return distance * ( time /= duration ) * time * time * time * time + start; },
   strongEaseOut: function(time, start, distance, duration) { return distance * ( ( time = time / duration - 1) * time * time * time * time + 1 ) + start; },
-  sinEaseIn: function( time, start, distance, duration ) { return distance * ( time /= duration) * time * time + start; },
+  sinEaseIn: function(time, start, distance, duration) { return distance * ( time /= duration) * time * time + start; },
   sinEaseOut: function(time,start,distance,duration){ return distance * ( ( time = time / duration - 1) * time * time + 1 ) + start; },
 };
 
@@ -334,8 +333,8 @@ Animation.prototype.setTarget = function (selector) {
       status: 'pending',
       queue: [],
       timeStart: '',
-      positionStart: { x: '', y: '' },
-      positionEnd: { x: '', y: '' },
+      positionStart: {x: '', y:''},
+      positionEnd: {x: '', y:''},
     };
   }
 };
@@ -373,8 +372,8 @@ Animation.prototype.update =  function (position, selector) {
   target.element.style.top = position.y + 'px';
 
   // position
-  target.positionStart = { x: position.x, y: position.y };
-  target.positionEnd = { x: position.x + target.queue[0].x, y: position.y + target.queue[0].y };
+  target.positionStart = {x: position.x, y: position.y};
+  target.positionEnd = {x: position.x + target.queue[0].x, y: position.y + target.queue[0].y };
   // time
   target.timeStart = null;
 
@@ -383,7 +382,7 @@ Animation.prototype.update =  function (position, selector) {
     if (target.timeStart === null) target.timeStart = time; // 动画开始时间
     timeUsed = time - target.timeStart;
     // 当前动画完成
-    if (timeUsed >= target.queue[0].duration) {
+    if (timeUsed>= target.queue[0].duration) {
       target.queue.shift();
       that.step(target.element, target.positionEnd.x, target.positionEnd.y);
       target.status = 'running';
@@ -417,10 +416,10 @@ Animation.prototype.update =  function (position, selector) {
 };
 
 /**
- * [step dom操作]
+ * [step dom 操作]
  * @param  {[DOM]} element [dom 元素]
- * @param  {[Number]} x        [x坐标]
- * @param  {[Number]} y        [y坐标]
+ * @param  {[Number]} x        [x 坐标]
+ * @param  {[Number]} y        [y 坐标]
  */
 Animation.prototype.step = function (element, x, y) {
   element.style.left = x + 'px';
@@ -429,7 +428,7 @@ Animation.prototype.step = function (element, x, y) {
 
 /**
  * [push 加入动画队列]
- * @param  {[String]} selector [dom选择器]
+ * @param  {[String]} selector [dom 选择器]
  * @param  {[Object]} conf     [位置数据]
  */
 Animation.prototype.push = function (selector, conf) {
@@ -458,36 +457,36 @@ Animation.prototype.clear = function (selector) {
 };
 ```
 
-##### 3）使用`IntersectionObserver`API来替代`scroll`事件实现元素相交检测  
+##### 3）使用 `IntersectionObserver`API 来替代 `scroll` 事件实现元素相交检测
 
-以下是一些需要用到相交检测的场景：  
+以下是一些需要用到相交检测的场景：
   - 图片懒加载 -- 当图片滚动到可见时才进行加载
   - 内容无限滚动 -- 用户滚动到接近滚动容器底部时直接加载更多数据，而无需用户操作翻页，给用户一种网页可以无限滚动的错觉
   - 检测广告的曝光情况——为了计算广告收益，需要知道广告元素的曝光情况
   - 在用户看见某个区域时执行任务、播放视频
 
-&nbsp;&nbsp;&nbsp;&nbsp; 以内容无限滚动为例，古老的相交检测方案就是使用`scroll`事件监听滚动容器，在监听器函数中获取滚动元素的几何属性判断元素是否已经滚动到底部。我们知道`scrollTop`等属性的获取和设置都会导致页面回流，并且如果界面需要绑定多个监听函数到`scroll`事件进行类似操作的时候，页面性能会大打折扣：
+&nbsp;&nbsp;&nbsp;&nbsp; 以内容无限滚动为例，古老的相交检测方案就是使用 `scroll` 事件监听滚动容器，在监听器函数中获取滚动元素的几何属性判断元素是否已经滚动到底部。我们知道 `scrollTop` 等属性的获取和设置都会导致页面回流，并且如果界面需要绑定多个监听函数到 `scroll` 事件进行类似操作的时候，页面性能会大打折扣：
 ```js
 /* 滚动监听 */
   onScroll = () => {
-    const { 
+    const {
       scrollTop, scrollHeight, clientHeight
     } = document.querySelector('#target');
-    
+
     /* 已经滚动到底部 */
     // scrollTop(向上滚动的高度)；clientHeight(容器可视总高度)；scrollHeight(容器的总内容长度)
     if (scrollTop + clientHeight === scrollHeight) { /* do something ... */ }
   }
 ```
-&nbsp;&nbsp;&nbsp;&nbsp; 因此在处理相交检测的问题时我们应该在考虑兼容性的情况下尽可能使用`IntersectionObserver` API，浏览器会自行优化多个元素的相交管理。IntersectionObserver API 允许你配置一个回调函数，当以下情况发生时会被调用：
-  - 每当目标(target)元素与设备视窗或者其他指定元素发生交集的时候执行。设备视窗或者其他元素我们称它为根元素或根(root)。
-  - Observer第一次监听目标元素的时候
+&nbsp;&nbsp;&nbsp;&nbsp; 因此在处理相交检测的问题时我们应该在考虑兼容性的情况下尽可能使用 `IntersectionObserver` API，浏览器会自行优化多个元素的相交管理。IntersectionObserver API 允许你配置一个回调函数，当以下情况发生时会被调用：
+  - 每当目标 (target) 元素与设备视窗或者其他指定元素发生交集的时候执行。设备视窗或者其他元素我们称它为根元素或根(root)。
+  - Observer 第一次监听目标元素的时候
 
-&nbsp;&nbsp;&nbsp;&nbsp; 创建一个 IntersectionObserver对象，并传入相应参数和回调用函数，该回调函数将会在目标(target)元素和根(root)元素的交集大小超过阈值(threshold)规定的大小时候被执行：
+&nbsp;&nbsp;&nbsp;&nbsp; 创建一个 IntersectionObserver 对象，并传入相应参数和回调用函数，该回调函数将会在目标 (target) 元素和根 (root) 元素的交集大小超过阈值 (threshold) 规定的大小时候被执行：
 ```js
 let options = {
     root: document.querySelector('#scrollArea'),
-    rootMargin: '0px', // 指定根(root)元素的外边距
+    rootMargin: '0px', // 指定根 (root) 元素的外边距
     threshold: 1.0, // 表示子元素完全和容器元素相交
 }
 
@@ -495,11 +494,11 @@ const observer = new IntersectionObserver(callback, options);
 observer.observe(document.querySelector('#scrollTarget'));
 ```
 
-&nbsp;&nbsp;&nbsp;&nbsp; **配置项1：** 通常需要关注文档最接近的可滚动祖先元素的交集更改，如果元素不是可滚动元素的后代，则默认为设备视窗。如果要观察相对于根(root)元素的交集，请指定根(root)元素为null。  
+&nbsp;&nbsp;&nbsp;&nbsp; ** 配置项 1：** 通常需要关注文档最接近的可滚动祖先元素的交集更改，如果元素不是可滚动元素的后代，则默认为设备视窗。如果要观察相对于根 (root) 元素的交集，请指定根 (root) 元素为 null。
 
-&nbsp;&nbsp;&nbsp;&nbsp; **配置项2：** 目标(target)元素与根(root)元素之间的交叉度是交叉比(intersection ratio)。这是目标(target)元素相对于根(root)的交集百分比的表示，它的取值在0.0和1.0之间。  
+&nbsp;&nbsp;&nbsp;&nbsp; ** 配置项 2：** 目标 (target) 元素与根 (root) 元素之间的交叉度是交叉比 (intersection ratio)。这是目标(target) 元素相对于根 (root) 的交集百分比的表示，它的取值在 0.0 和 1.0 之间。
 
-&nbsp;&nbsp;&nbsp;&nbsp; **配置项3：** 根(root)元素的外边距。类似于 CSS 中的  margin 属性，比如 "10px 20px 30px 40px" (top, right, bottom, left)。如果有指定root参数，则rootMargin也可以使用百分比来取值。该属性值是用作root元素和target发生交集时候的计算交集的区域范围，使用该属性可以控制root元素每一边的收缩或者扩张。默认值为0。  
+&nbsp;&nbsp;&nbsp;&nbsp; ** 配置项 3：** 根 (root) 元素的外边距。类似于 CSS 中的  margin 属性，比如 "10px 20px 30px 40px" (top, right, bottom, left)。如果有指定 root 参数，则 rootMargin 也可以使用百分比来取值。该属性值是用作 root 元素和 target 发生交集时候的计算交集的区域范围，使用该属性可以控制 root 元素每一边的收缩或者扩张。默认值为 0。
 
 这里我们再以一个实际案例来进行展示，即图片懒加载方案：
 ```js
@@ -523,7 +522,7 @@ observer.observe(document.querySelector('#scrollTarget'));
         item.isIntersecting - true(相交开始)，false(相交结束)
         item.rootBounds - 描述根元素
         item.target - 目标元素
-        item.time - 时间原点(网页在窗口加载完成时的时间点)到交叉被触发的时间的时间戳
+        item.time - 时间原点 (网页在窗口加载完成时的时间点) 到交叉被触发的时间的时间戳
       */
       if (item.isIntersecting) {
         loadImage(item.target);
@@ -535,25 +534,25 @@ observer.observe(document.querySelector('#scrollTarget'));
   imagesToLoad.forEach(function(image) {
     intersectionObserver.observe(image);
   });
-  
+
 })();
 ```
 
-##### 4）使用`Web-Workers`在后台运行CPU密集型任务  
-&nbsp;&nbsp;&nbsp;&nbsp; Web Worker 允许你在后台线程中运行脚本。如果你有一些高强度的任务，可以将它们分配给 Web Worker，这些 WebWorker 可以在不干扰用户界面的情况下运行它们。创建后，Web Worker 可以将消息发布到该代码指定的事件处理程序来与 JavaScript 代码通信，反之亦然。  
+##### 4）使用 `Web-Workers` 在后台运行 CPU 密集型任务
+&nbsp;&nbsp;&nbsp;&nbsp; Web Worker 允许你在后台线程中运行脚本。如果你有一些高强度的任务，可以将它们分配给 Web Worker，这些 WebWorker 可以在不干扰用户界面的情况下运行它们。创建后，Web Worker 可以将消息发布到该代码指定的事件处理程序来与 JavaScript 代码通信，反之亦然。
 
-&nbsp;&nbsp;&nbsp;&nbsp; 一个简单的专用worker示例，我们在主进程代码中创建一个worker实例，然后向实例发送一个数字，worker接受到消息后拿到数字进行一次`斐波那契函数`运算，并发送运算结果给主线程：
+&nbsp;&nbsp;&nbsp;&nbsp; 一个简单的专用 worker 示例，我们在主进程代码中创建一个 worker 实例，然后向实例发送一个数字，worker 接受到消息后拿到数字进行一次 ` 斐波那契函数 ` 运算，并发送运算结果给主线程：
 ```js
 /* -------------- main.js -------------- */
 var myWorker = new Worker("fibonacci.js");
 worker.onmessage = function (e) {
-  console.log('The result of fibonacci.js: ', e.data);
+  console.log('The result of fibonacci.js:', e.data);
 };
 worker.postMessage(100);
 
 /* -------------- fibonacci.js -------------- */
 function fibonacci(n) {
-  if (n > 1)
+  if (n> 1)
     return fibonacci(n - 2) + fibonacci(n - 1);
   return n;
 }
@@ -563,17 +562,17 @@ self.onmessage = function(e) {
 }
 ```
 
-\> Worker的常见类型
+\> Worker 的常见类型
 
-  - **专用Worker：** 一个专用worker仅仅能被生成它的脚本所使用。
-  - **共享Worker：** 一个共享worker可以被多个脚本使用——即使这些脚本正在被不同的window、iframe或者worker访问。
-  - **Service Workers：** 一般作为web应用程序、浏览器和网络（如果可用）之前的代理服务器。它们旨在（除开其他方面）创建有效的离线体验，拦截网络请求，以及根据网络是否可用采取合适的行动并更新驻留在服务器上的资源。他们还将允许访问推送通知和后台同步API。
-  - **Chrome Workers：** 一种仅适用于firefox的worker。如果您正在开发附加组件，希望在扩展程序中使用worker且有在你的worker中访问  js-ctypes 的权限，你可以使用Chrome Workers。
-  - **Audio Workers：** 音频worker使得在web worker上下文中直接完成脚本化音频处理成为可能。
+  - ** 专用 Worker：** 一个专用 worker 仅仅能被生成它的脚本所使用。
+  - ** 共享 Worker：** 一个共享 worker 可以被多个脚本使用——即使这些脚本正在被不同的 window、iframe 或者 worker 访问。
+  - **Service Workers：** 一般作为 web 应用程序、浏览器和网络（如果可用）之前的代理服务器。它们旨在（除开其他方面）创建有效的离线体验，拦截网络请求，以及根据网络是否可用采取合适的行动并更新驻留在服务器上的资源。他们还将允许访问推送通知和后台同步 API。
+  - **Chrome Workers：** 一种仅适用于 firefox 的 worker。如果您正在开发附加组件，希望在扩展程序中使用 worker 且有在你的 worker 中访问  js-ctypes 的权限，你可以使用 Chrome Workers。
+  - **Audio Workers：** 音频 worker 使得在 web worker 上下文中直接完成脚本化音频处理成为可能。
 
-\> Worker中可以使用的函数和接口  
+\> Worker 中可以使用的函数和接口
 
-&nbsp;&nbsp;&nbsp;&nbsp; 你可以在web worker中使用大多数的标准javascript特性，包括：
+&nbsp;&nbsp;&nbsp;&nbsp; 你可以在 web worker 中使用大多数的标准 javascript 特性，包括：
   - Navigator
   - Location(只读)
   - XMLHttpRequest
@@ -581,28 +580,28 @@ self.onmessage = function(e) {
   - setTimeout/setInterval
   - Cache & IndexedDB
 
-\> 关于线程安全  
+\> 关于线程安全
 
-&nbsp;&nbsp;&nbsp;&nbsp; Worker接口会生成真正的操作系统级别的线程，然而，对于 web worker 来说，与其他线程的通信点会被很小心的控制，这意味着你很难引起并发问题。你没有办法去访问非线程安全的组件或者是 DOM，此外你还需要通过序列化对象来与线程交互特定的数据。所以你要是不费点劲儿，还真搞不出错误来。
+&nbsp;&nbsp;&nbsp;&nbsp; Worker 接口会生成真正的操作系统级别的线程，然而，对于 web worker 来说，与其他线程的通信点会被很小心的控制，这意味着你很难引起并发问题。你没有办法去访问非线程安全的组件或者是 DOM，此外你还需要通过序列化对象来与线程交互特定的数据。所以你要是不费点劲儿，还真搞不出错误来。
 
-\> 内容安全策略  
+\> 内容安全策略
 
-&nbsp;&nbsp;&nbsp;&nbsp; 有别于创建它的document对象，worker有它自己的执行上下文。因此普遍来说，worker并不受限于创建它的document（或者父级worker）的内容安全策略。举个例子，假设一个document有如下头部声明：`Content-Security-Policy: script-src 'self'`，这个声明有一部分作用在于禁止脚本代码使用eval()方法。然而，如果脚本代码创建了一个worker，在worker中却是可以使用eval()的。  
+&nbsp;&nbsp;&nbsp;&nbsp; 有别于创建它的 document 对象，worker 有它自己的执行上下文。因此普遍来说，worker 并不受限于创建它的 document（或者父级 worker）的内容安全策略。举个例子，假设一个 document 有如下头部声明：`Content-Security-Policy: script-src 'self'`，这个声明有一部分作用在于禁止脚本代码使用 eval() 方法。然而，如果脚本代码创建了一个 worker，在 worker 中却是可以使用 eval() 的。
 
-&nbsp;&nbsp;&nbsp;&nbsp; 为了给worker指定内容安全策略，必须为发送worker代码的请求本身加上一个`内容安全策略`。有一个例外情况，即worker脚本的使用dataURL或者blob创建的话，worker会继承创建它的document或者worker的内容安全策略。
+&nbsp;&nbsp;&nbsp;&nbsp; 为了给 worker 指定内容安全策略，必须为发送 worker 代码的请求本身加上一个 ` 内容安全策略 `。有一个例外情况，即 worker 脚本的使用 dataURL 或者 blob 创建的话，worker 会继承创建它的 document 或者 worker 的内容安全策略。
 
 \> 一些使用场景
 
-  - 在一些不采用`websockets`架构的应用中使用传统的轮询方式定时获取接口数据以供前端脚本实现一些界面和数据自动更新功能
-  - 光线追踪：光线追踪是一种通过将光线追踪为像素来生成图像的渲染技术。光线追踪使用CPU密集型数学计算来模拟光线路径。这个想法是模拟反射，折射，材质等一些效果。所有这些计算逻辑都可以添加到Web Worker中以避免阻塞UI线程。
-  - 加密：由于对个人和敏感数据的监管日益严格，端到端加密越来越受欢迎。加密可能是一件非常耗时的事情，特别是如果有很多数据必须经常加密（例如在将数据发送到服务器之前）。这是一个非常好的场景，可以使用Web Worker。
-  - 预取数据：为了优化您的网站或Web应用程序并缩短数据加载时间，您可以利用Web Workers预先加载和存储一些数据，以便稍后在需要时使用它。
-  - PWA进式Web应用程序：这种应用程序中即使网络连接不稳定，它们也必须快速加载。这意味着数据必须存储在本地浏览器中，这是IndexDB或类似的API进场的地方。为了在不阻塞UI线程的情况下使用，工作必须在Web Workers中完成。
+  - 在一些不采用 `websockets` 架构的应用中使用传统的轮询方式定时获取接口数据以供前端脚本实现一些界面和数据自动更新功能
+  - 光线追踪：光线追踪是一种通过将光线追踪为像素来生成图像的渲染技术。光线追踪使用 CPU 密集型数学计算来模拟光线路径。这个想法是模拟反射，折射，材质等一些效果。所有这些计算逻辑都可以添加到 Web Worker 中以避免阻塞 UI 线程。
+  - 加密：由于对个人和敏感数据的监管日益严格，端到端加密越来越受欢迎。加密可能是一件非常耗时的事情，特别是如果有很多数据必须经常加密（例如在将数据发送到服务器之前）。这是一个非常好的场景，可以使用 Web Worker。
+  - 预取数据：为了优化您的网站或 Web 应用程序并缩短数据加载时间，您可以利用 Web Workers 预先加载和存储一些数据，以便稍后在需要时使用它。
+  - PWA 进式 Web 应用程序：这种应用程序中即使网络连接不稳定，它们也必须快速加载。这意味着数据必须存储在本地浏览器中，这是 IndexDB 或类似的 API 进场的地方。为了在不阻塞 UI 线程的情况下使用，工作必须在 Web Workers 中完成。
 
-##### 5）使用事件委托  
+##### 5）使用事件委托
 &nbsp;&nbsp;&nbsp;&nbsp; 事件委托就是把一个元素响应事件（click、keydown......）的函数委托到另一个元素。一般来讲，会把一个或者一组元素的事件委托到它的父层或者更外层元素上，真正绑定事件的是外层元素，当事件响应到需要绑定的元素上时，会通过事件冒泡机制从而触发它的外层元素的绑定事件上，然后在外层元素上去执行函数。[=> 一篇不错的参考文章](https://zhuanlan.zhihu.com/p/26536815)
 
-&nbsp;&nbsp;&nbsp;&nbsp; 其实我们熟悉的 React 框架也并不是将 click 事件直接绑定在 dom 上面，而是采用事件冒泡的形式冒泡到 document 上面，这个思路借鉴了事件委托机制。而更老一点的jQuery也是允许我们直接使用它提供的API来进行事件委托：
+&nbsp;&nbsp;&nbsp;&nbsp; 其实我们熟悉的 React 框架也并不是将 click 事件直接绑定在 dom 上面，而是采用事件冒泡的形式冒泡到 document 上面，这个思路借鉴了事件委托机制。而更老一点的 jQuery 也是允许我们直接使用它提供的 API 来进行事件委托：
 ```js
 $('.parent').on('click', 'a', function () {
   console.log('click event on tag a');
@@ -612,16 +611,16 @@ $('.parent').on('click', 'a', function () {
 
 ![event-pop](http://nojsja.gitee.io/static-resources/images/optimization/event-pop.jpg)
 
-\>  事件模型的**三个阶段**：
+\>  事件模型的 ** 三个阶段 **：
 
 - 捕获阶段：在事件冒泡的模型中，捕获阶段不会响应任何事件
 - 目标阶段：目标阶段就是指事件响应到触发事件的最底层元素上
 - 冒泡阶段：冒泡阶段就是事件的触发响应会从最底层目标一层层地向外到最外层（根节点），事件代理即是利用
 件冒泡的机制把里层所需要响应的事件绑定到外层
 
-\> 事件委托的**优点**：
-- 减少内存消耗，提升性能  
-我们不需要再为每个列表元素都绑定一个事件，只需要将事件函数绑定到父级`ul`组件：
+\> 事件委托的 ** 优点 **：
+- 减少内存消耗，提升性能
+我们不需要再为每个列表元素都绑定一个事件，只需要将事件函数绑定到父级 `ul` 组件：
 ```
 <ul id="list">
   <li>item 1</li>
@@ -631,12 +630,12 @@ $('.parent').on('click', 'a', function () {
   <li>item n</li>
 </ul>
 ```
-- 动态绑定事件  
-&nbsp;&nbsp;&nbsp;&nbsp; 比如上述的例子中列表项就几个，我们给每个列表项都绑定了事件。在很多时候，我们需要通过 AJAX 或者用户操作动态的增加或者去除列表项元素，那么在每一次改变的时候都需要重新给新增的元素绑定事件，给即将删去的元素解绑事件。  
+- 动态绑定事件
+&nbsp;&nbsp;&nbsp;&nbsp; 比如上述的例子中列表项就几个，我们给每个列表项都绑定了事件。在很多时候，我们需要通过 AJAX 或者用户操作动态的增加或者去除列表项元素，那么在每一次改变的时候都需要重新给新增的元素绑定事件，给即将删去的元素解绑事件。
 
 &nbsp;&nbsp;&nbsp;&nbsp; 如果用了事件委托就没有这种麻烦了，因为事件是绑定在父层的，和目标元素的增减是没有关系的，执行到目标元素是在真正响应执行事件函数的过程中去匹配的。所以使用事件在动态绑定事件的情况下是可以减少很多重复工作的。
 
-\> 使用`Element.matchesSelector` API简单实现事件委托：
+\> 使用 `Element.matchesSelector` API 简单实现事件委托：
 ```js
 if (!Element.prototype.matches) {
   Element.prototype.matches =
@@ -648,8 +647,8 @@ if (!Element.prototype.matches) {
     function(s) {
       var matches = (this.document || this.ownerDocument).querySelectorAll(s),
         i = matches.length;
-      while (--i >= 0 && matches.item(i) !== this) {}
-      return i > -1;            
+      while (--i>= 0 && matches.item(i) !== this) {}
+      return i > -1;
     };
 }
 
@@ -658,38 +657,38 @@ document.getElementById('list').addEventListener('click', function (e) {
   var event = e || window.event;
   var target = event.target || event.srcElement;
   if (target.matches('li.class-1')) {
-    console.log('the content is: ', target.innerHTML);
+    console.log('the content is:', target.innerHTML);
   }
 });
 ```
 
-\>  事件委托的**局限性**：
+\>  事件委托的 ** 局限性 **：
 - 比如 focus、blur 之类的事件本身没有事件冒泡机制，所以无法委托。
 - mousemove、mouseout 这样的事件，虽然有事件冒泡，但是只能不断通过位置去计算定位，对性能消耗高，因此也是不适合于事件委托的。
 
-##### 6）一些编码方面的优化建议  
-  - 长列表数据的遍历使用`for`循环替代`forEach`。  
+##### 6）一些编码方面的优化建议
+  - 长列表数据的遍历使用 `for` 循环替代 `forEach`。
 
-  &nbsp;&nbsp;&nbsp;&nbsp; for循环能通过关键字`break`实现循环中断，forEach首先性能不如for，其次在处理一些需要条件断开的循环时比较麻烦(可以包裹try catch，然后throw error断开)。如果是数组类型的数据遍历的话，也可以使用`array.every(item => { if (...) return false; else do something; })`来实现条件断开。
+  &nbsp;&nbsp;&nbsp;&nbsp; for 循环能通过关键字 `break` 实现循环中断，forEach 首先性能不如 for，其次在处理一些需要条件断开的循环时比较麻烦 (可以包裹 try catch，然后 throw error 断开)。如果是数组类型的数据遍历的话，也可以使用 `array.every(item => { if (...) return false; else do something; })` 来实现条件断开。
 
-  - 尽量不要在全局作用域声明过多变量  
-  
-  &nbsp;&nbsp;&nbsp;&nbsp; 全局变量存在于全局上下文，全局上下文是作用域链的顶端，当通过作用域链进行变量查找的时候，会延长查找时间。全局执行上下文会一直存在于上下文执行栈，直到程序推出，这样会影响GC垃圾回收。如果局部作用域中定义了同名变量，会遮蔽或者污染全局。  
+  - 尽量不要在全局作用域声明过多变量
 
-  &nbsp;&nbsp;&nbsp;&nbsp; 可以使用单例模式来封装一系列逻辑(运用了闭包的原理)，并通过一个公用的变量名暴露给作用域中的其它模块使用，同时也提高了代码的内聚性：
+  &nbsp;&nbsp;&nbsp;&nbsp; 全局变量存在于全局上下文，全局上下文是作用域链的顶端，当通过作用域链进行变量查找的时候，会延长查找时间。全局执行上下文会一直存在于上下文执行栈，直到程序推出，这样会影响 GC 垃圾回收。如果局部作用域中定义了同名变量，会遮蔽或者污染全局。
+
+  &nbsp;&nbsp;&nbsp;&nbsp; 可以使用单例模式来封装一系列逻辑 (运用了闭包的原理)，并通过一个公用的变量名暴露给作用域中的其它模块使用，同时也提高了代码的内聚性：
   ```js
   /* bad */
   const workData = {};
-  function workA() { /* do something ... */ }
-  function workB() { /* do something ... */ }
-  function workC() { /* do something ... */ }
+  function workA() { /* do something ... */}
+  function workB() { /* do something ... */}
+  function workC() { /* do something ... */}
 
   /* good */
   const work = (function (initParams) {
     const workData = {};
-    function workA() { /* do something ... */ }
-    function workB() { /* do something ... */ }
-    function workC() { /* do something ... */ }
+    function workA() { /* do something ... */}
+    function workB() { /* do something ... */}
+    function workC() { /* do something ... */}
 
     return {
       doWorkA: workA,
@@ -705,9 +704,9 @@ document.getElementById('list').addEventListener('click', function (e) {
   work.doWorkA();
   work.workSeries();
   ```
-  - 使用`switch`和`map`的方式处理需要大量逻辑判断的情况  
-  
-  &nbsp;&nbsp;&nbsp;&nbsp; 连续的`if`判断中在到达目标条件之前需要经过多个条件判断，而map和switch方式都能够通过条件直接找到对应的处理逻辑。
+  - 使用 `switch` 和 `map` 的方式处理需要大量逻辑判断的情况
+
+  &nbsp;&nbsp;&nbsp;&nbsp; 连续的 `if` 判断中在到达目标条件之前需要经过多个条件判断，而 map 和 switch 方式都能够通过条件直接找到对应的处理逻辑。
   ```js
   /* bad */
   if (condition === 'a')
@@ -729,19 +728,19 @@ document.getElementById('list').addEventListener('click', function (e) {
     default:
       break;
   }
-  
+
   const conditionMap = {
-    a: function() { /* do something */ },
-    b: function() { /* do something */ },
+    a: function() { /* do something */},
+    b: function() { /* do something */},
     ...
   };
   conditionMap[condition]();
   ```
-  - 定义构造函数时使用原型声明对象的公用方法  
-  
-  &nbsp;&nbsp;&nbsp;&nbsp; 我们在`new`一个对象时，js所做的就是创建一个空对象，并把此对象作为构造函数的context来执行(参考call调用逻辑)，执行后空对象上就被复制了构造函数的的属性和方法，然后js会把构造函数的原型绑定到对象的`__proto__`属性上，最后构造函数将对象返回给我们使用。  
+  - 定义构造函数时使用原型声明对象的公用方法
 
-  &nbsp;&nbsp;&nbsp;&nbsp; 从以上可以看出，如果我们直接把一些function逻辑写入构造函数的话，在对象创建的时候每个function都会在新对象上被创建一次，消耗额外的资源，且违反了程序复用原则。建议将function放入构造函数的原型，那么对象就能通过原型链查找来使用这个方法，而不是在对象自身上重新复制一个一模一样的逻辑。
+  &nbsp;&nbsp;&nbsp;&nbsp; 我们在 `new` 一个对象时，js 所做的就是创建一个空对象，并把此对象作为构造函数的 context 来执行 (参考 call 调用逻辑)，执行后空对象上就被复制了构造函数的的属性和方法，然后 js 会把构造函数的原型绑定到对象的 `__proto__` 属性上，最后构造函数将对象返回给我们使用。
+
+  &nbsp;&nbsp;&nbsp;&nbsp; 从以上可以看出，如果我们直接把一些 function 逻辑写入构造函数的话，在对象创建的时候每个 function 都会在新对象上被创建一次，消耗额外的资源，且违反了程序复用原则。建议将 function 放入构造函数的原型，那么对象就能通过原型链查找来使用这个方法，而不是在对象自身上重新复制一个一模一样的逻辑。
   ```js
   /* bad */
   function Structure(attr) {
@@ -768,15 +767,15 @@ document.getElementById('list').addEventListener('click', function (e) {
 
 #### 1. 网络层面
 
-##### 1）React jsx/js文件压缩  
+##### 1）React jsx/js 文件压缩
 
-##### 2）使用`React.lazy`和`React.Suspense`实现代码分割和懒加载  
+##### 2）使用 `React.lazy` 和 `React.Suspense` 实现代码分割和懒加载
 
-&nbsp;&nbsp;&nbsp;&nbsp; React开发的应用通常会借用`webpack`这类项目打包器将编写的各个模块代码和引入的依赖库的代码打包成一个单独的JS文件，有些未做CSS样式分离优化的项目甚至连样式表都和JS文件打包在一起，然后在页面加载的HTML文件中需要下载了这一整个JS文件后之后才能进去到页面构建阶段。对于中小型项目还好，简单的首屏优化就能将资源压缩到足够小，但是一些大型项目可能存在很多子项目，如果不对代码做分割然后按子项目模块加载的话，在首屏我们浏览器需要下载整个项目的依赖文件，导致加载时间过长。  
+&nbsp;&nbsp;&nbsp;&nbsp; React 开发的应用通常会借用 `webpack` 这类项目打包器将编写的各个模块代码和引入的依赖库的代码打包成一个单独的 JS 文件，有些未做 CSS 样式分离优化的项目甚至连样式表都和 JS 文件打包在一起，然后在页面加载的 HTML 文件中需要下载了这一整个 JS 文件后之后才能进去到页面构建阶段。对于中小型项目还好，简单的首屏优化就能将资源压缩到足够小，但是一些大型项目可能存在很多子项目，如果不对代码做分割然后按子项目模块加载的话，在首屏我们浏览器需要下载整个项目的依赖文件，导致加载时间过长。
 
-&nbsp;&nbsp;&nbsp;&nbsp; 使用`React.lazy`可以分割子项目代码并根据当前页面路由来动态加载页面依赖文件，尽管并没有减少应用整体的代码体积，但你可以避免加载用户永远不需要的代码，并在初始加载的时候减少所需加载的代码量。
+&nbsp;&nbsp;&nbsp;&nbsp; 使用 `React.lazy` 可以分割子项目代码并根据当前页面路由来动态加载页面依赖文件，尽管并没有减少应用整体的代码体积，但你可以避免加载用户永远不需要的代码，并在初始加载的时候减少所需加载的代码量。
 
-注意：搭配`Babel`进行代码编译时需要安装额外的babel插件以提供动态加载功能：
+注意：搭配 `Babel` 进行代码编译时需要安装额外的 babel 插件以提供动态加载功能：
 ```json
 {
   "presets": [...],
@@ -787,7 +786,7 @@ document.getElementById('list').addEventListener('click', function (e) {
 }
 ```
 
-- React.lazy 函数能让你像渲染常规组件一样处理动态引入的组件：  
+- React.lazy 函数能让你像渲染常规组件一样处理动态引入的组件：
   它接受一个函数，这个函数需要动态调用 import()。它必须返回一个 Promise，该 Promise 需要 resolve 一个 defalut export 的 React 组件。
   ```js
   /* 使用前 */
@@ -798,9 +797,9 @@ document.getElementById('list').addEventListener('click', function (e) {
   /* -------------- OtherComponent.js -------------- */
   export default function() { return (<span>other</span>) };
   ```
-- 使用 React.Suspense 提供一个组件加载时的占位组件：  
+- 使用 React.Suspense 提供一个组件加载时的占位组件：
   ```js
-  import React, { Suspense } from 'react';
+  import React, {Suspense} from 'react';
 
   const OtherComponent = React.lazy(() => import('./OtherComponent'));
 
@@ -833,12 +832,12 @@ document.getElementById('list').addEventListener('click', function (e) {
   class ErrorBoundary extends React.Component {
     constructor(props) {
       super(props);
-      this.state = { hasError: false };
+      this.state = {hasError: false};
     }
 
     static getDerivedStateFromError(error) {
       // 更新 state 使下一次渲染能够显示降级后的 UI
-      return { hasError: true };
+      return {hasError: true};
     }
 
     componentDidCatch(error, errorInfo) {
@@ -854,8 +853,8 @@ document.getElementById('list').addEventListener('click', function (e) {
   ```
 - 代码分割搭配 React-Router 同样适用
   ```js
-  import React, { Suspense, lazy } from 'react';
-  import { BrowserRouter as Router, Route, Switch } from 'react-router-dom';
+  import React, {Suspense, lazy} from 'react';
+  import {BrowserRouter as Router, Route, Switch} from 'react-router-dom';
 
   const Home = lazy(() => import('./routes/Home'));
 
@@ -870,9 +869,9 @@ document.getElementById('list').addEventListener('click', function (e) {
   );
   ```
 
-##### 3）使用`React.Fragment`来避免非必要DOM层级的引入  
+##### 3）使用 `React.Fragment` 来避免非必要 DOM 层级的引入
 
-&nbsp;&nbsp;&nbsp;&nbsp; React通常要求我们在编写一个组件时返回单个container组件包裹的DOM结构，而不允许直接返回多个未包裹的子组件，如果不使用Fragment就必须额外添加一层DOM节点，比如：
+&nbsp;&nbsp;&nbsp;&nbsp; React 通常要求我们在编写一个组件时返回单个 container 组件包裹的 DOM 结构，而不允许直接返回多个未包裹的子组件，如果不使用 Fragment 就必须额外添加一层 DOM 节点，比如：
 ```js
 /* bad */
 class myComponent extends React.Component {
@@ -886,8 +885,8 @@ class myComponent extends React.Component {
   }
 }
 ```
-额外添加的`div`增加了无用的DOM层级，且会造成`table`组件无法正确渲染(tr/td之间多了一层div)。
-使用Fragment后最终所有`td`标签都会被直接添加到上层的`tr`标签下，同时也不会产生多余层级：
+额外添加的 `div` 增加了无用的 DOM 层级，且会造成 `table` 组件无法正确渲染 (tr/td 之间多了一层 div)。
+使用 Fragment 后最终所有 `td` 标签都会被直接添加到上层的 `tr` 标签下，同时也不会产生多余层级：
 ```js
 /* good */
 class myComponent extends React.Component {
@@ -904,9 +903,9 @@ class myComponent extends React.Component {
 
 #### 2. 渲染层面
 
-##### 1）使用`shouldComponentUpdate`避免不必要渲染  
+##### 1）使用 `shouldComponentUpdate` 避免不必要渲染
 
-&nbsp;&nbsp;&nbsp;&nbsp; 当一个React组件内部state或外部传入props更新时，会触发组件的重新渲染，开发者可以在`shouldComponentUpdate`生命周期中通过对比传入的即将被更新的state和props来决定组件是否要重新渲染，函数默认返回true，即触发渲染：
+&nbsp;&nbsp;&nbsp;&nbsp; 当一个 React 组件内部 state 或外部传入 props 更新时，会触发组件的重新渲染，开发者可以在 `shouldComponentUpdate` 生命周期中通过对比传入的即将被更新的 state 和 props 来决定组件是否要重新渲染，函数默认返回 true，即触发渲染：
 ```js
 class CounterButton extends React.Component {
   constructor(props) {
@@ -919,7 +918,7 @@ class CounterButton extends React.Component {
       this.props.color !== nextProps.color ||
       this.state.count !== nextState.count
     ) return true;
-    
+
     return false;
   }
 
@@ -934,11 +933,11 @@ class CounterButton extends React.Component {
   }
 }
 ```
-&nbsp;&nbsp;&nbsp;&nbsp; **适用情况：** 当前组件的props/state并没有发生改变，但是由于其父组件的重新渲染，导致当前组件也被迫进入了重新渲染阶段。这时候为组件添加`shouldComponentUpdate`生命周期函数进行数据比较就显得尤为重要了，特别是当组件的DOM结构复杂、嵌套层次很深，重新渲染的性能消耗昂贵的时候。  
+&nbsp;&nbsp;&nbsp;&nbsp; ** 适用情况：** 当前组件的 props/state 并没有发生改变，但是由于其父组件的重新渲染，导致当前组件也被迫进入了重新渲染阶段。这时候为组件添加 `shouldComponentUpdate` 生命周期函数进行数据比较就显得尤为重要了，特别是当组件的 DOM 结构复杂、嵌套层次很深，重新渲染的性能消耗昂贵的时候。
 
-&nbsp;&nbsp;&nbsp;&nbsp; **滥用情况：** 并非所有组件都需要被添加此生命周期用于数据比较，因为比较这一过程本身也是需要消耗性能的，如果一个组件的state/props本来就会经常更新，那么这个组件久无需使用`scp`进行优化  
+&nbsp;&nbsp;&nbsp;&nbsp; ** 滥用情况：** 并非所有组件都需要被添加此生命周期用于数据比较，因为比较这一过程本身也是需要消耗性能的，如果一个组件的 state/props 本来就会经常更新，那么这个组件久无需使用 `scp` 进行优化
 
-&nbsp;&nbsp;&nbsp;&nbsp; **深比较函数：** 有时候一个组件所需的数据结构很复杂，比如用于展示当前目录层级的资源树组件，其依赖的数据采用树形结构，树形组件一般采用递归的渲染方式，组件的渲染更新操作昂贵。因此我们可以考虑在这类组件的`scp`生命周期中使用深比较函数来对更新前后的属性数据进行一次递归比较，以判断当前资源树组件是否需要进行更新：
+&nbsp;&nbsp;&nbsp;&nbsp; ** 深比较函数：** 有时候一个组件所需的数据结构很复杂，比如用于展示当前目录层级的资源树组件，其依赖的数据采用树形结构，树形组件一般采用递归的渲染方式，组件的渲染更新操作昂贵。因此我们可以考虑在这类组件的 `scp` 生命周期中使用深比较函数来对更新前后的属性数据进行一次递归比较，以判断当前资源树组件是否需要进行更新：
 ```js
 /**
  * [deepComparison 深比较]
@@ -946,8 +945,8 @@ class CounterButton extends React.Component {
  * @return {[type]}      [boolean]
  */
 function deepComparison(data1, data2) {
-  const { hasOwnProperty } = Object.prototype;
-  const { toString } = Object.prototype;
+  const {hasOwnProperty} = Object.prototype;
+  const {toString} = Object.prototype;
 
   // 获取变量类型
   const getType = (d) => {
@@ -999,14 +998,14 @@ function deepComparison(data1, data2) {
   return compare(data1, data2);
 }
 ```
-&nbsp;&nbsp;&nbsp;&nbsp; **最佳实践：** 深比较函数其实消耗的性能很大，特别是当数据层级很深的时候，函数的递归需要创建和销毁多个执行上下文，可能数据比较本身所消耗的性能就多于一次渲染了。因此大部分情况下使用`immutable`不可变数据结构(对象每次更新都返回一个全新的对象，对象的引用发生变化) + `shallowEqual`做浅比较是比较理想的选择。
+&nbsp;&nbsp;&nbsp;&nbsp; ** 最佳实践：** 深比较函数其实消耗的性能很大，特别是当数据层级很深的时候，函数的递归需要创建和销毁多个执行上下文，可能数据比较本身所消耗的性能就多于一次渲染了。因此大部分情况下使用 `immutable` 不可变数据结构 (对象每次更新都返回一个全新的对象，对象的引用发生变化) + `shallowEqual` 做浅比较是比较理想的选择。
 
-##### 2）使用`PureComponnet`实现简单展示组件的自动浅比较  
+##### 2）使用 `PureComponnet` 实现简单展示组件的自动浅比较
 
-&nbsp;&nbsp;&nbsp;&nbsp; 上文提到`scu`生命周期中我们可以通过自定义prop/state比较函数来来控制组件是否需要重新渲染，最后得出了`immutable`不可变数据+shallowEqual是最佳实践。其实React已经给我们提供了一种自带浅比较函数的组件类型即`React.PureComponnet`，它适用于一些数据类型简单的展示组件，当我们给这些React组件传入相同的 props 和 state时，render() 函数会渲染相同的内容，那么在这些情况下使用 React.PureComponent 可提高性能：
+&nbsp;&nbsp;&nbsp;&nbsp; 上文提到 `scu` 生命周期中我们可以通过自定义 prop/state 比较函数来来控制组件是否需要重新渲染，最后得出了 `immutable` 不可变数据 + shallowEqual 是最佳实践。其实 React 已经给我们提供了一种自带浅比较函数的组件类型即 `React.PureComponnet`，它适用于一些数据类型简单的展示组件，当我们给这些 React 组件传入相同的 props 和 state 时，render() 函数会渲染相同的内容，那么在这些情况下使用 React.PureComponent 可提高性能：
 ```js
 class SimpleCounter extends React.PureComponnet {
-  state = { count: 0 }
+  state = {count: 0}
 
   render(props) {
     return (
@@ -1019,11 +1018,11 @@ class SimpleCounter extends React.PureComponnet {
 }
 ```
 
-&nbsp;&nbsp;&nbsp;&nbsp; **适用情况** 和 **滥用情况** 与`scp`生命周期大致相同，不过需要额外注意：  
-- React.PureComponent仅作对象的浅层比较，如果对象中包含复杂的数据结构，则有可能因为无法检查深层的差别，产生错误的比对结果。
-- 我们可以仅仅在props 和 state 较为简单时，才使用 React.PureComponent。
+&nbsp;&nbsp;&nbsp;&nbsp; ** 适用情况 ** 和 ** 滥用情况 ** 与 `scp` 生命周期大致相同，不过需要额外注意：
+- React.PureComponent 仅作对象的浅层比较，如果对象中包含复杂的数据结构，则有可能因为无法检查深层的差别，产生错误的比对结果。
+- 我们可以仅仅在 props 和 state 较为简单时，才使用 React.PureComponent。
 - 另一种处理方式就是在深层数据结构发生变化时调用 forceUpdate() 来确保组件被正确地更新。
-- 当然也可以使用[ immutable.js ](https://immutable-js.github.io/immutable-js/)框架来处理数据结构，可以加快不可变对象加速嵌套数据的比较。一种简单的处理方式是在state数据需要更新时我们手动进行对象引用的更新：
+- 当然也可以使用 [immutable.js](https://immutable-js.github.io/immutable-js/) 框架来处理数据结构，可以加快不可变对象加速嵌套数据的比较。一种简单的处理方式是在 state 数据需要更新时我们手动进行对象引用的更新：
 ```js
 class SimpleDisplay extends React.PureComponent {
   state = {
@@ -1031,31 +1030,31 @@ class SimpleDisplay extends React.PureComponent {
   }
 
   insertItem = () => {
-    const { list } = this.state;
+    const {list} = this.state;
     /* bad - 组件不会更新 */
     list.push('c');
-    this.setState({ list });
+    this.setState({list});
 
-    /* good - 重新更新list变量的引用 */
-    this.setState({ list: [...list, 'c'] });
+    /* good - 重新更新 list 变量的引用 */
+    this.setState({list: [...list, 'c'] });
     // or
-    this.setState({ list: a.concat('c') });
+    this.setState({list: a.concat('c') });
 
   }
 
   render() {
     return (
       <div onClick={this.insertItem}>
-      { this.state.list.join('/') }
+      {this.state.list.join('/') }
       </div>
     )
   }
 }
 ```
 
-##### 3）使用`React.memo`缓存和复用组件的渲染结果  
+##### 3）使用 `React.memo` 缓存和复用组件的渲染结果
 
-&nbsp;&nbsp;&nbsp;&nbsp; `React.memo()`为高阶组组件，如果组件在相同 props 的情况下渲染相同的结果(state的更新依然会导致重新渲染)，那么你可以通过将其包装在 React.memo 中调用，以此通过记忆组件渲染结果的方式来提高组件的性能表现。这意味着在这种情况下，React 将跳过渲染组件的操作并直接复用最近一次渲染的结果。  
+&nbsp;&nbsp;&nbsp;&nbsp; `React.memo()` 为高阶组组件，如果组件在相同 props 的情况下渲染相同的结果 (state 的更新依然会导致重新渲染)，那么你可以通过将其包装在 React.memo 中调用，以此通过记忆组件渲染结果的方式来提高组件的性能表现。这意味着在这种情况下，React 将跳过渲染组件的操作并直接复用最近一次渲染的结果。
 
 &nbsp;&nbsp;&nbsp;&nbsp; 默认情况下其只会对复杂对象做浅层对比，如果你想要控制对比过程，那么请将自定义的比较函数通过第二个参数传入来实现：
 ```js
@@ -1065,32 +1064,32 @@ function MyComponent(props) {
 function areEqual(prevProps, nextProps) {
   /*
   如果把 nextProps 与 prevProps 的比较结果一致则返回 true，
-  否则返回 false，这一点与shoudComponentUpdate表现相反，且areEqual
-  中无法对组件内部state进行比较
+  否则返回 false，这一点与 shoudComponentUpdate 表现相反，且 areEqual
+  中无法对组件内部 state 进行比较
   */
 }
 export default React.memo(MyComponent, areEqual);
 ```
-\>  **不建议**使用`React.memo()`的情况：  
-- 如果组件经常接收不同的属性props对象来更新的话，那么缓存上一次渲染结果这一过程毫无意义，且增加了额外的性能支出。
-- 此方法仅作为性能优化的方式而存在，不要依赖它来“阻止”渲染，因为这会产生 bug。
-  
-\>  **建议**使用`React.memo()`的情况：
-- 一个组件经常会以相同的props更新，比如父组件的其它部分更新导致的当前子组件非必要渲染
-- 常常用于将函数组件转变为具有`memorized`缓存特性的组件，组件内部可以使用`useState`hook进行内部状态管理，对组件的自更新没有影响。
-- 如果一个组件包含大量复杂的`dom`结构，重新渲染的性能消耗较大的话可以考虑使用`React.memo`包裹，避免很多不必要的渲染情况，在props不变的情况下让react能直接复用上次的渲染结果。
+\>  ** 不建议 ** 使用 `React.memo()` 的情况：
+- 如果组件经常接收不同的属性 props 对象来更新的话，那么缓存上一次渲染结果这一过程毫无意义，且增加了额外的性能支出。
+- 此方法仅作为性能优化的方式而存在，不要依赖它来 “阻止” 渲染，因为这会产生 bug。
 
-##### 4）使用Context来共享全局数据  
+\>  ** 建议 ** 使用 `React.memo()` 的情况：
+- 一个组件经常会以相同的 props 更新，比如父组件的其它部分更新导致的当前子组件非必要渲染
+- 常常用于将函数组件转变为具有 `memorized` 缓存特性的组件，组件内部可以使用 `useState`hook 进行内部状态管理，对组件的自更新没有影响。
+- 如果一个组件包含大量复杂的 `dom` 结构，重新渲染的性能消耗较大的话可以考虑使用 `React.memo` 包裹，避免很多不必要的渲染情况，在 props 不变的情况下让 react 能直接复用上次的渲染结果。
 
-&nbsp;&nbsp;&nbsp;&nbsp; Context 设计目的是为了共享那些对于一个组件树而言是“全局”的数据，例如当前认证的用户、主题或首选语言，使用 context, 我们可以避免通过中间元素来逐级传递 props。举个例子，在下面的代码中，我们通过一个 “theme” 属性手动调整一个按钮组件的样式：
+##### 4）使用 Context 来共享全局数据
+
+&nbsp;&nbsp;&nbsp;&nbsp; Context 设计目的是为了共享那些对于一个组件树而言是 “全局” 的数据，例如当前认证的用户、主题或首选语言，使用 context, 我们可以避免通过中间元素来逐级传递 props。举个例子，在下面的代码中，我们通过一个 “theme” 属性手动调整一个按钮组件的样式：
 ```js
 /* -------------- context.js -------------- */
 const theme = {
-  light: { color: 'black', backgroundColor: 'white' },
-  dark: { color: 'white', backgroundColor: 'black' }
+  light: {color: 'black', backgroundColor: 'white'},
+  dark: {color: 'white', backgroundColor: 'black'}
 }
 
-// 为当前的 theme 创建一个 context（“light”为默认值）。
+// 为当前的 theme 创建一个 context（“light” 为默认值）。
 export default const ThemeContext = React.createContext(theme.light);
 
 /* -------------- App.js -------------- */
@@ -1100,8 +1099,8 @@ class App extends React.Component {
   render() {
     // 使用一个 Provider 来将当前的 theme 传递给以下的组件树。
     // 无论多深，任何组件都能读取这个值。
-    // 在这个例子中，我们将 “dark” 作为当前的值传递下去，当Provider不指定当前值时
-    // createContext中传入的默认值会生效
+    // 在这个例子中，我们将 “dark” 作为当前的值传递下去，当 Provider 不指定当前值时
+    // createContext 中传入的默认值会生效
     return (
       <ThemeContext.Provider value="dark">
         <Toolbar />
@@ -1133,22 +1132,22 @@ class ThemedButton extends React.Component {
   }
 }
 ```
-&nbsp;&nbsp;&nbsp;&nbsp; 对于不需要订阅context更新来重新渲染界面的情况，上面的代码示例已经足够应付，如果想要接收动态变化的context值来响应式更新界面，则需要使用`Context.Consumer`API，它内部包裹一个返回dom组件的function函数，传递给函数的 value 值等价于组件树上方离这个 context 最近的 Provider 提供的 value 值。如果没有对应的 Provider，value 参数等同于传递给 createContext() 的 默认值：
+&nbsp;&nbsp;&nbsp;&nbsp; 对于不需要订阅 context 更新来重新渲染界面的情况，上面的代码示例已经足够应付，如果想要接收动态变化的 context 值来响应式更新界面，则需要使用 `Context.Consumer`API，它内部包裹一个返回 dom 组件的 function 函数，传递给函数的 value 值等价于组件树上方离这个 context 最近的 Provider 提供的 value 值。如果没有对应的 Provider，value 参数等同于传递给 createContext() 的 默认值：
 ```js
 ...
 render() {
   return (
     <MyContext.Consumer>
-      { value => <span>{value}</span>/* 基于 context 值进行渲染*/ }
+      {value => <span>{value}</span>/* 基于 context 值进行渲染 */ }
     </MyContext.Consumer>
   )
 }
 ```
-**注意：** Context 主要应用场景在于很多不同层级的组件需要访问同样一些的数据。请谨慎使用，因为这会使得组件的复用性变差。
+** 注意：** Context 主要应用场景在于很多不同层级的组件需要访问同样一些的数据。请谨慎使用，因为这会使得组件的复用性变差。
 
-##### 5）优化组件分割策略来处理长列表组件的渲染  
+##### 5）优化组件分割策略来处理长列表组件的渲染
 
-&nbsp;&nbsp;&nbsp;&nbsp; 有时候我们需要渲染一些拥有很多子组件的的列表组件，比如一个展示当前目录下有哪些文件的`FileList`组件，它包含很多子组件`FileListItem`，如下。想象我们在使用 input 组件获取输入值更新 state 得时候，同时也不可避免的触发了同一个render函数下`FileListItem`组件的重新渲染，即使从父级传入的 files 数组未发生任任何改变：
+&nbsp;&nbsp;&nbsp;&nbsp; 有时候我们需要渲染一些拥有很多子组件的的列表组件，比如一个展示当前目录下有哪些文件的 `FileList` 组件，它包含很多子组件 `FileListItem`，如下。想象我们在使用 input 组件获取输入值更新 state 得时候，同时也不可避免的触发了同一个 render 函数下 `FileListItem` 组件的重新渲染，即使从父级传入的 files 数组未发生任任何改变：
 ```js
 class FileList extends Component {
   state = {
@@ -1175,11 +1174,11 @@ class FileList extends Component {
 
 ```
 
-&nbsp;&nbsp;&nbsp;&nbsp; 这时候我们就可以考虑在设计组件结构时将 `files.map()`这部分的逻辑完全抽离到一个完整的子组件内，否则前面提到的`shouldComponentUpdate`、`PureComponent`、`memo`等优化方法都将无法施展。我们无法直接在`FileList`组件内针对 files 数组未改变的情况下做任何优化，因为 input 组件的每次状态更新都会让 `FileList` 组件的每一个部分都重新渲染一遍，优化的组件结构如下：
+&nbsp;&nbsp;&nbsp;&nbsp; 这时候我们就可以考虑在设计组件结构时将 `files.map()` 这部分的逻辑完全抽离到一个完整的子组件内，否则前面提到的 `shouldComponentUpdate`、`PureComponent`、`memo` 等优化方法都将无法施展。我们无法直接在 `FileList` 组件内针对 files 数组未改变的情况下做任何优化，因为 input 组件的每次状态更新都会让 `FileList` 组件的每一个部分都重新渲染一遍，优化的组件结构如下：
 ```jsx
 /* -------------- FileList.js -------------- */
 class FileList extends Component {
-  state = { value: null }
+  state = {value: null}
 
   onChange = (e) => this.setState({ value: e.target.value })
 
@@ -1194,7 +1193,7 @@ class FileList extends Component {
 }
 
 /* -------------- FileListItemContainer.js -------------- */
-export default React.memo(function({ files }) {
+export default React.memo(function({ files}) {
   return (
     <div>
       {
@@ -1207,17 +1206,17 @@ export default React.memo(function({ files }) {
 });
 ```
 
-##### 6）正确理解组件 key 的使用策略  
+##### 6）正确理解组件 key 的使用策略
 
-&nbsp;&nbsp;&nbsp;&nbsp; 在 React 中，UI 界面的构建是由当前虚拟DOM树状态决定的。前后两个状态就对应两套界面，产生不同的状态之后，然后由 React 通过时间复杂度为O(n)的 dom diff 算法来比较两个界面的区别，最后由React选择性的来更新真实DOM。  
+&nbsp;&nbsp;&nbsp;&nbsp; 在 React 中，UI 界面的构建是由当前虚拟 DOM 树状态决定的。前后两个状态就对应两套界面，产生不同的状态之后，然后由 React 通过时间复杂度为 O(n) 的 dom diff 算法来比较两个界面的区别，最后由 React 选择性的来更新真实 DOM。
 
-&nbsp;&nbsp;&nbsp;&nbsp; 要想理解 React组件 key 的设计理念我们得先简单了解一下React进行DOM树 diff 的过程，我们都知道Js脚本直接操作网页DOM元素时会造成重绘和回流等`低效渲染`，因此React的DOM树 diff 过程针对的是更新前后两颗虚拟的DOM树，虚拟DOM树并不是真实的DOM节点，而是一种描述页面DOM元素结构的树形数据结构，每个虚拟树节点存储了一个DOM元素的属性和样式等信息。React 需要基于这两棵树之间的差别来判断如何有效率的更新 UI 以保证当前 UI 与最新的树保持同步。为了提高树diff的效率，于是 React 在以下两个假设的基础之上提出了一套复杂度为 O(n) 的启发式算法：
-- i. 两个不同类型的元素会产生出不同的树(比如 img 和 span 被看做完全不同的两个节点)
+&nbsp;&nbsp;&nbsp;&nbsp; 要想理解 React 组件 key 的设计理念我们得先简单了解一下 React 进行 DOM 树 diff 的过程，我们都知道 Js 脚本直接操作网页 DOM 元素时会造成重绘和回流等 ` 低效渲染 `，因此 React 的 DOM 树 diff 过程针对的是更新前后两颗虚拟的 DOM 树，虚拟 DOM 树并不是真实的 DOM 节点，而是一种描述页面 DOM 元素结构的树形数据结构，每个虚拟树节点存储了一个 DOM 元素的属性和样式等信息。React 需要基于这两棵树之间的差别来判断如何有效率的更新 UI 以保证当前 UI 与最新的树保持同步。为了提高树 diff 的效率，于是 React 在以下两个假设的基础之上提出了一套复杂度为 O(n) 的启发式算法：
+- i. 两个不同类型的元素会产生出不同的树 (比如 img 和 span 被看做完全不同的两个节点)
 - ii. 开发者可以通过 key 属性来暗示哪些子元素在不同的渲染下能保持稳定
 
-&nbsp;&nbsp;&nbsp;&nbsp; 如果两次渲染同一位置的某个元素的类型改变，例如从 span 变成了 image，那么不用多说这个组件和其子组件都会先被卸载，同时触发卸载前组件的生命周期`componentWillUnmount`，然后将新的DOM节点渲染添加到页面上，新的组件实例将执行 `componentWillMount`、`componentDidMount` 等周期方法，所有跟之前的树所关联的 state 也会被销毁。  
+&nbsp;&nbsp;&nbsp;&nbsp; 如果两次渲染同一位置的某个元素的类型改变，例如从 span 变成了 image，那么不用多说这个组件和其子组件都会先被卸载，同时触发卸载前组件的生命周期 `componentWillUnmount`，然后将新的 DOM 节点渲染添加到页面上，新的组件实例将执行 `componentWillMount`、`componentDidMount` 等周期方法，所有跟之前的树所关联的 state 也会被销毁。
 
-&nbsp;&nbsp;&nbsp;&nbsp; 如果两次渲染组件的类型未改变，React 将更新该组件实例的 props 以跟最新的元素保持一致，并且调用该实例的 `componentWillReceiveProps`、`componentWillUpdate` 以及 `componentDidUpdate` 方法。下一步，React 会调用 `render()`方法并比较其子节点产生的差异。
+&nbsp;&nbsp;&nbsp;&nbsp; 如果两次渲染组件的类型未改变，React 将更新该组件实例的 props 以跟最新的元素保持一致，并且调用该实例的 `componentWillReceiveProps`、`componentWillUpdate` 以及 `componentDidUpdate` 方法。下一步，React 会调用 `render()` 方法并比较其子节点产生的差异。
 
 想象我们在子元素列表末尾新增元素时：
 ```js
@@ -1225,54 +1224,54 @@ export default React.memo(function({ files }) {
   <li>first</li>
   <li>second</li>
 </ul>
-/* 插入third */
+/* 插入 third */
 <ul>
   <li>first</li>
   <li>second</li>
   <li>third</li>
 </ul>
 ```
-React 会先匹配到两颗虚拟DOM树对应的 `first`节点，然后匹配到两棵树的 `second` 节点，最后发现在`second`之后出现了一个全新的节点，dom渲染时就会插入第三个元素 `<li>third</li>` 到`second`之后，其更新开销会比较小。  
+React 会先匹配到两颗虚拟 DOM 树对应的 `first` 节点，然后匹配到两棵树的 `second` 节点，最后发现在 `second` 之后出现了一个全新的节点，dom 渲染时就会插入第三个元素 `<li>third</li>` 到 `second` 之后，其更新开销会比较小。
 
-&nbsp;&nbsp;&nbsp;&nbsp; 但是也有一种比较坏的情况，当我们将`third`节点插入到列表头时，React在 diff 过程中发现所有子节点都发生了变化(整体位置发生了相对改变)，React 不会意识到应该保留`first`和`second`，而是会重建每一个子元素，这种情况会带来性能问题：
+&nbsp;&nbsp;&nbsp;&nbsp; 但是也有一种比较坏的情况，当我们将 `third` 节点插入到列表头时，React 在 diff 过程中发现所有子节点都发生了变化 (整体位置发生了相对改变)，React 不会意识到应该保留 `first` 和 `second`，而是会重建每一个子元素，这种情况会带来性能问题：
 ```jsx
 <ul>
   <li>first</li>
   <li>second</li>
 </ul>
-/* 插入third */
+/* 插入 third */
 <ul>
   <li>third</li>
   <li>first</li>
   <li>second</li>
 </ul>
 ```
-&nbsp;&nbsp;&nbsp;&nbsp; 为了解决以上问题，React 支持 `key` 属性。当子元素拥有 key 时，React 使用 key 来匹配原有树上的子元素以及最新树上的子元素，相当于每个子节点都有了ID，因此能够游刃有余的判断哪些节点需要重建，而哪些节点只需要进行简单的位置移动即可。比如上个例子中React根据组件的Key就能识别我们只需要新建`third`节点并将它插入到first节点之前就能满足要求，而不需要将列表元素都重建一遍。  
+&nbsp;&nbsp;&nbsp;&nbsp; 为了解决以上问题，React 支持 `key` 属性。当子元素拥有 key 时，React 使用 key 来匹配原有树上的子元素以及最新树上的子元素，相当于每个子节点都有了 ID，因此能够游刃有余的判断哪些节点需要重建，而哪些节点只需要进行简单的位置移动即可。比如上个例子中 React 根据组件的 Key 就能识别我们只需要新建 `third` 节点并将它插入到 first 节点之前就能满足要求，而不需要将列表元素都重建一遍。
 
-\> 对组件key的 **误解 和 乱用：**
-- 页面中的所有组件key都不能重复 => 错！我们只需要保证同一列表层级的组件key不重复即可，当有重复key时可能会导致React在多次渲染时结果错乱。
-- 使用`Math.random()`函数来随机产生key值 => 大错特错！这样子做了之后，每次渲染key值都会变化，会引起所有使用了key的组件都会被卸载重建一次，性能优化效果为负。
-- key值只能用于列表组件 => 错！我们可以给任意一个组件添加key值，比如我们想让某个组件在props/state完全没改变的情况下触发其重建更新，那么就可以给予它两个阶段不同的key值。一个例子是用于重置Antd Form表单状态，让其在某些特殊情况下以之前的默认值重新挂载(触发表单更改后其默认值无法恢复)。
+\> 对组件 key 的 ** 误解 和 乱用：**
+- 页面中的所有组件 key 都不能重复 => 错！我们只需要保证同一列表层级的组件 key 不重复即可，当有重复 key 时可能会导致 React 在多次渲染时结果错乱。
+- 使用 `Math.random()` 函数来随机产生 key 值 => 大错特错！这样子做了之后，每次渲染 key 值都会变化，会引起所有使用了 key 的组件都会被卸载重建一次，性能优化效果为负。
+- key 值只能用于列表组件 => 错！我们可以给任意一个组件添加 key 值，比如我们想让某个组件在 props/state 完全没改变的情况下触发其重建更新，那么就可以给予它两个阶段不同的 key 值。一个例子是用于重置 Antd Form 表单状态，让其在某些特殊情况下以之前的默认值重新挂载 (触发表单更改后其默认值无法恢复)。
 
-##### 7）使用虚拟化渲染技术来优化超长列表组件  
+##### 7）使用虚拟化渲染技术来优化超长列表组件
 
-&nbsp;&nbsp;&nbsp;&nbsp; 有时候项目中要求我们在不使用分页的情况下渲染一个超长的列表组件，比如一个文件上传列表里面的每个文件上传任务，我们同时添加成千上万个上传任务，然后并行上传几个，操作者同时也能通过列表的上下滚动来查看每个上传任务的状态。这种变态数量级的界面元素展示+本就不简单的上传流程控制，必然导致我们的界面会有一定程度的卡顿。  
+&nbsp;&nbsp;&nbsp;&nbsp; 有时候项目中要求我们在不使用分页的情况下渲染一个超长的列表组件，比如一个文件上传列表里面的每个文件上传任务，我们同时添加成千上万个上传任务，然后并行上传几个，操作者同时也能通过列表的上下滚动来查看每个上传任务的状态。这种变态数量级的界面元素展示 + 本就不简单的上传流程控制，必然导致我们的界面会有一定程度的卡顿。
 
-&nbsp;&nbsp;&nbsp;&nbsp; 一个解决方案就是可以采用懒加载技术来实现当滚动到任务列表底部时加载其余的一小部分任务列表元素，这样虽然解决了初次渲染时耗费时间过长的问题，不过随着滚动到底部加载的任务条目越来越多，界面的渲染负载也会越来越大。这种情况下采用虚拟化滚动技术来进行优化就显得很有必要了。  
+&nbsp;&nbsp;&nbsp;&nbsp; 一个解决方案就是可以采用懒加载技术来实现当滚动到任务列表底部时加载其余的一小部分任务列表元素，这样虽然解决了初次渲染时耗费时间过长的问题，不过随着滚动到底部加载的任务条目越来越多，界面的渲染负载也会越来越大。这种情况下采用虚拟化滚动技术来进行优化就显得很有必要了。
 
 &nbsp;&nbsp;&nbsp;&nbsp; 虚拟列表是一种根据滚动容器元素的可视区域高度来渲染长列表数据中某一个部分数据的技术。这里需要简单了解一下其原理，如果要直接使用的话可以考虑这两个热门的虚拟滚动库 [react-window](https://react-window.now.sh/) 和 [react-virtualized](https://bvaughn.github.io/react-virtualized/)。
 
-\> 首先清楚虚拟化滚动技术中的几个**关键元素**：
+\> 首先清楚虚拟化滚动技术中的几个 ** 关键元素 **：
 
 ![vitual-scroll](http://nojsja.gitee.io/static-resources/images/optimization/vitual-scroll.png)
 
 - i. 滚动容器元素：一般情况下，滚动容器元素是 window 对象。然而，我们可以通过布局的方式，在某个页面中任意指定一个或者多个滚动容器元素。只要某个元素能在内部产生横向或者纵向的滚动，那这个元素就是滚动容器元素。
-- ii. 可滚动区域：滚动容器元素的内部内容区域。假设有 100 条数据，每个列表项的高度是 50，那么可滚动的区域的高度就是 100 * 50。可滚动区域当前的具体高度值一般可以通过(滚动容器)元素的 scrollHeight 属性获取。用户可以通过滚动来改变列表在可视区域的显示部分。
-- iii. 可视区域：滚动容器元素的视觉可见区域。如果容器元素是 window 对象，可视区域就是浏览器的视口大小(即视觉视口)；如果容器元素是某个 div 元素，其高度是 300，右侧有纵向滚动条可以滚动，那么视觉可见的区域就是可视区域。
+- ii. 可滚动区域：滚动容器元素的内部内容区域。假设有 100 条数据，每个列表项的高度是 50，那么可滚动的区域的高度就是 100 * 50。可滚动区域当前的具体高度值一般可以通过 (滚动容器) 元素的 scrollHeight 属性获取。用户可以通过滚动来改变列表在可视区域的显示部分。
+- iii. 可视区域：滚动容器元素的视觉可见区域。如果容器元素是 window 对象，可视区域就是浏览器的视口大小 (即视觉视口)；如果容器元素是某个 div 元素，其高度是 300，右侧有纵向滚动条可以滚动，那么视觉可见的区域就是可视区域。
 
 \> 如何在只渲染少量可视元素的情况下，还能让滚动条的长度和位置显示正确呢：
-- i. 首先明确滚动容器内容的总高度=`列表元素高度 * 列表元素总个数`，容器可视高度固定，通过设置css `overflow: scroll` 就能显示滚动条。
-- ii. 滚动容器的可视高度固定，那么可视区域能显示的列表元素个数=`容器可视高度/列表元素高度`，这些少量的元素不足以撑起容器元素的进行滚动，滚动容器滚动条高度仍然会为0。因此我们通过设置容器元素`paddingTop+paddingBottom`(startOffset+endOffset)来让容器元素内容总高度正确显示，这里`padding+可视高度=容器内容总高度`。
+- i. 首先明确滚动容器内容的总高度 =` 列表元素高度 * 列表元素总个数 `，容器可视高度固定，通过设置 css `overflow: scroll` 就能显示滚动条。
+- ii. 滚动容器的可视高度固定，那么可视区域能显示的列表元素个数 =` 容器可视高度 / 列表元素高度 `，这些少量的元素不足以撑起容器元素的进行滚动，滚动容器滚动条高度仍然会为 0。因此我们通过设置容器元素 `paddingTop+paddingBottom`(startOffset+endOffset) 来让容器元素内容总高度正确显示，这里 `padding + 可视高度 = 容器内容总高度 `。
 ```jsx
 ...
 render() {
@@ -1284,17 +1283,17 @@ render() {
       }}
       className='wrapper'
     >
-      { /* render list */ }
+      {/* render list */}
     </div>
   )
 }
 ```
-- iii. 容器能正确显示滚动高度了，那么如何让我们在滚动的时候能知道应该显示哪些元素呢？一个巧妙的方法就是根据当前滚动条的`scrollTop`(滚动容器的固有属性：表示能够向上滚动的高度值，可以直接获取)计算首个应该渲染的元素的索引`startIndex`以及最后需要渲染的元素的索引`endIndex`，然后再根据两个索引分别计算 paddingTop 和 paddingBottom 即可：
+- iii. 容器能正确显示滚动高度了，那么如何让我们在滚动的时候能知道应该显示哪些元素呢？一个巧妙的方法就是根据当前滚动条的 `scrollTop`(滚动容器的固有属性：表示能够向上滚动的高度值，可以直接获取) 计算首个应该渲染的元素的索引 `startIndex` 以及最后需要渲染的元素的索引 `endIndex`，然后再根据两个索引分别计算 paddingTop 和 paddingBottom 即可：
   - startIndex = Math.ceil(scrollTop / 滚动容器元素总高度)
   - 可视元素个数 = 可视区域高度 / 滚动元素高度
   - endIndex = startIndex + 可视区域元素个数
-  - 当前渲染元素renderItems = data.slice(startIndex, endIndex)
+  - 当前渲染元素 renderItems = data.slice(startIndex, endIndex)
   - paddingTop = startIndex * 滚动元素高度
   - paddingBottom = (this.data.length - this.endIndex - 1) * 滚动元素高度
 
-&nbsp;&nbsp;&nbsp;&nbsp; 以上为虚拟化滚动简化的描述模型，实际实现时还要考虑：缓存已经加载的列表元素的位置信息、列表元素的高度是否可变、增加缓冲元素来减少白屏情况(缓冲元素就是预加载的几个接近视口可显示元素的上下部分其它元素)、容器元素resize后的处理等。处理情况还是比较复杂，使用成熟的库处理而不是自己造轮子是比较好的方案，不过个中原理还是要理解。
+&nbsp;&nbsp;&nbsp;&nbsp; 以上为虚拟化滚动简化的描述模型，实际实现时还要考虑：缓存已经加载的列表元素的位置信息、列表元素的高度是否可变、增加缓冲元素来减少白屏情况 (缓冲元素就是预加载的几个接近视口可显示元素的上下部分其它元素)、容器元素 resize 后的处理等。处理情况还是比较复杂，使用成熟的库处理而不是自己造轮子是比较好的方案，不过个中原理还是要理解。
