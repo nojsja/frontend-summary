@@ -49,7 +49,7 @@ let message = {text: expectedTextButGotJSON};
 
 高阶组件（HOC）是 React 中用于复用组件逻辑的一种高级技巧。HOC 自身不是 React API 的一部分，它是一种基于 React 的组合特性而形成的设计模式。
 
-![](https://nojsja.gitee.io/static-resources/images/react/HOC.png)
+![](https://nojsja.github.io/static-resources/images/react/HOC.png)
 
 ### 一、高阶组件解决了什么问题？
 
@@ -62,7 +62,7 @@ let message = {text: expectedTextButGotJSON};
 
 #### 1. mixin 模式
 
-![](https://nojsja.gitee.io/static-resources/images/react/mixin.png)
+![](https://nojsja.github.io/static-resources/images/react/mixin.png)
 
 老版本的 mixin，在 react 初期提供一种组合方法。通过 React.createClass 加入 mixins 属性，如下：
 
@@ -128,7 +128,7 @@ class Index extends React.Component{
 
 #### 2. extends 模式
 
-![](https://nojsja.gitee.io/static-resources/images/react/extend.png)
+![](https://nojsja.github.io/static-resources/images/react/extend.png)
 
 在 class 组件盛行之后，我们可以通过继承的方式进一步的强化我们的组件。这种模式的好处在于，可以封装基础功能组件，然后根据需要去 extends 我们的基础组件，按需强化组件，但是值得注意的是，必须要对基础组件有足够的掌握，否则会造成一些列意想不到的情况发生。
 
@@ -169,7 +169,7 @@ class Index extends Base{
 
 #### 3. HOC 模式
 
-![](https://nojsja.gitee.io/static-resources/images/react/HO.png)
+![](https://nojsja.github.io/static-resources/images/react/HO.png)
 
 HOC 即 React 高阶组件，是一种将组件逻辑抽象成一个函数的方式。函数接收组件作为参数，返回一个新的组件，新组件可以拥有组件的所有特性，并且可以自定义自己的属性和方法。
 
@@ -202,7 +202,7 @@ class Index extends React.Component{
 
 #### 4. 自定义 hooks 模式
 
-![](https://nojsja.gitee.io/static-resources/images/react/customHooks.png)
+![](https://nojsja.github.io/static-resources/images/react/customHooks.png)
 
 hooks 的诞生，一大部分原因是解决无状态组件没有 state 和逻辑难以复用问题。hooks 可以将一段逻辑封装起来，做到开箱即用。
 
@@ -470,7 +470,7 @@ export default ()=>{
 ## ➣ hooks 为什么不能放在条件判断里？
 以 setState 为例，在 react 内部，每个组件 (Fiber) 的 hooks 都是以链表的形式存在 memorizedState 属性中：
 
-![](http://nojsja.gitee.io/static-resources/images/interview/hooks.png)
+![](http://nojsja.github.io/static-resources/images/interview/hooks.png)
 
 update 阶段，每次调用 useState，链表就会执行 next 向后移动一步。如果将 useState 写在条件判断中，假设条件判断不成立，没有执行里面的 useState 方法，会导致接下来所有的 useState 的取值出现偏移，从而导致异常发生。
 
@@ -548,13 +548,13 @@ useLayoutEffect，因为从源码中调用的位置来看，useLayoutEffect的 c
 
 这样只需要对树进行一次遍历，便能完成整个 DOM 树的比较。
 
-![](http://nojsja.gitee.io/static-resources/images/interview/diff1.png)
+![](http://nojsja.github.io/static-resources/images/interview/diff1.png)
 
 这就意味着，如果 dom 节点发生了跨层级移动，react 会删除旧的节点，生成新的节点，而不会复用。
 
 2、component diff：如果不是同一类型的组件，会删除旧的组件，创建新的组件
 
-![](http://nojsja.gitee.io/static-resources/images/interview/diff2.png)
+![](http://nojsja.github.io/static-resources/images/interview/diff2.png)
 
 3、element diff：对于同一层级的一组子节点，需要通过唯一 id 进行来区分
 
@@ -637,7 +637,7 @@ function createHistory(options={}) {
 
 ### 二、整体流程
 
-![](https://nojsja.gitee.io/static-resources/images/react/react-router-all.png)
+![](https://nojsja.github.io/static-resources/images/react/react-router-all.png)
 
 单页面应用路由实现原理是，切换 url，监听 url 变化，从而渲染不同的页面组件，主要的方式有 history 模式和 hash 模式。
 
@@ -702,19 +702,19 @@ window.addEventListener('hashchange',function(e){
 
 一句话：实现 URL 与 UI 界面的同步。其中在 react-router 中，URL 对应 Location 对象，而 UI 是由 react components 来决定的，这样就转变成 location 与 components 之间的同步问题。
 
-![](https://nojsja.gitee.io/static-resources/images/react/react-router.png)
+![](https://nojsja.github.io/static-resources/images/react/react-router.png)
 
 #### 1. 组件层面描述具体实现
 
 在 react-router 中最主要的 component 是 Router RouterContext Link，history 库起到了中间桥梁的作用。
 
-![](https://nojsja.gitee.io/static-resources/images/react/react-router-process1.png)
+![](https://nojsja.github.io/static-resources/images/react/react-router-process1.png)
 
 #### 2. API 层面描述具体实现
 
 为了简单说明，只描述使用 browserHistory 的实现，hashHistory 的实现过程是类似的，就不在说明。
 
-![](https://nojsja.gitee.io/static-resources/images/react/react-router-process2.png)
+![](https://nojsja.github.io/static-resources/images/react/react-router-process2.png)
 
 ## ➣ React-Router V4 版本路由中心化声明，分布式渲染实现
 

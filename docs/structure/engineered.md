@@ -903,7 +903,7 @@ Next.js 具有同类框架中最佳的 “开发人员体验” 和许多内置�
 
 MVC 是 Model View Controller 的简写。MVC 架构下，请求会先发送给 Controller，由它调度 Model 层的 Service 来完成业务逻辑，然后返回对应的 View。
 
-![](https://nojsja.gitee.io/static-resources/images/arch/mvc.png)
+![](https://nojsja.github.io/static-resources/images/arch/mvc.png)
 
 ### 洋葱模型
 
@@ -913,9 +913,9 @@ Node.js 提供了 http 模块用于监听端口、处理 http 请求，返回响
 
 这一层做的事情就是给 request 和 response 添加了很多处理请求响应的方法，满足各种场景的需求，并且对路由做了处理，而且，也提供了中间件的调用链便于复用一些代码，这种中间件的调用链叫做洋葱模型。
 
-![](https://nojsja.gitee.io/static-resources/images/arch/onion1.png)
+![](https://nojsja.github.io/static-resources/images/arch/onion1.png)
 
-![](https://nojsja.gitee.io/static-resources/images/arch/onion2.png)
+![](https://nojsja.github.io/static-resources/images/arch/onion2.png)
 
 洋葱模型下在一定程度上解决了一些业务处理和职责分离问题，但这没有解决架构问题：当模块多了怎么办，怎么管理？如何划分 Model、View、Controller？一些分布于 Controller 之间的通用逻辑比如鉴权和限流等怎么组织和处理？Nest.js 的诞生就是为了解决这些问题。
 
@@ -949,13 +949,13 @@ IOC 架构的好处是不需要手动创建对象和根据依赖关系传入不�
 
 ### AOP 面向切面编程
 
-![](https://nojsja.gitee.io/static-resources/images/arch/AOP.png)
+![](https://nojsja.github.io/static-resources/images/arch/AOP.png)
 
 AOP 就是使用上图所示的 “横切” 技术，AOP 把软件系统分为两个部分：__核心关注点__ 和 __横切关注点__。业务处理的主要流程是核心关注点，与之关系不大的部分是横切关注点。横切关注点的一个特点是，经常发生在核心关注点的多处，而各处都基本相似。比如权限认证、日志、事务处理。Aop 的作用在于分离系统中的各种关注点，将核心关注点和横切关注点分离开来。AOP 的核心思想就是 “`将应用程序中的业务逻辑同对其提供支持的通用服务进行分离`”。
 
 一个请求过来，可能会经过 Controller（控制器）、Service（服务）、Repository（数据库访问） 的逻辑，这些可以称为系统的核心逻辑也就是核心关注。其它比如：日志、验证、入参转换、错误捕获处理等这些通用处理逻辑可能分布在各个核心关注点的业务过程前或后，但是如果直接加入到业务代码中不做分离的话又会造成功能代码冗余，也不利于维护和更改。因此需要将其抽离为横切关注点，抽离为一个或多个公共处理切面。
 
-![](https://nojsja.gitee.io/static-resources/images/arch/MVC_AOP.png)
+![](https://nojsja.github.io/static-resources/images/arch/MVC_AOP.png)
 
 而 Nest.js 实现 AOP 的方式更多，一共有五种，包括 Middleware、Guard、Pipe、Inteceptor、ExceptionFilter。
 

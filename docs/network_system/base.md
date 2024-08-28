@@ -144,7 +144,7 @@ TCP 协议是面向连接的，是一种可靠的传输协议。客户端和服�
 
 __简述三次握手的过程：__
 
-![](https://nojsja.gitee.io/static-resources/images/http/tcp-shakehands.png)
+![](https://nojsja.github.io/static-resources/images/http/tcp-shakehands.png)
 
 > SYN 这个标志位只有在 TCP 建立连接时才会被置 1 , 握手完成后 SYN 标志位被置 0。
 
@@ -169,7 +169,7 @@ __简述四次挥手的过程：__
 
 __TCP 协议的包头结构__
 
-![](https://nojsja.gitee.io/static-resources/images/interview/tcp-protocol.png)
+![](https://nojsja.github.io/static-resources/images/interview/tcp-protocol.png)
 
 源端口 16 位；目标端口 16 位；序列号 32 位；回应序号 32 位；TCP 头长度 4 位；reserved 保留 6 位；控制代码 6 位；窗口大小 16 位；偏移量 16 位；校验和 16 位；选项 32 位 (可选)；
 
@@ -212,7 +212,7 @@ __不可靠性__
 
 __头部开销小，传输数据报文时是很高效的__
 
-![](https://nojsja.gitee.io/static-resources/images/interview/udp-protocol.jpg)
+![](https://nojsja.github.io/static-resources/images/interview/udp-protocol.jpg)
 
 UDP 头部包含了以下几个数据：
 
@@ -240,11 +240,11 @@ UDP 头部包含了以下几个数据：
 
 &nbsp;&nbsp;&nbsp;&nbsp; 这里先看张大家最熟悉的 Devtools 网络图：
 
-![](http://nojsja.gitee.io/static-resources/images/http/network.png)
+![](http://nojsja.github.io/static-resources/images/http/network.png)
 
 图中青色、绿色和橙色圈出的部分分别是来自内存 (memory 缓存)、磁盘 (disk 缓存) 和 Http 请求拿到的数据 (非缓存)，还有一种返回码 304 的请求也是从缓存 (memory/disk) 中获取数据。304 跟 memory/disk 缓存的区别是：在浏览器判断资源已经过期的情况下会去服务器查询资源是否更新，如果资源没更新则返回 304 码，浏览器收到 304 码就会更新资源的过期时间并直接从之前 disk/memory 缓存中拿到当前资源，换言之如果资源没过期，那么浏览器就会跳过向服务器校验资源这一步并直接去拿 memory/disk 缓存获取。
 
-![](http://nojsja.gitee.io/static-resources/images/http/http_cache2.png)
+![](http://nojsja.github.io/static-resources/images/http/http_cache2.png)
 
 大致流程如下：
 
@@ -281,7 +281,7 @@ UDP 头部包含了以下几个数据：
 
 &nbsp;&nbsp;&nbsp;&nbsp; HTTP 缓存根据工作方式分为 ` 强缓存 ` 和 ` 协商缓存 `，浏览器首先会判断 ` 强缓存 ` 是否命中，命中失败才会尝试进行 ` 协商缓存 `。
 
-![](http://nojsja.gitee.io/static-resources/images/http/http_cache.png)
+![](http://nojsja.github.io/static-resources/images/http/http_cache.png)
 
 1）强缓存
 

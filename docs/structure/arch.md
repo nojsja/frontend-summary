@@ -215,7 +215,7 @@ div[data-qiankun-react16] .app-main {
 - `onGlobalStateChange`：注册 `观察者` 函数 - 响应 `globalState` 变化，在 `globalState` 发生改变时触发该 `观察者` 函数。
 - `offGlobalStateChange`：取消 `观察者` 函数 - 该实例不再响应 `globalState` 变化。
 
-![](https://nojsja.gitee.io/static-resources/images/arch/micro-frontend-actions.png)
+![](https://nojsja.github.io/static-resources/images/arch/micro-frontend-actions.png)
 
 我们从上图可以看出，我们可以先注册 `观察者` 到观察者池中，然后通过修改 `globalState` 可以触发所有的 `观察者` 函数，从而达到组件间通信的效果。
 
@@ -427,7 +427,7 @@ webpack 就像一条生产线，要经过一系列处理流程后才能将源文
 
 webpack 通过 Tapable 来组织这条复杂的生产线。 webpack 在运行过程中会广播事件，插件只需要监听它所关心的事件，就能加入到这条生产线中，去改变生产线的运作。 webpack 的事件流机制保证了插件的有序性，使得整个系统扩展性很好。
 
-![](https://nojsja.gitee.io/static-resources/images/webpack/webpack-process.png)
+![](https://nojsja.github.io/static-resources/images/webpack/webpack-process.png)
 
 Webpack 的运行流程是一个串行的过程，从启动到结束会依次执行以下流程 :
 
@@ -473,7 +473,7 @@ Webpack 的运行流程是一个串行的过程，从启动到结束会依次执
 
 #### 初始化阶段
 
-![](https://nojsja.gitee.io/static-resources/images/webpack/webpack-initial.png)
+![](https://nojsja.github.io/static-resources/images/webpack/webpack-initial.png)
 
 解释：
 
@@ -528,7 +528,7 @@ Webpack 架构很灵活，但代价是牺牲了源码的直观性，比如说上
 
 构建阶段从 entry 开始递归解析资源与资源的依赖，在 compilation 对象内逐步构建出 module 集合以及 module 之间的依赖关系，核心流程：
 
-![](https://nojsja.gitee.io/static-resources/images/webpack/webpack-build.png)
+![](https://nojsja.github.io/static-resources/images/webpack/webpack-build.png)
 
 构建阶段从入口文件开始：
 
@@ -574,7 +574,7 @@ compile(callback) {
 
 `seal` 原意密封、上锁，我个人理解在 webpack 语境下接近于 **“将模块装进蜜罐”** 。`seal` 函数主要完成从 `module` 到 `chunks` 的转化，核心流程：
 
-![](https://nojsja.gitee.io/static-resources/images/webpack/webpack-output.png)
+![](https://nojsja.github.io/static-resources/images/webpack/webpack-output.png)
 
 简单梳理一下：
 
@@ -678,11 +678,11 @@ const {
 
 触发时机与 webpack 工作过程紧密相关，大体上从启动到结束，`compiler` 对象逐次触发如下钩子：
 
-![](https://nojsja.gitee.io/static-resources/images/webpack/webpack-compiler.png)
+![](https://nojsja.github.io/static-resources/images/webpack/webpack-compiler.png)
 
 而 `compilation` 对象逐次触发：
 
-![](https://nojsja.gitee.io/static-resources/images/webpack/webpack-compilation.png)
+![](https://nojsja.github.io/static-resources/images/webpack/webpack-compilation.png)
 
 所以，理解清楚前面说的 webpack 工作的主流程，基本上就可以捋清楚“什么时候会触发什么钩子”。
 
@@ -693,7 +693,7 @@ const {
 
 关于编写 loader，可以查看：[官网](https://www.webpackjs.com/contribute/writing-a-loader/)
 
-![](https://nojsja.gitee.io/static-resources/images/webpack/webpack-loader.png)
+![](https://nojsja.github.io/static-resources/images/webpack/webpack-loader.png)
 
 
 ## ➣ Webpack Plugin 和 Loader 编写

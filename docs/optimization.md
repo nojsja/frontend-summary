@@ -4,7 +4,7 @@ title: ● 性能优化
 description: optimization 的描述
 ---
 
-![](http://nojsja.gitee.io/static-resources/images/interview/frontend-optimization.png)
+![](http://nojsja.github.io/static-resources/images/interview/frontend-optimization.png)
 
 &nbsp;&nbsp;&nbsp;&nbsp; 前端性能优化是个很大的概念，涉及HTTP协议、浏览器渲染原理、操作系统和网络、前端工程化和Js底层原理等各个方面。通过建立思维导图可以让我们很好的将各个优化方面组织和联系起来。  
 &nbsp;&nbsp;&nbsp;&nbsp; 按照优化原理的不同则可以将其分为`网络层面优化`和`渲染层面`的优化，网络层面的优化更多体现在资源加载时的优化，而渲染层的优化更多体现在运行时优化。  

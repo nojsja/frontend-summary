@@ -130,7 +130,7 @@ box-sizing属性可以为三个值之一：
 
 - 1）布局视口（layout viewport）
 
-![](http://nojsja.gitee.io/static-resources/images/interview/layout_viewport.png)
+![](http://nojsja.github.io/static-resources/images/interview/layout_viewport.png)
 
 一般移动设备的浏览器都默认设置了一个 viewport 元标签，定义一个虚拟的布局视口（layout viewport），用于解决早期的页面在手机上显示的问题。iOS, Android 基本都将这个视口分辨率设置为 980px，所以 PC 上的网页基本能在手机上呈现，只不过元素看上去很小，一般默认可以通过手动缩放网页。
 
@@ -138,7 +138,7 @@ box-sizing属性可以为三个值之一：
 
 - 2）视觉视口（visual viewport）
 
-![](http://nojsja.gitee.io/static-resources/images/interview/visual_viewport.png)
+![](http://nojsja.github.io/static-resources/images/interview/visual_viewport.png)
 
 视觉视口是用户当前看到的区域，用户可以通过缩放操作视觉视口，同时不会影响布局视口。
 

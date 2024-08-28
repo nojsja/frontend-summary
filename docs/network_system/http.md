@@ -178,7 +178,7 @@ HTTP 长轮询是人为编程实现的一种通信方式，它在短轮询的基
 
 `HTTPS` 是超文本传输安全协议，即`HTTP + SSL/TLS`。说白了，就是一个加强版的HTTP
 
-![](https://nojsja.gitee.io/static-resources/images/interview/http-ssl.png)
+![](https://nojsja.github.io/static-resources/images/interview/http-ssl.png)
 
 HTTP本文开始讲了，所以我们要理解HTTPS的精华，就要先弄清楚这个`SSL/TLS`了
 
@@ -192,7 +192,7 @@ TLS是SSL的升级版，而且TLS1.2版本以下都已废弃，目前主要用�
 
 随便拿出一个加密套件举例，如：**RSA-PSK-AES128-GCM-SHA256**，就是长这样，代表什么意思呢，我们看图
 
-![](https://nojsja.gitee.io/static-resources/images/interview/http-suit.png)
+![](https://nojsja.github.io/static-resources/images/interview/http-suit.png)
 
 - **`RSA`**：表示握手时用RSA算法交换密钥
 - **`PSK`**：表示使用PSK算法签名

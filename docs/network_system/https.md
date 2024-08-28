@@ -6,7 +6,7 @@ description: 网络协议
 
 ## ➣ HTTPS 概念
 
-![](https://nojsja.gitee.io/static-resources/images/interview/http-ssl.png)
+![](https://nojsja.github.io/static-resources/images/interview/http-ssl.png)
 
 HTTPS 是身披 SSL 外壳的 HTTP HTTPS 并非是应用层的一种新协议。只是 HTTP 通信接口部分用 SSL（Secure Socket Layer）和 TLS（Transport Layer Security）协议代替而已。
 
@@ -22,7 +22,7 @@ HTTPS 具有三个特性：
 
 ## ➣ HTTPS 数字证书业务流程
 
-![](https://nojsja.gitee.io/static-resources/images/interview/https-process.jpg)
+![](https://nojsja.github.io/static-resources/images/interview/https-process.jpg)
 
 __1. 数字证书认证机构的业务流程__
 

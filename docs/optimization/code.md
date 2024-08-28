@@ -90,7 +90,7 @@ module.exports = {
 ##### 5）使用雪碧图
 &nbsp;&nbsp;&nbsp;&nbsp; 使用雪碧图本质上优化了 HTTP 请求的数量，将众多图片拼贴为一张作为背景图片引用，然后我们给一个元素设置固定大小，让它的背景图片位置进行变化，只截取大图一部分进行显示，就好像显示出了不同的图片，这就是雪碧图的原理。
 
-![](http://nojsja.gitee.io/static-resources/images/optimization/sprite.png)
+![](http://nojsja.github.io/static-resources/images/optimization/sprite.png)
 
 ```css
 .container {
@@ -297,7 +297,7 @@ anime.push('#animationTarget', { x: 50, y: 50, duration: 1000, func: 'easeIn'});
 anime.push('#animationTarget', { x: -50, y: -50, duration: 500, func: 'linear'});
 ```
 预览图：
-![](http://nojsja.gitee.io/static-resources/images/optimization/animation.gif)
+![](http://nojsja.github.io/static-resources/images/optimization/animation.gif)
 ```js
 /**
  * [tween 缓动算法]
@@ -609,7 +609,7 @@ $('.parent').on('click', 'a', function () {
 ```
 \>  关于事件冒泡机制：
 
-![event-pop](http://nojsja.gitee.io/static-resources/images/optimization/event-pop.jpg)
+![event-pop](http://nojsja.github.io/static-resources/images/optimization/event-pop.jpg)
 
 \>  事件模型的 ** 三个阶段 **：
 
@@ -1263,7 +1263,7 @@ React 会先匹配到两颗虚拟 DOM 树对应的 `first` 节点，然后匹配
 
 \> 首先清楚虚拟化滚动技术中的几个 ** 关键元素 **：
 
-![vitual-scroll](http://nojsja.gitee.io/static-resources/images/optimization/vitual-scroll.png)
+![vitual-scroll](http://nojsja.github.io/static-resources/images/optimization/vitual-scroll.png)
 
 - i. 滚动容器元素：一般情况下，滚动容器元素是 window 对象。然而，我们可以通过布局的方式，在某个页面中任意指定一个或者多个滚动容器元素。只要某个元素能在内部产生横向或者纵向的滚动，那这个元素就是滚动容器元素。
 - ii. 可滚动区域：滚动容器元素的内部内容区域。假设有 100 条数据，每个列表项的高度是 50，那么可滚动的区域的高度就是 100 * 50。可滚动区域当前的具体高度值一般可以通过 (滚动容器) 元素的 scrollHeight 属性获取。用户可以通过滚动来改变列表在可视区域的显示部分。

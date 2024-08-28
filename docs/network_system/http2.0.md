@@ -9,7 +9,7 @@ description: 网络协议
 
 正式讲 HTTP2 之前我们先讲一下 HTTP 的发展史。
 
-![](https://nojsja.gitee.io/static-resources/images/http/http-http2.0.png)
+![](https://nojsja.github.io/static-resources/images/http/http-http2.0.png)
 
 - HTTP/0.9 - 单行协议
     HTTP 于 1990 年问世，那时候 HTTP 非常简单：只支持 GET 方法；没有首部；只能获取纯文本。
@@ -39,7 +39,7 @@ description: 网络协议
 
 HTTP2 性能提升的核心就在于二进制分帧层。HTTP2 是二进制协议，他采用二进制格式传输数据而不是 1.x 的文本格式。
 
-![](https://nojsja.gitee.io/static-resources/images/http/http2.0.png)
+![](https://nojsja.github.io/static-resources/images/http/http2.0.png)
 
 看图吧！很清晰的表达了 HTTP/1.1 的响应和 2.0 的区别。1.1 响应是文本格式，而 2.0 把响应划分成了两个帧，图中的 HEADERS（首部）和 DATA（消息负载） 是帧的类型。[了解更多帧的类型](https://www.ibm.com/developerworks/cn/web/wa-http2-under-the-hood/index.html) 也就是说一条 HTTP 响应，划分成了两个帧来传输，并且采用二进制来编码。
 
@@ -55,7 +55,7 @@ HTTP2 性能提升的核心就在于二进制分帧层。HTTP2 是二进制协�
 
 上面提到 HTTP/1.1 的线头阻塞和多个 TCP 连接的问题，HTTP2 的多路复用完美解决。HTTP2 让所有的通信都在一个 TCP 连接上完成，真正实现了请求的并发。我们来看一下 HTTP2 具体是怎么实现的：
 
-![](https://nojsja.gitee.io/static-resources/images/http/http2.0-stream.png)
+![](https://nojsja.github.io/static-resources/images/http/http2.0-stream.png)
 
 HTTP2 建立一个 TCP 连接，一个连接上面可以有任意多个流（stream），消息分割成一个或多个帧在流里面传输。帧传输过去以后，再进行重组，形成一个完整的请求或响应。这使得所有的请求或响应都无法阻塞。 我们再来回看上面的那个 demo:
 
@@ -72,7 +72,7 @@ HTTP2 建立一个 TCP 连接，一个连接上面可以有任意多个流（str
 
 HTTP2 的静态字典是长这个样子的（只截取了部分，[完整表格在这里](https://httpwg.org/specs/rfc7541.html#static.table.definition)）：
 
-![](https://nojsja.gitee.io/static-resources/images/http/http2.0-headers.png)
+![](https://nojsja.github.io/static-resources/images/http/http2.0-headers.png)
 
 所以我们在传输首部字段的时候，例如要传输 method:GET, 那我们只需要传输静态字典里面 method:GET 对应的索引值就可以了，一个字节搞定。像 user-agent、cookie 这种静态字典里面只有首部名称而没有值的首部，第一次传输需要 user-agent 在静态字典中的索引以及他的值，值会采用静态 Huffman 编码来减小体积。
 

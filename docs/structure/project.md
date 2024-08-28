@@ -222,7 +222,7 @@ Electron 端因为可以直接支持本地数据持久化，因此所有的文�
 
 ### 一、整体设计
 
-![web_sdk_structure](http://nojsja.gitee.io/static-resources/images/im/web_sdk_structure.png)
+![web_sdk_structure](http://nojsja.github.io/static-resources/images/im/web_sdk_structure.png)
 
 #### 1. Storage 存储
 
@@ -308,7 +308,7 @@ Protocol Buffer 在传输过程中其实只会传输四个信息，分别是：
 
 值得注意的是很多枚举类型的 value 值前后端也有一定的码值规则进行映射。protobuf 和 value 码值都起到了压缩消息体的作用，其实 header 也有压缩算法，可以参考以下说明。
 
-![](https://nojsja.gitee.io/static-resources/images/interview/protobuf.jpg)
+![](https://nojsja.github.io/static-resources/images/interview/protobuf.jpg)
 
 - [01] body 部分采用 `protobuf` 格式 (protocol buffer) 进行数据编码传输和解码
   - protobuf 是谷歌的一种开源、跨平台的序列化数据格式，其中 proto 文件用于描述数据结构，将冗长的明文字段映射为简短的值表示。
@@ -525,7 +525,7 @@ token 作为用户使用 IM 系统时通信的凭证，用于验证用户身份�
 
 流程图：
 
-![get_token](http://nojsja.gitee.io/static-resources/images/im/get_token.png)
+![get_token](http://nojsja.github.io/static-resources/images/im/get_token.png)
 
 （1）客户端向 __应用服务器__ 发送请求，请求携带 userId、appKey 等参数。
 
@@ -535,13 +535,13 @@ token 作为用户使用 IM 系统时通信的凭证，用于验证用户身份�
 
 （4）对于后续客户端获取 token 的请求，App 应用服务器直接从数据库中返回之前从 API 服务器拿到的 token。进而流程简化为：
 
-![get_token_cache](http://nojsja.gitee.io/static-resources/images/im/get_token_cache.png)
+![get_token_cache](http://nojsja.github.io/static-resources/images/im/get_token_cache.png)
 
 #### 3. 客户端对 token 的本地化处理
 
 客户端获取到 token 后，可以直接使用 token 跟应用服务器、消息服务器通信。对 token 做本地持久化存储支持后，客户端也可自行实现自动登录和登录过期逻辑。
 
-![client_token](http://nojsja.gitee.io/static-resources/images/im/client_token.png)
+![client_token](http://nojsja.github.io/static-resources/images/im/client_token.png)
 
 #### 4. 客户端和 IM 消息服务端进行业务通信
 
@@ -710,7 +710,7 @@ RongIMClient.reconnect(callback, config);
 
 架构：
 
-![electron-re](http://nojsja.gitee.io/static-resources/images/electron-re/electron-re_arch.png)
+![electron-re](http://nojsja.github.io/static-resources/images/electron-re/electron-re_arch.png)
 
 ### 一、ProcessManager
 

@@ -93,7 +93,7 @@ console.log(stringValue.substr(3, -4));     // ""  - 从第三位开始截取，
 
 速记图：
 
-![](https://nojsja.gitee.io/static-resources/images/interview/==.png)
+![](https://nojsja.github.io/static-resources/images/interview/==.png)
 
 ## ➣ ES6 新增特性
 
@@ -147,7 +147,7 @@ JS 引擎一直等待着任务队列中任务的到来，然后加以处理，�
 
 ## ➣ EventLoop 事件循环
 
-![](http://nojsja.gitee.io/static-resources/images/interview/browser_eventloop.png)
+![](http://nojsja.github.io/static-resources/images/interview/browser_eventloop.png)
 
 JavaScript 是用于实现网页交互逻辑的，涉及到 dom 操作，如果多个线程同时操作需要做同步互斥的处理，为了简化就设计成了单线程，但是如果单线程的话，遇到定时逻辑、网络请求又会阻塞住。怎么办呢？
 可以加一层调度逻辑。把 JS 代码封装成一个个的任务，放在一个任务队列中，主线程就不断的取任务执行就好了。
@@ -250,7 +250,7 @@ V8 引擎是 chrome 浏览器内部和 Node 的 JS 执行引擎，其特性是�
 V8 引擎的垃圾回收采用了 分代回收 的回收策略
 在 V8 内部，把内存空间分成了新生代和老生代区域, 针对不同代采用不同的 GC 算法
 
-![gc](http://nojsja.gitee.io/static-resources/images/interview/gc1.png)
+![gc](http://nojsja.github.io/static-resources/images/interview/gc1.png)
 
 其中新生代区域空间较小，在 64 位操作系统上为 32M, 在 32 位操作系统上为 16M，其中保存着存活时间较短的对象。
 v8 将新生代空间均分为两个等大空间，使用中的空间称为 from, 空闲的空间称为 to。当 from 空间使用达到一定上限，就会触发垃圾回收机制。V8 新生代的垃圾回收采用的是 Scavenge 策略。
@@ -261,22 +261,22 @@ v8 将新生代空间均分为两个等大空间，使用中的空间称为 from
 
 将 from 空间中的活跃对象（使用中对象）进行标记，识别出等待回收的对象
 
-![gc](http://nojsja.gitee.io/static-resources/images/interview/gc2.png)
+![gc](http://nojsja.github.io/static-resources/images/interview/gc2.png)
 
 2. 排序整理阶段
 
 将 from 空间中的活跃对象拷贝到 to 空间中
 
-![gc](http://nojsja.gitee.io/static-resources/images/interview/gc3.png)
+![gc](http://nojsja.github.io/static-resources/images/interview/gc3.png)
 
 将 from 空间完全释放
 
-![gc](http://nojsja.gitee.io/static-resources/images/interview/gc4.png)
+![gc](http://nojsja.github.io/static-resources/images/interview/gc4.png)
 3. 交换阶段
 
 将 from 空间和 to 空间进行互换，完成本次垃圾回收操作。
 
-![gc](http://nojsja.gitee.io/static-resources/images/interview/gc5.png)
+![gc](http://nojsja.github.io/static-resources/images/interview/gc5.png)
 
 与新生代区域不同，老生代区域存放的是活动时间较长的对象，比如全局对象、闭包等。
 与新生代区域一样，老生代内存区同样也存在大小限制，和进行垃圾回收的特有策略
@@ -289,7 +289,7 @@ v8 将新生代空间均分为两个等大空间，使用中的空间称为 from
 
 默认情况下，程序生成的对象会首先被放置在 from 空间中。当进行垃圾回收，将对象们从 from 移至 to 时，会通过检查该对象的内存地址来判断该对象是否已经经历过一次 Scavenge 运算，如果是，则将该对象移至老生代空间。接下来，判断 to 空间是否超过 25%, 如果是，则仍将该对象移至老生代空间。
 
-![gc](http://nojsja.gitee.io/static-resources/images/interview/gc6.png)
+![gc](http://nojsja.github.io/static-resources/images/interview/gc6.png)
 
 ##### II. 老生代对象回收实现
 
@@ -302,15 +302,15 @@ v8 将新生代空间均分为两个等大空间，使用中的空间称为 from
 
 - 开始阶段，其中 ABCDEF 为已使用内存
 
-![gc](http://nojsja.gitee.io/static-resources/images/interview/gc7.png)
+![gc](http://nojsja.github.io/static-resources/images/interview/gc7.png)
 
 - 标记阶段，其中 ACE 为活跃对象，其余为待清除对象
 
-![gc](http://nojsja.gitee.io/static-resources/images/interview/gc8.png)
+![gc](http://nojsja.github.io/static-resources/images/interview/gc8.png)
 
 - 清除阶段，将待清除对象的空间释放
 
-![gc](http://nojsja.gitee.io/static-resources/images/interview/gc9.png)
+![gc](http://nojsja.github.io/static-resources/images/interview/gc9.png)
 
 由以上图示不难发现，标记清除算法在每次清除过后，内存会出现不连续的状态。后续继续在老生代空间里分配内存时，如果需要分配一个大内存，由于剩余的碎片空间不足以完成此次分配，就会提前触发垃圾回收，而这次回收是不必要的。
 
@@ -320,15 +320,15 @@ v8 将新生代空间均分为两个等大空间，使用中的空间称为 from
 
 - 标记阶段，和标记清除算法一致。
 
-![gc](http://nojsja.gitee.io/static-resources/images/interview/gc10.png)
+![gc](http://nojsja.github.io/static-resources/images/interview/gc10.png)
 
 - 整理阶段，将活跃对象拷贝直堆内存的另一端
 
-![gc](http://nojsja.gitee.io/static-resources/images/interview/gc11.png)
+![gc](http://nojsja.github.io/static-resources/images/interview/gc11.png)
 
 - 清除阶段，将拷贝对象边界外的内存清空
 
-![gc](http://nojsja.gitee.io/static-resources/images/interview/gc12.png)
+![gc](http://nojsja.github.io/static-resources/images/interview/gc12.png)
 
 (3) 标记清除算法和标记整理算法的结合使用
 

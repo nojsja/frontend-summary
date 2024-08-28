@@ -401,7 +401,7 @@ function throttle(fn, time) {
 
 ## ➣ Js 事件循环 (宏任务、微任务)
 
-![](http://nojsja.gitee.io/static-resources/images/interview/EventLoop.png)
+![](http://nojsja.github.io/static-resources/images/interview/EventLoop.png)
 
 &nbsp;&nbsp;&nbsp;&nbsp; 每次执行栈执行的代码就是一个宏任务（包括每次从事件队列中获取一个事件回调并放到执行栈中执行）
 再检测本次循环中是否寻在微任务，存在的话就依次从微任务的任务队列中读取执行完所有的微任务，再读取宏任务的任务队列中的任务执行，再执行所有的微任务，如此循环。JS 的执行顺序就是每次事件循环中的宏任务 - 微任务。
@@ -468,7 +468,7 @@ let setTimeout = (fn, timeout, ...args) => {
 
 ## ➣ tcp 协议三次握手和四次挥手
 
-![](http://nojsja.gitee.io/static-resources/images/interview/tcp.png)
+![](http://nojsja.github.io/static-resources/images/interview/tcp.png)
 
 ##### 1. 三次握手讲解
 - 客户端发送位码为 syn＝1, 随机产生 seq 确认号到服务器，服务器由 SYN=1 知道客户端要求建立联机（客户端：我要连接你）

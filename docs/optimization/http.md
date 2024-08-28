@@ -132,6 +132,6 @@ Preconnect 可以直接添加到 HTML 中 link 标签的属性中，也可以写
 
 如下是为 Google Fonts 使用 preconnect 的例子，通过给 `fonts.gstatic.com` 加入 preconnect 提示，浏览器将立刻发起请求，和 CSS 请求并行执行。在这个场景下，**preconnect 从关键路径中消除了三个 RTTs（Round-Trip Time）** 并**减少了超过半秒的延迟**，lya Grigorik 的 [eliminating RTTS with preconnect](https://link.juejin.cn?target=https%3A%2F%2Fwww.igvita.com%2F2015%2F08%2F17%2Feliminating-roundtrips-with-preconnect%2F "https://www.igvita.com/2015/08/17/eliminating-roundtrips-with-preconnect/") 一文中有更详细的分析。
 
-![](https://nojsja.gitee.io/static-resources/images/interview/preconnect.png)
+![](https://nojsja.github.io/static-resources/images/interview/preconnect.png)
 
 使用 preconnect 是个有效而且克制的资源优化方法，它不仅可以优化页面并且可以防止资源利用的浪费。除了 Internet Explorer，Safari，IOS Safari 和 Opera Mini 的现代浏览器已经支持了 preconnect。

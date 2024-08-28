@@ -133,7 +133,7 @@ export class Store {
 
 ### 一、工作流程
 
-![](https://nojsja.gitee.io/static-resources/images/interview/mobx-process.png)
+![](https://nojsja.github.io/static-resources/images/interview/mobx-process.png)
 
 一共有这么几个步骤：
 

@@ -10,7 +10,7 @@ Node.js 中模块分为内置模块、外部扩展模块和自定义模块。
 
 大致步骤：
 
-![](http://nojsja.gitee.io/static-resources/images/interview/node-module.jpg)
+![](http://nojsja.github.io/static-resources/images/interview/node-module.jpg)
 
 1. 先计算模块路径
 
@@ -87,19 +87,19 @@ child_process.spawn() 方法会异步地衍生子进程，且不阻塞 Node.js �
 
 - `child_process.exec(command[, options][, callback])`: 衍生 shell 并且在 shell 中运行命令，当完成时则将 stdout 和 stderr 传给回调函数。
 
-  ![](http://nojsja.gitee.io/static-resources/images/interview/exec_options.png)
+  ![](http://nojsja.github.io/static-resources/images/interview/exec_options.png)
 
 - `child_process.execFile(file[, args][, options][, callback])`: 类似于 exec()，但是默认情况下它会直接衍生命令而不先衍生 shell。exec() 和 execFile() 之间区别的重要性可能因平台而异，在 Unix 类型的操作系统上，execFile() 可以更高效，因为默认情况下不会衍生 shell。但是在 Windows 上， .bat 和 .cmd 文件在没有终端的情况下不能自行执行，因此无法使用 execFile() 启动。当在 Windows 上运行时，要调用 .bat 和 .cmd 文件，可以使用设置了 shell 选项的 child_process.spawn()、child_process.exec() 或衍生 cmd.exe 并将 .bat 或 .cmd 文件作为参数传入（也就是 shell 选项和 child_process.exec() 所做的）
 
-  ![](http://nojsja.gitee.io/static-resources/images/interview/execFile_options.png)
+  ![](http://nojsja.github.io/static-resources/images/interview/execFile_options.png)
 
 - `child_process.fork(modulePath[, args][, options])`: 衍生新的 Node.js 进程，并调用指定的模块，该模块已建立了 IPC 通信通道，可以在父进程与子进程之间发送消息。记住，衍生的 Node.js 子进程独立于父进程，但两者之间建立的 IPC 通信通道除外。 每个进程都有自己的内存，带有自己的 V8 实例。 由于需要额外的资源分配，因此不建议衍生大量的 Node.js 子进程。
 
-  ![](http://nojsja.gitee.io/static-resources/images/interview/fork_options.png)
+  ![](http://nojsja.github.io/static-resources/images/interview/fork_options.png)
 
 - `child_process.spawn(command[, args][, options])`：方法使用给定的 command 衍生新的进程，并传入 args 中的命令行参数，如果省略 args，则其默认为空数组。如果参数 options 选项 shell 为 true，则在 shell 中运行 command，在 Unix 上使用 '/bin/sh'，在 Windows 上使用 process.env.ComSpec。
 
-  ![](http://nojsja.gitee.io/static-resources/images/interview/spawn_options.png)
+  ![](http://nojsja.github.io/static-resources/images/interview/spawn_options.png)
 
 ## ➣ Node.js 创建子进程参数 `stdio` 的理解
 
@@ -275,7 +275,7 @@ Transform 流的例子包括：
 
 ## ➣ EventLoop 事件循环
 
-![](http://nojsja.gitee.io/static-resources/images/interview/node_eventloop.png)
+![](http://nojsja.github.io/static-resources/images/interview/node_eventloop.png)
 
 Node.js 是一个新的 JS 运行环境，它同样要支持异步逻辑，包括定时器、IO、网络请求，很明显，也可以用 Event Loop 那一套来跑。
 但是呢，浏览器那套 Event Loop 就是为浏览器设计的，对于做高性能服务器来说，那种设计还是有点粗糙了。
@@ -290,7 +290,7 @@ Node.js 是一个新的 JS 运行环境，它同样要支持异步逻辑，包�
 
 解释一下这五种宏任务：
 
-![](http://nojsja.gitee.io/static-resources/images/interview/node_macro_task.png)
+![](http://nojsja.github.io/static-resources/images/interview/node_macro_task.png)
 
 - Timers Callback： 涉及到时间，肯定越早执行越准确，所以这个优先级最高很容易理解。
 - Pending Callback：处理网络、IO 等异常时的回调，有的 unix 系统会等待发生错误的上报，所以得处理下。
