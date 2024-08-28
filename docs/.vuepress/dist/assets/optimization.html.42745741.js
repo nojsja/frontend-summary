@@ -1,0 +1,1 @@
+const t={key:"v-51afc9b3",path:"/optimization.html",title:"\u25CF \u6027\u80FD\u4F18\u5316",lang:"zh-CN",frontmatter:{lang:"zh-CN",title:"\u25CF \u6027\u80FD\u4F18\u5316",description:"optimization \u7684\u63CF\u8FF0"},excerpt:"",headers:[],git:{updatedTime:1724857511e3},filePathRelative:"optimization.md"};export{t as data};
